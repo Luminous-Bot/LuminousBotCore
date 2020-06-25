@@ -1,0 +1,674 @@
+﻿using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using Public_Bot.Modules.Handlers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using static Public_Bot.Modules.Handlers.MuteHandler;
+
+namespace Public_Bot.Modules.Commands
+{
+    [DiscordHandler]
+    public class ModCommands
+    {
+        public static DiscordShardedClient client { get; set; }
+        public ModCommands(DiscordShardedClient _client)
+        {
+            client = _client;
+            try
+            {
+                CurrentGuildModLogs = Public_Bot.Modules.Handlers.StateHandler.LoadObject<List<GuildModLogs>>("GuildLogs");
+            }
+            catch
+            {
+                CurrentGuildModLogs = new List<GuildModLogs>();
+            }
+        }
+        public static void SaveModlogs()
+        {
+            StateHandler.SaveObject<List<GuildModLogs>>("GuildLogs", CurrentGuildModLogs);
+        }
+        public static List<GuildModLogs> CurrentGuildModLogs { get; set; }
+        public static void AddModlog(ModLog log)
+        {
+            var g = client.GetGuild(log.GuildID);
+            if (g == null)
+                return;
+            var u = g.GetUser(log.UserID);
+            if (u == null)
+                throw new Exception("User is not in guild");
+            if (!CurrentGuildModLogs.Any(x => x.GuildID == log.GuildID))
+            {
+                CurrentGuildModLogs.Add(new GuildModLogs()
+                {
+                    GuildID = log.GuildID,
+                    GuildName = g.Name,
+                    Users = new List<Users>()
+                    {
+                        new Users()
+                        {
+                            ModLogs = new List<ModLog>(){ log },
+                            UserID = log.UserID,
+                            UserName = $"{u}"
+                        }
+                    }
+                });
+            }
+            else
+            {
+                var guildLogs = CurrentGuildModLogs.Find(x => x.GuildID == log.GuildID);
+                if(!guildLogs.Users.Any(x => x.UserID == log.UserID))
+                {
+                    guildLogs.Users.Add(new Users()
+                    {
+                        UserID = log.UserID,
+                        UserName = $"{u}",
+                        ModLogs = new List<ModLog>() { log }
+                    });
+                }
+                else
+                {
+                    guildLogs.Users.Find(x => x.UserID == log.UserID).ModLogs.Add(log);
+                }
+            }
+        }
+        public class GuildModLogs
+        {
+            public string GuildName { get; set; }
+            public ulong GuildID { get; set; }
+            public List<Users> Users { get; set; } = new List<Users>();
+        }
+        public class Users
+        {
+            public string UserName { get; set; }
+            public ulong UserID { get; set; }
+            public List<ModLog> ModLogs { get; set; }
+        }
+        public class ModLog
+        {
+            public Moderator Moderator { get; set; }
+            public ulong GuildID { get; set; }
+            public ulong UserID { get; set; }
+            public Action Action { get; set; }
+            public DateTime Time { get; set; }
+            public string Reason { get; set; }
+        }
+        public class Moderator
+        {
+            public string UserName { get; set; }
+            public ulong UserID { get; set; }
+        }
+        public enum Action
+        {
+            Warned,
+            Kicked,
+            Banned,
+            Muted,
+            Voicebanned,
+            Tempbanned
+        }
+        [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficent with this module, you can keep track of users modlogs and keep your server in order!")]
+        public class ModCommandsModule : CommandModuleBase
+        {
+            public async Task CreateAction(string[] args, Action action, ICommandContext context)
+            {
+                var curUser = await context.Guild.GetCurrentUserAsync();
+                if (!curUser.GuildPermissions.Administrator)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**The bot need better permissions!**",
+                        Description = @"The bot needs the `Administrator` permission to use this command!",
+                        Color = Color.Red,
+                        Timestamp = DateTimeOffset.Now,
+                    }.Build());
+                    return;
+                }
+                
+                string actionString = 
+                    action == Action.Warned 
+                    ? "Warn" : action == Action.Kicked 
+                    ? "Kick" : action == Action.Banned 
+                    ? "Ban" : $"{action}";
+                if (args.Length == 0)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**Who?**",
+                        Description = @"You didnt provide any arguments ¯\_(ツ)_/¯",
+                        Color = Color.Red,
+                        Timestamp = DateTimeOffset.Now,
+                    }.Build());
+                    return;
+                }
+                SocketGuildUser user = GetUser(args[0]);
+                if (user == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**Who?**",
+                        Description = @$"The user you provided is invalid ¯\_(ツ)_/¯",
+                        Color = Color.Red,
+                        Timestamp = DateTimeOffset.Now,
+                    }.Build());
+                    return;
+                }
+                if (args.Length == 1)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**Why?**",
+                        Description = @$"You didnt provide any reason to {actionString} **{user}** ¯\_(ツ)_/¯",
+                        Color = Color.Red,
+                        Timestamp = DateTimeOffset.Now,
+                    }.Build());
+                    return;
+                }
+
+                ModLog m = new ModLog()
+                {
+                    Action = action,
+                    GuildID = context.Guild.Id,
+                    Reason = string.Join(' ', args.Skip(1)),
+                    Time = DateTime.UtcNow,
+                    UserID = user.Id,
+                    Moderator = new Moderator()
+                    {
+                        UserID = context.Message.Author.Id,
+                        UserName = context.Message.Author.ToString()
+                    },
+                };
+                AddModlog(m);
+                SaveModlogs();
+                bool Dmed = true;
+                try
+                {
+                    await user.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"**You have been {action} on {context.Guild.Name}**",
+                        Fields = new List<EmbedFieldBuilder>() 
+                        {
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Moderator",
+                                Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.UserName}",
+                                IsInline = true,
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Reason",
+                                Value = m.Reason,
+                                IsInline = true
+                            }
+                        },
+                        Color = action == Action.Warned ? Color.Orange : Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                }
+                catch
+                {
+                    Dmed = false;
+                }
+                if(action == Action.Kicked)
+                {
+                    try
+                    {
+                        await user.KickAsync($"{m.Reason} - {m.Moderator.UserName}");
+                    }
+                    catch(Exception ex)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**There was an error!**",
+                            Description = $"{ex.Message}",
+                            Color = Color.Red,
+                            Timestamp = DateTimeOffset.Now,
+                        }.Build());
+                        return;
+                    }
+                }
+                else if (action == Action.Banned)
+                {
+                    try
+                    {
+                        await user.BanAsync(7, $"{m.Reason} - {m.Moderator.UserName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**There was an error!**",
+                            Description = $"{ex.Message}",
+                            Color = Color.Red,
+                            Timestamp = DateTimeOffset.Now,
+                        }.Build());
+                        return;
+                    }
+                }
+                await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = $"Successfully {action} user {user.Username}",
+                    Fields = new List<EmbedFieldBuilder>() 
+                    {
+                        new EmbedFieldBuilder()
+                        {
+                            Name ="Moderator",
+                            Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.UserName}",
+                            IsInline = true
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Reason",
+                            Value = m.Reason,
+                            IsInline = true
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Notified in DM?",
+                            Value = Dmed,
+                            IsInline = true
+                        }
+                    },
+                    Color = Color.DarkGreen,
+                    Timestamp = DateTime.Now
+                }.Build());
+
+            }
+            [DiscordCommand("warn", RequiredPermission = true, description = "Warns a user", commandHelp = "Usage - `(PREFIX)warn <@user> <reason>`")]
+            public async Task Warn(params string[] args)
+            {
+                await CreateAction(args, Action.Warned, Context);
+            }
+            [DiscordCommand("kick", RequiredPermission = true, description = "Kicks a user", commandHelp = "Usage - `(PREFIX)kick <@user> <reason>`")]
+            public async Task Kick(params string[] args)
+            {
+                await CreateAction(args, Action.Kicked, Context);
+            }
+            [DiscordCommand("ban", RequiredPermission = true, description = "Bans a user", commandHelp = "Usage - `(PREFIX)ban <@user> <reason>`")]
+            public async Task Ban(params string[] args)
+            {
+                await CreateAction(args, Action.Banned, Context);
+            }
+            [DiscordCommand("unmute", RequiredPermission = true, description = "Unmutes a muted user", commandHelp = "Usage - `(PREFIX)unmute <@user> <reason>`")]
+            public async Task unmute(params string[] args)
+            {
+                if (args.Length == 0)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Who..?",
+                        Description = "Who do you want me to unmute",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                var user = GetUser(args[0]);
+                if(user == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "**Who..?**",
+                        Description = "That user is invalid!",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                if (user.Roles.Any(x => x.Id == GuildSettings.MutedRoleID))
+                {
+                    var role = Context.Guild.GetRole(GuildSettings.MutedRoleID);
+                    try
+                    {
+                        await user.RemoveRoleAsync(role);
+                        MuteHandler.CurrentMuted.Remove(MuteHandler.CurrentMuted.Find(x => x.UserID == user.Id));
+                        MuteHandler.SaveMuted();
+                        Embed b2 = new EmbedBuilder()
+                        {
+                            Title = $"**Successfully Unmuted user {user.ToString()}**",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                { new EmbedFieldBuilder(){
+                                    Name = "Moderator",
+                                    Value = Context.Message.Author.ToString(),
+                                    IsInline = true
+                                } }
+                            },
+                            Timestamp = DateTime.Now,
+                            Color = Color.Green
+                        }.Build();
+                        await Context.Channel.SendMessageAsync("", false, b2);
+                    }
+                    catch (Exception ex)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                        {
+                            Title = "**There was an Error**",
+                            Description = $"Looks like we faild trying to remove the muted role, Heres the error message: {ex.Message}",
+                            Color = Color.Red,
+                            Timestamp = DateTime.Now
+                        }.Build());
+                        return;
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "**That user is not Muted**",
+                        Description = "There not muted lol. dont know what else you want me to say",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+
+            }
+            [DiscordCommand("mute", RequiredPermission = true, description = "Mutes a user", commandHelp = "Usage - `(PREFIX)mute <@user> <timespan> <reason>`\nTimespans:\n`10m` - Ten minutes\n`1h` - One hour\n`45s` - Forty five seconds\n`2d` - Two days\n`1y` - One year (dont recommend)")]
+            public async Task Mute(params string[] args)
+            {
+                if (GuildSettings.MutedRoleID == 0)
+                {
+                    await Context.Channel.SendMessageAsync($"This command requires a \"Muted Role\", To set one up do `{GuildSettings.Prefix}createmutedrole`");
+                    return;
+                }
+
+                if (args.Length == 0)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**Who? How long? and Why?**",
+                        Description = "Please provide a user, time, and reason",
+                        Timestamp = DateTime.Now,
+                        Color = Color.Orange
+                    }.Build());
+                    return;
+                }
+                if (args.Length == 1)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Give me a time!",
+                        Description = $"if you wanted to mute for 10 minutes use `{GuildSettings.Prefix}mute <user> 10m <reason>`",
+                        Color = Color.Orange,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                if (args.Length == 2)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Give me a Reason!",
+                        Description = $"You need to provide a reason",
+                        Color = Color.Orange,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                var user = GetUser(args[0]);
+                if (user == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Who?",
+                        Description = $"That user is invalid!",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                if (user.Roles.Any(x => x.Id == GuildSettings.MutedRoleID))
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "That user is already muted!",
+                        Description = "We cant mute someone whos already muted :/",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                var regex = new Regex(@"^(\d*)([a-z])$");
+                var datetime = DateTime.UtcNow;
+                //TimeSpan s = new TimeSpan();
+                if (regex.IsMatch(args[1].ToLower()))
+                {
+                    var r = regex.Match(args[1].ToLower());
+                    switch (r.Groups[2].Value)
+                    {
+                        case "s":
+                            datetime = datetime.AddSeconds(double.Parse(r.Groups[1].Value));
+                            break;
+                        case "m":
+                            datetime = datetime.AddMinutes(double.Parse(r.Groups[1].Value));
+                            break;
+                        case "h":
+                            datetime = datetime.AddHours(double.Parse(r.Groups[1].Value));
+                            break;
+                        case "d":
+                            datetime = datetime.AddDays(double.Parse(r.Groups[1].Value));
+                            break;
+                        case "y":
+                            datetime = datetime.AddYears(int.Parse(r.Groups[1].Value));
+                            break;
+                        default:
+                            await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                            {
+                                Title = "**How long?**",
+                                Description = $"Please provide a valid time span, here are some examples\n" +
+                                $"`10m` - Ten minutes\n" +
+                                $"`1h` - One hour\n" +
+                                $"`45s` - Forty five seconds\n" +
+                                $"`2d` - Two days\n" +
+                                $"`1y` - One year (dont recommend)",
+                                Color = Color.Red,
+                                Timestamp = DateTime.Now
+                            }.Build());
+                            return;
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "**How long?**",
+                        Description = $"Please provide a valid time span, here are some examples\n" +
+                        $"`10m` - Ten minutes\n" +
+                        $"`1h` - One hour\n" +
+                        $"`45s` - Forty five seconds\n" +
+                        $"`2d` - Two days\n" +
+                        $"`1y` - One year (dont recommend)",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                string reason = string.Join(' ', args.Skip(2));
+                try
+                {
+                    await user.AddRoleAsync(Context.Guild.GetRole(GuildSettings.MutedRoleID));
+                }
+                catch (Exception ex)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "**Welp, that didnt work!**",
+                        Description = $"We couldn't add the muted role to {user}, heres the reason: {ex.Message}",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+
+                Embed b = new EmbedBuilder()
+                {
+                    Title = $"**You have been Muted on {Context.Guild.Name}**",
+                    Fields = new List<EmbedFieldBuilder>()
+                    {
+                        { new EmbedFieldBuilder(){
+                            Name = "Moderator",
+                            Value = Context.Message.Author.ToString(),
+                            IsInline = true
+                        } },
+                        {new EmbedFieldBuilder()
+                        {
+                            Name = "Reason",
+                            Value = reason,
+                            IsInline = true
+                        } }
+                    },
+                    Timestamp = DateTime.Now,
+                    Color = Color.Orange
+                }.Build();
+                bool dmed = true;
+                try
+                {
+                    await user.SendMessageAsync("", false, b);
+                }
+                catch
+                { dmed = false; }
+                Embed b2 = new EmbedBuilder()
+                {
+                    Title = $"Successfully **Muted** user **{user}**",
+                    Fields = new List<EmbedFieldBuilder>()
+                    {
+                        { new EmbedFieldBuilder(){
+                            Name = "Moderator",
+                            Value = Context.Message.Author.ToString(),
+                            IsInline = true
+                        } },
+                        {new EmbedFieldBuilder()
+                        {
+                            Name = "Reason",
+                            Value = reason,
+                            IsInline = true
+                        } },
+                        {new EmbedFieldBuilder()
+                        {
+                            Name = "Notified in DM?",
+                            Value = dmed,
+                            IsInline = true
+                        } }
+                    },
+                    Timestamp = DateTime.Now,
+                    Color = Color.Green
+                }.Build();
+                await Context.Channel.SendMessageAsync("", false, b2);
+                AddModlog(new ModLog()
+                {
+                    Action = Action.Muted,
+                    GuildID = Context.Guild.Id,
+                    UserID = user.Id,
+                    Moderator = new Moderator() { UserID = Context.User.Id, UserName = Context.User.ToString() },
+                    Reason = reason,
+                    Time = DateTime.UtcNow
+                });
+                SaveModlogs();
+                Handlers.MuteHandler.AddNewMuted(user.Id, datetime, GuildSettings);
+            }
+            [DiscordCommand("modlogs", RequiredPermission = true, description = "View a users modlogs", commandHelp = "Usage `(PREFIX)modlogs <@user>`")]
+            public async Task modlogs(params string[] args)
+            {
+                if(args.Length == 0)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "**Who's logs do you want to view?**",
+                        Description = "Please provide a user",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                var user = GetUser(args[0]);
+                if(user == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "**Who's that?**",
+                        Description = "Please provide a valid user",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
+                {
+                    var modlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
+                    if(modlogs.Users.Any(x => x.UserID == user.Id))
+                    {
+                        var userlog = modlogs.Users.Find(x => x.UserID == user.Id);
+                        var pg = ModlogsPageHandler.BuildHelpPage(userlog.ModLogs, 0, user.Id, Context.Guild.Id, Context.User.Id);
+                        var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
+                        var msg = await Context.Channel.SendMessageAsync("", false, emb.Build());
+                        pg.MessageID = msg.Id;
+                        ModlogsPageHandler.CurrentPages.Add(pg);
+                        ModlogsPageHandler.SaveMLPages();
+                        await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1")});
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                        {
+                            Title = $"Modlogs for **{user}**",
+                            Description = "This user has no logs! :D",
+                            Color = Color.Green,
+                            Timestamp = DateTime.Now
+                        }.Build());
+                        return;
+                    }
+                }
+            }
+            
+            [DiscordCommand("purge", RequiredPermission = true, commandHelp = "Usage - `(PREFIX)purge <ammount>`, `(PREFIX)purge <@user> <ammount>`", description = "Deletes `x` ammount of messages")]
+            public async Task purge(uint amount)
+            {
+                var messages = await Context.Channel.GetMessagesAsync((int)amount + 1).FlattenAsync();
+                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
+                const int delay = 2000;
+                var m = await Context.Channel.SendMessageAsync($"Purge completed!");
+                await Task.Delay(delay);
+                await m.DeleteAsync();
+            }
+            [DiscordCommand("purge")]
+            public async Task purge(string usr, uint ammount)
+            {
+                
+                var user = GetUser(usr);
+                if (user == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Invalid ID",
+                        Description = "The user is not in the server or the ID is invalid!",
+                        Color = Color.Red
+                    }.Build());
+                    return;
+                }
+                var tmp = await Context.Channel.GetMessagesAsync(100).FlattenAsync();
+                if (!tmp.Any(x => x.Author.Id == user.Id))
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Unable to find messages",
+                        Description = $"we cant find any messages from <@{user.Id}>!",
+                        Color = Color.Red
+                    }.Build());
+                    return;
+                }
+                var messages = tmp.Where(x => x.Author.Id == user.Id).Take((int)ammount);
+                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
+                const int delay = 2000;
+                var m = await Context.Channel.SendMessageAsync($"Purge completed!");
+                await Task.Delay(delay);
+                await m.DeleteAsync();
+
+            }
+        }
+    }
+}
