@@ -61,7 +61,7 @@ namespace Public_Bot.Modules.Handlers
             if (pagenum > pageTotals)
                 pagenum = pagenum - 1;
             //page.page = pagenum;
-            var rs = page.Modlogs.Skip((pagenum - 1) * 25).Take(25);
+            var rs = page.Modlogs.Skip((pagenum - 1) * 25).Take(25).ToArray();
             var guild = client.GetGuild(page.GuildID);
             var user = guild.GetUser(page.UserID);
             var gs = CommandHandler.GetGuildSettings(page.GuildID);
@@ -73,13 +73,17 @@ namespace Public_Bot.Modules.Handlers
                 Fields = new List<EmbedFieldBuilder>(),
                 Footer = new EmbedFooterBuilder() { Text = $"Page {pagenum}/{pageTotals}"}
             };
-            foreach (var log in rs)
+            for (int i = 0; i != rs.Count(); i++)
             {
+                var log = rs[i];
                 b.Fields.Add(new EmbedFieldBuilder()
                 {
                     IsInline = false,
-                    Name = Enum.GetName(typeof(ModCommands.Action), log.Action),
-                    Value = $"Reason: {log.Reason}\nModerator: {log.Moderator.UserName} <@{log.Moderator.UserID}>\nDate: {log.Time}"
+                    Name = (((pagenum - 1) * 25) + (i + 1)).ToString() + $": {log.Action}",
+                    Value =
+                    $"Reason: {log.Reason}\n" +
+                    $"Moderator: <@{log.Moderator.UserID}> ({log.Moderator.UserName})\n" +
+                    $"Date: {log.Time}"
                 });
             }
             if (page.Modlogs.Count == 0)

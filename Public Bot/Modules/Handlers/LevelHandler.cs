@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -20,10 +22,10 @@ namespace Public_Bot.Modules.Handlers
         public static int Update = 0;
         public class GuildLevelSettings
         {
-            public Dictionary<int, ulong> RankRoles { get; set; } = new Dictionary<int, ulong>();
+            public Dictionary<uint, ulong> RankRoles { get; set; } = new Dictionary<uint, ulong>();
             public double LevelMultiplier { get; set; } = 1.10409;
             public uint maxlevel { get; set; } = 100;
-            public uint DefaultBaseLevelXp { get; set; } = 4;
+            public uint DefaultBaseLevelXp { get; set; } = 30;
             public double XpPerMessage { get; set; } = 1;
             public double XpPerVCMinute { get; set; } = 5;
             public ulong LevelUpChan { get; set; }
@@ -34,7 +36,8 @@ namespace Public_Bot.Modules.Handlers
                 public int R { get; set; }
                 public int G { get; set; }
                 public int B { get; set; }
-
+                public Color Get()
+                    => new Color(this.R, this.G, this.B);
                 public color() { }
                 public color(int r, int g, int b) { this.R = r; this.G = g; this.B = b; }
 
@@ -72,13 +75,15 @@ namespace Public_Bot.Modules.Handlers
         {
             public ulong GuildID { get; set; }
             public ulong UserID { get; set; }
-            public int CurrentLevel { get; set; } = 0;
+            public string Username { get; set; } = "";
+            public uint CurrentLevel { get; set; } = 0;
             public double CurrentXP { get; set; } = 0;
-            public double NextLevelXP { get; set; } = 4;
+            public double NextLevelXP { get; set; } = 30;
             public LevelUser() { }
             public LevelUser(SocketGuildUser user)
             {
                 UserID = user.Id;
+                Username = user.ToString();
                 GuildID = user.Guild.Id;
             }
         }
@@ -192,9 +197,9 @@ namespace Public_Bot.Modules.Handlers
             {
                 GuildLevels = StateHandler.LoadObject<List<GuildLeaderboards>>("levels");
             }
-            catch { GuildLevels = new List<GuildLeaderboards>(); CommandHandler.CurrentGuildSettings.Where(x => x.Leveling).ToList().ForEach(x => GuildLevels.Add(new GuildLeaderboards(client.GetGuild(x.GuildID)))); }
-            new Timer() { AutoReset = true, Interval = 5000, Enabled = true }.Elapsed += HandleSaving;
-            new Timer() { AutoReset = true, Interval = 60000, Enabled = true }.Elapsed += GiveVCPoints;
+            catch { GuildLevels = new List<GuildLeaderboards>(); CommandHandler.CurrentGuildSettings.Where(x => x.ModulesSettings["🧪 Levels 🧪"]).ToList().ForEach(x => GuildLevels.Add(new GuildLeaderboards(client.GetGuild(x.GuildID)))); }
+            new System.Timers.Timer() { AutoReset = true, Interval = 5000, Enabled = true }.Elapsed += HandleSaving;
+            new System.Timers.Timer() { AutoReset = true, Interval = 60000, Enabled = true }.Elapsed += GiveVCPoints;
             client.MessageReceived += HandleLevelAdd;
 
         }
@@ -251,9 +256,12 @@ namespace Public_Bot.Modules.Handlers
             var gs = CommandHandler.GetGuildSettings(user.GuildID);
             if (user.CurrentLevel < gu.Settings.maxlevel)
             {
-                user.CurrentXP = user.CurrentXP - user.NextLevelXP;
-                user.NextLevelXP = user.NextLevelXP * gu.Settings.LevelMultiplier;
-                user.CurrentLevel++;
+                while(user.CurrentXP >= user.NextLevelXP)
+                {
+                    user.CurrentXP = user.CurrentXP - user.NextLevelXP;
+                    user.NextLevelXP = user.NextLevelXP * gu.Settings.LevelMultiplier;
+                    user.CurrentLevel++;
+                }
                 bool GotRole = false;
                 if(gu.Settings.RankRoles.Count != 0)
                 {
@@ -302,10 +310,13 @@ namespace Public_Bot.Modules.Handlers
             if (arg.Channel.GetType() == typeof(SocketDMChannel))
                 return;
             var sm = arg as SocketUserMessage;
-            if (sm.Channel == null)
+            if (sm == null)
                 return;
             var g = (sm.Channel as SocketGuildChannel).Guild;
             if (g == null)
+                return;
+            var gs = GuildSettings.Get(g.Id);
+            if (!gs.ModulesSettings["🧪 Levels 🧪"])
                 return;
             if (GuildLevels.Any(x => x.GuildID == g.Id))
             {
@@ -315,6 +326,8 @@ namespace Public_Bot.Modules.Handlers
                     if (gl.CurrentUsers.Any(x => x.UserID == sm.Author.Id))
                     {
                         var usr = gl.CurrentUsers.Find(x => x.UserID == sm.Author.Id);
+                        if (usr.Username != sm.Author.ToString())
+                            usr.Username = sm.Author.ToString();
                         usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
                         if (usr.CurrentXP >= usr.NextLevelXP)
                             LevelUpUser(usr);
@@ -324,6 +337,8 @@ namespace Public_Bot.Modules.Handlers
                     else
                     {
                         var usr = new LevelUser(arg.Author as SocketGuildUser);
+                        if (usr.Username != sm.Author.ToString())
+                            usr.Username = sm.Author.ToString();
                         usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
                         if (usr.CurrentXP >= usr.NextLevelXP)
                             LevelUpUser(usr);
@@ -333,6 +348,39 @@ namespace Public_Bot.Modules.Handlers
                     }
                 }
             }
+        }
+        public static async Task GiveForNewRole(GuildLeaderboards gl, SocketRole role, uint level, SocketGuildUser runner, SocketTextChannel chan)
+        {
+            var guild = client.GetGuild(gl.GuildID);
+            int count = 0;
+            foreach(var user in guild.Users.Where(x => gl.CurrentUsers.Find(y => y.UserID == x.Id) != null && gl.CurrentUsers.Find(y => y.UserID == x.Id && !x.Roles.Contains(role)).CurrentLevel >= level))
+            {
+                await user.AddRoleAsync(role);
+                count++;
+                Thread.Sleep(3000);
+            }
+            if(count > 0)
+            {
+                await chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
+                {
+                    Title = "Finnished adding Roles!",
+                    Description = $"We added the {role.Mention} to {count} different users who had a level equal or greater than {level}",
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+            }
+            else
+            {
+                await chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
+                {
+                    Title = "That was easy!",
+                    Description = $"Looks like there was no one to give {role.Mention} to.",
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+            }
+        }
+        public async Task RemoveFromRole(GuildLeaderboards gl, SocketRole role)
+        {
+
         }
     }
 }

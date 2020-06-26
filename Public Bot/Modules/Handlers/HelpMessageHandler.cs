@@ -113,6 +113,9 @@ namespace Public_Bot.Modules.Handlers
                 else
                     HelpPagesStaff[item.ModuleName] += $"\n{item.CommandName}"/*.PadRight(item.ModuleName.Length)*/;
             }
+            HelpPagesPublic["👨🏼‍💻 General 👨🏼‍💻"] += "\nhelp";
+            HelpPagesStaff["👨🏼‍💻 General 👨🏼‍💻"] += "\nhelp";
+
             HelpPagesPublicCount = (int)Math.Ceiling((double)HelpPagesPublic.Count / (double)HelpmsgPerPage);
             HelpPagesStaffCount = (int)Math.Ceiling((double)HelpPagesStaff.Count / (double)HelpmsgPerPage);
         }
@@ -172,7 +175,7 @@ namespace Public_Bot.Modules.Handlers
         }
         public static HelpPages CalcHelpPage(SocketGuildUser usr, GuildSettings s)
         {
-            if (s.PermissionRoles.Any(x => usr.Roles.Any(y => y.Id == x)))
+            if (s.PermissionRoles.Any(x => usr.Roles.Any(y => y.Id == x)) || usr.Guild.OwnerId == usr.Id)
                 return HelpPages.Staff;
             else
                 return HelpPages.Public;

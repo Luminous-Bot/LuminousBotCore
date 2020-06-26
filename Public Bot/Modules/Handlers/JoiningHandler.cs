@@ -26,13 +26,13 @@ namespace Public_Bot.Modules.Handlers
             foreach (var m in s.ModulesSettings)
                 md.Add($"{string.Join(' ', m.Key.Split(' ').Skip(1).Take(m.Key.Split(' ').Length - 2))}\nEnabled?: {m.Value}\n");
             Dictionary<string, string> prm = new Dictionary<string, string>();
-            prm.Add("Admin:", $"{perms.Administrator}");
-            prm.Add("Kick:", $"{perms.KickMembers}");
-            prm.Add("Ban:", $"{perms.BanMembers}");
-            prm.Add("Mentions:", $"{perms.MentionEveryone}");
-            prm.Add("Manage Guild:", $"{perms.ManageGuild}");
-            prm.Add("Channels:", $"{perms.ViewChannel}");
-            prm.Add("Manage Roles:", $"{perms.ManageRoles}");
+            prm.Add("Admin:", $"{(perms.Administrator ? "✅" : "❌")}");
+            prm.Add("Kick:", $"{(perms.KickMembers ? "✅" : "❌")}");
+            prm.Add("Ban:", $"{(perms.BanMembers ? "✅" : "❌")}");
+            prm.Add("Mentions:", $"{(perms.MentionEveryone ? "✅" : "❌")}");
+            prm.Add("Manage Guild:", $"{(perms.ManageGuild ? "✅" : "❌")}");
+            prm.Add("Channels:", $"{(perms.ViewChannel ? "✅" : "❌")}");
+            prm.Add("Manage Roles:", $"{(perms.ManageRoles ? "✅" : "❌")}");
             int leng = prm.Keys.Max(x => x.Length);
             List<string> final = new List<string>();
             foreach (var itm in prm)
@@ -40,11 +40,11 @@ namespace Public_Bot.Modules.Handlers
 
             await arg.DefaultChannel.SendMessageAsync("", false, new EmbedBuilder()
             {
-                Title = $"Thanks for adding {client.CurrentUser}!",
-                Description = $"Please look at the `{s.Prefix}help setup` command for help setting up this bot. This bot has Setup itself with these settings. if you need further assistance join our [Discord!](https://discord.gg/w8EcwBy)",
+                Title = $"Thanks for adding {client.CurrentUser.Username}!",
+                Description = $"We recommend you look at the `{s.Prefix}help setup` command for help setting up this bot. This bot has Setup itself with these settings. if you need further assistance join our [Discord!](https://discord.gg/w8EcwBy)",
                 Color = Color.Green,
                 Timestamp = DateTime.Now,
-                ThumbnailUrl = client.CurrentUser.GetAvatarUrl(ImageFormat.WebP),
+                //ThumbnailUrl = client.CurrentUser.GetAvatarUrl(ImageFormat.WebP),
                 Fields = new List<EmbedFieldBuilder>()
                     {
                         new EmbedFieldBuilder()
@@ -65,7 +65,11 @@ namespace Public_Bot.Modules.Handlers
                             Name = "Permission roles",
                             Value = $"These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", s.PermissionRoles)}>\n\nTo add one use `{s.Prefix}addpermission <@role>`\nTo remove one use `{s.Prefix}removepermission <@role>`"
                         }
-                    }
+                    },
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "Luminous: Made by quin#3017"
+                }
             }.Build());
         }
     }

@@ -17,6 +17,8 @@ namespace Public_Bot
         public Dictionary<string, bool> ModulesSettings { get; set; } = new Dictionary<string, bool>();
         public ulong MutedRoleID { get; set; } = 0;
         public bool Leveling { get; set; } = true;
+        public ulong LogChannel { get; set; } = 0;
+        public bool Logging { get; set; } = false;
         public GuildSettings() { }
 
         public static void SaveGuildSettings()
@@ -37,6 +39,8 @@ namespace Public_Bot
             else throw new Exception();
             return this;
         }
+        public static GuildSettings Get(ulong id)
+            => CommandHandler.CurrentGuildSettings.Any(x => x.GuildID == id) ? CommandHandler.CurrentGuildSettings.Find(x => x.GuildID == id) : null;
         public GuildSettings(IGuild guild)
         {
             if (guild == null)
@@ -46,10 +50,18 @@ namespace Public_Bot
             if (curUser.GuildPermissions.Administrator)
                 ModulesSettings.Add("🔨 Mod Commands 🔨", true);
             else
-                ModulesSettings.Add("🔨 Mod Commands 🔨", false);
+                if(curUser.GuildPermissions.KickMembers && curUser.GuildPermissions.BanMembers && curUser.GuildPermissions.ManageRoles && curUser.GuildPermissions.ManageMessages)
+                    ModulesSettings.Add("🔨 Mod Commands 🔨", true);
+                else
+                    ModulesSettings.Add("🔨 Mod Commands 🔨", false);
+            if (curUser.GuildPermissions.ManageRoles || curUser.GuildPermissions.Administrator)
+                ModulesSettings.Add("🧪 Levels 🧪", true);
+            else
+                ModulesSettings.Add("🧪 Levels 🧪", false);
+
             foreach (var itm in CustomCommandService.Modules)
-                if(!ModulesSettings.ContainsKey(itm.Key))
-                    ModulesSettings.Add(itm.Key, true);
+                    if (!ModulesSettings.ContainsKey(itm.Key))
+                        ModulesSettings.Add(itm.Key, true);
             PermissionRoles.AddRange(guild.Roles.Where(x => x.Permissions.Administrator).Select(x => x.Id));
 
             if (Leveling)

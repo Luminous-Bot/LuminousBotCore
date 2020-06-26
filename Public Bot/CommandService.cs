@@ -388,7 +388,12 @@ namespace Public_Bot
                 try
                 {
                     var u = context.Guild.GetUser(context.Message.Author.Id);
-                    CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : true;
+                    CommandModuleBase.HasExecutePermission = 
+                        cmd.RequirePermission 
+                        ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) 
+                        ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) 
+                        : context.Guild.OwnerId == context.User.Id 
+                        : true;
 
                     if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
                         return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidPermissions };
@@ -467,7 +472,7 @@ namespace Public_Bot
                     try
                     {
                         var u = context.Guild.GetUser(context.Message.Author.Id);
-                        CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : true;
+                        CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : context.Guild.OwnerId == context.User.Id : true;
 
                         if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
                             return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidPermissions };
@@ -521,7 +526,7 @@ namespace Public_Bot
                     try
                     {
                         var u = context.Guild.GetUser(context.Message.Author.Id);
-                        CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : true;
+                        CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : context.Guild.OwnerId == context.User.Id : true;
 
                         if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
                             return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidPermissions };

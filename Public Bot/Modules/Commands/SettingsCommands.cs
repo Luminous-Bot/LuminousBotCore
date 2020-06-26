@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
@@ -15,16 +16,16 @@ namespace Public_Bot.Modules.Commands
         [DiscordCommand("modules",
             commandHelp = "`(PREFIX)modules <enable/disable/list> <modulename>`",
             description = "Enables or disables a module",
-            RequiredPermission = false
+            RequiredPermission = true
             )]
         public async Task Modules(params string[] args)
         {
             await Module(args);
         }
         [DiscordCommand("module",
-            commandHelp = "`(PREFIX)modules <enable/disable/list> <modulename>`",
+            commandHelp = "`(PREFIX)module <enable/disable/list> <modulename>`",
             description = "Enables or disables a module",
-            RequiredPermission = false
+            RequiredPermission = true
             )]
         public async Task Module(params string[] args)
         {
@@ -176,6 +177,26 @@ namespace Public_Bot.Modules.Commands
                 }
                 if (args[0].ToLower() == "disable")
                 {
+                    if(GuildSettings.ModulesSettings.Keys.Any(x => x.ToLower().Contains("general")))
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = $"Why?",
+                            Description = $"You cant disable the General Commands module :/",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (GuildSettings.ModulesSettings.Keys.Any(x => x.ToLower().Contains("setting")))
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = $"Why?",
+                            Description = $"You cant disable the Settings Commands module :/",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
                     if (GuildSettings.ModulesSettings.Keys.Any(x => x.ToLower().Contains(moduleName)))
                     {
                         if (setting.Value)
@@ -219,6 +240,16 @@ namespace Public_Bot.Modules.Commands
         public async Task setmrole(string t)
         {
             var role = GetRole(t);
+            if(role == null)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Invalid Role!",
+                    Description = $"The role \"{t}\" is invalid!",
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
             GuildSettings.MutedRoleID = role.Id;
             GuildSettings.SaveGuildSettings();
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -264,7 +295,7 @@ namespace Public_Bot.Modules.Commands
                 Color = Color.Green,
             }.WithCurrentTimestamp().Build());
         }
-        [DiscordCommand("addpermission", RequiredPermission = true, commandHelp = "`(PREFIX)addpermssion <@role>`", description = "Adds a role to the permission list")]
+        [DiscordCommand("addpermission", RequiredPermission = true, commandHelp = "`(PREFIX)addpermission <@role>`", description = "Adds a role to the permission list")]
         public async Task addmodrole(string r)
         {
             var role = GetRole(r);
@@ -290,7 +321,7 @@ namespace Public_Bot.Modules.Commands
                 Color = Color.Green,
             }.WithCurrentTimestamp().Build());
         }
-        [DiscordCommand("removepermission", RequiredPermission = true, commandHelp = "`(PREFIX)removepermssion <@role>`", description = "Removes a role from the permission list")]
+        [DiscordCommand("removepermission", RequiredPermission = true, commandHelp = "`(PREFIX)removepermission <@role>`", description = "Removes a role from the permission list")]
         public async Task removemodrole(string r)
         {
             var role = GetRole(r);
@@ -316,62 +347,171 @@ namespace Public_Bot.Modules.Commands
                 Color = Color.Green,
             }.WithCurrentTimestamp().Build());
         }
-        [DiscordCommand("leveling", RequiredPermission = true)]
-        public async Task leveling(string param)
+        //[DiscordCommand("leveling", RequiredPermission = true)]
+        //public async Task leveling(string param)
+        //{
+        //    bool res = true;
+        //    switch (param.ToLower())
+        //    {
+        //        case "disable":
+        //            res = false;
+        //            break;
+        //        case "off":
+        //            res = false;
+        //            break;
+        //        case "false":
+        //            res = false;
+        //            break;
+        //        case "enable":
+        //            res = true;
+        //            break;
+        //        case "on":
+        //            res = true;
+        //            break;
+        //        case "true":
+        //            res = true;
+        //            break;
+        //        default:
+        //            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+        //            {
+        //                Title = "Sorry I don't understand",
+        //                Description = "please use one of these to turn on or off the leveling system",
+        //                Fields = new List<EmbedFieldBuilder>()
+        //                {
+        //                    new EmbedFieldBuilder()
+        //                    {
+        //                        Name = "**__Turn on leveling__**",
+        //                        Value = "```enable\non\ntrue```",
+        //                        IsInline = true
+        //                    },
+        //                    new EmbedFieldBuilder()
+        //                    {
+        //                        Name = "**__Turn off leveling__**",
+        //                        Value = "```disable\noff\nfalse```",
+        //                        IsInline = true
+        //                    }
+        //                },
+        //                Color = Color.Orange
+        //            }.WithCurrentTimestamp().Build());
+        //            return;
+        //    }
+        //    var inx = CommandHandler.CurrentGuildSettings.IndexOf(GuildSettings);
+        //    CommandHandler.CurrentGuildSettings[inx].Leveling = res;
+        //    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+        //    {
+        //        Title = "Success!",
+        //        Description = $"Leveling is now {(res == true ? "Enabled" : "Disabled")}!",
+        //        Color = Color.Green
+        //    }.WithCurrentTimestamp().Build());
+        //}
+        //[DiscordCommand("rolecard")]
+        //public async Task rolecard(params string[] args)
+        //{
+        //    if(args.Length == 0)
+        //    {
+        //        //TODO:
+        //    }
+        //}
+        [DiscordCommand("prefix", RequiredPermission = true, description = "Changes the prefix of the Bot", commandHelp = "Usage - `(PREFIX)prefix <prefix>`")]
+        public async Task prefix(string prefix)
         {
-            bool res = true;
-            switch (param.ToLower())
-            {
-                case "disable":
-                    res = false;
-                    break;
-                case "off":
-                    res = false;
-                    break;
-                case "false":
-                    res = false;
-                    break;
-                case "enable":
-                    res = true;
-                    break;
-                case "on":
-                    res = true;
-                    break;
-                case "true":
-                    res = true;
-                    break;
-                default:
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "Sorry I don't understand",
-                        Description = "please use one of these to turn on or off the leveling system",
-                        Fields = new List<EmbedFieldBuilder>()
-                        {
-                            new EmbedFieldBuilder()
-                            {
-                                Name = "**__Turn on leveling__**",
-                                Value = "```enable\non\ntrue```",
-                                IsInline = true
-                            },
-                            new EmbedFieldBuilder()
-                            {
-                                Name = "**__Turn off leveling__**",
-                                Value = "```disable\noff\nfalse```",
-                                IsInline = true
-                            }
-                        },
-                        Color = Color.Orange
-                    }.WithCurrentTimestamp().Build());
-                    return;
-            }
-            var inx = CommandHandler.CurrentGuildSettings.IndexOf(GuildSettings);
-            CommandHandler.CurrentGuildSettings[inx].Leveling = res;
+            GuildSettings.Prefix = prefix;
+            GuildSettings.SaveGuildSettings();
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Success!",
-                Description = $"Leveling is now {(res == true ? "Enabled" : "Disabled")}!",
+                Description  = $"The prefix is now `{prefix}`!",
                 Color = Color.Green
             }.WithCurrentTimestamp().Build());
+        }
+        [DiscordCommand("logs", RequiredPermission = true, commandHelp = "Usage - `(PREFIX)logs channel <channel>`, `(PREFIX)logs on/off`", description = "Set a channel to log to and enable or disable logging to a channel.")]
+        public async Task logs(params string[] args)
+        {
+            if(args.Length == 0)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "You didn't provide any arguments!",
+                    Description = $"Please see `{GuildSettings.Prefix}help logs` for how to use this command",
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            if(args[0].ToLower() == "on")
+            {
+                GuildSettings.Logging = true;
+                GuildSettings.SaveGuildSettings();
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Success!",
+                    Description = $"Logging is now Enabled!",
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            if (args[0].ToLower() == "off")
+            {
+                GuildSettings.Logging = false;
+                GuildSettings.SaveGuildSettings();
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Success!",
+                    Description = $"Logging is now Disabled!",
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            if (args[0].ToLower() == "channel")
+            {
+                if(args.Length == 2)
+                {
+                    var chan = GetChannel(args[1]);
+                    if(chan == null)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "That channel is invalid",
+                            Description = $"The channel \"{args[1]}\" is invalid",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if(chan.GetType() != typeof(SocketTextChannel))
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "That channel isn't a Text Channel",
+                            Description = $"Please provide a text channel",
+                            Color = Color.Red,
+                            Footer = new EmbedFooterBuilder()
+                            {
+                                Text = "Owo secrete footer text"
+                            }
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    GuildSettings.LogChannel = chan.Id;
+                    GuildSettings.Logging = true;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Success!",
+                        Description = $"The channel <#{chan.Id}> is now the log channel! We also turned on logging for you, if you wish to turn logging off you can do so by running `{GuildSettings.Prefix}logs off`",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "You didn't provide the correct arguments!",
+                        Description = $"Please see `{GuildSettings.Prefix}help logs` for how to use this command",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+            }
         }
     }
 }
