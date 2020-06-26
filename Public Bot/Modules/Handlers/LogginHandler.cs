@@ -210,7 +210,7 @@ namespace Public_Bot.Modules.Handlers
                                     IsInline = true,
                                 }
                             } : new List<EmbedFieldBuilder>(),
-                            Color = Color.Orange
+                            Color = Color.Red
                         }.WithCurrentTimestamp().Build());
                     }
                 }

@@ -99,20 +99,23 @@ namespace Public_Bot.Modules.Handlers
             {
                 if (item.CommandHelpMessage == null && item.CommandDescription == null)
                     continue;
-                if (!HelpPagesPublic.ContainsKey(item.ModuleName))
-                    HelpPagesPublic.Add(item.ModuleName, item.CommandName/*.PadRight(item.ModuleName.Length)*/);
-                else
-                    HelpPagesPublic[item.ModuleName] += $"\n{item.CommandName}"/*.PadRight(item.ModuleName.Length)*/;
+                if(s.ModulesSettings[item.ModuleName])
+                    if (!HelpPagesPublic.ContainsKey(item.ModuleName))
+                        HelpPagesPublic.Add(item.ModuleName, item.CommandName/*.PadRight(item.ModuleName.Length)*/);
+                    else
+                        HelpPagesPublic[item.ModuleName] += $"\n{item.CommandName}"/*.PadRight(item.ModuleName.Length)*/;
             }
             foreach (var item in CommandModuleBase.ReadCurrentCommands(s.Prefix))
             {
                 if (item.CommandHelpMessage == null && item.CommandDescription == null)
                     continue;
-                if (!HelpPagesStaff.ContainsKey(item.ModuleName))
-                    HelpPagesStaff.Add(item.ModuleName, item.CommandName/*.PadRight(item.ModuleName.Length)*/);
-                else
-                    HelpPagesStaff[item.ModuleName] += $"\n{item.CommandName}"/*.PadRight(item.ModuleName.Length)*/;
+                if (s.ModulesSettings[item.ModuleName])
+                    if (!HelpPagesStaff.ContainsKey(item.ModuleName))
+                        HelpPagesStaff.Add(item.ModuleName, item.CommandName/*.PadRight(item.ModuleName.Length)*/);
+                    else
+                        HelpPagesStaff[item.ModuleName] += $"\n{item.CommandName}"/*.PadRight(item.ModuleName.Length)*/;
             }
+            
             HelpPagesPublic["👨🏼‍💻 General 👨🏼‍💻"] += "\nhelp";
             HelpPagesStaff["👨🏼‍💻 General 👨🏼‍💻"] += "\nhelp";
 

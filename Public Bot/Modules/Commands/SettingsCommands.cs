@@ -177,7 +177,7 @@ namespace Public_Bot.Modules.Commands
                 }
                 if (args[0].ToLower() == "disable")
                 {
-                    if(GuildSettings.ModulesSettings.Keys.Any(x => x.ToLower().Contains("general")))
+                    if("👨🏼‍💻 General 👨🏼‍💻".Contains(args[1]))
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -187,7 +187,7 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    if (GuildSettings.ModulesSettings.Keys.Any(x => x.ToLower().Contains("setting")))
+                    if ("⚙️ Settings ⚙️".Contains(args[1]))
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
