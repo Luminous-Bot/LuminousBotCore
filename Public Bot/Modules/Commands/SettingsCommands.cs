@@ -513,5 +513,27 @@ namespace Public_Bot.Modules.Commands
                 }
             }
         }
+        [DiscordCommand("joinrole", description = "Gives new users a role", commandHelp = "Usage - `(PREFIX)joinrole <role>", RequiredPermission = true)]
+        public async Task Joinrole(string r)
+        {
+            var role = GetRole(r);
+            if(role == null)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Invalid Role!",
+                    Description = "The role you provided was invalid!",
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+            }
+            GuildSettings.NewMemberRole = role.Id;
+            GuildSettings.SaveGuildSettings();
+            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+            {
+                Title = "Success!",
+                Description = $"New members will now get the role {role.Mention}",
+                Color = Color.Green
+            }.WithCurrentTimestamp().Build());
+        }
     }
 }

@@ -127,6 +127,8 @@ namespace Public_Bot.Modules.Handlers
                 if (gs.LogChannel != 0 && gs.Logging)
                 {
                     var logchan = sgc.Guild.GetTextChannel(gs.LogChannel);
+                    if (arg3.Id == logchan.Id)
+                        return;
                     if (logchan != null)
                     {
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
@@ -166,7 +168,7 @@ namespace Public_Bot.Modules.Handlers
                                 new EmbedFieldBuilder()
                                 {
                                     Name = "New Message:",
-                                    Value = arg2.Content,
+                                    Value = arg2.Content == null ? "{no content}" : arg2.Content,
                                     IsInline = true,
 
                                 }
@@ -207,7 +209,7 @@ namespace Public_Bot.Modules.Handlers
                                     Value = arg1.Value.Content,
                                     IsInline = true,
                                 }
-                            } : null,
+                            } : new List<EmbedFieldBuilder>(),
                             Color = Color.Orange
                         }.WithCurrentTimestamp().Build());
                     }

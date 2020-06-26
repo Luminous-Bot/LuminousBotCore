@@ -45,6 +45,7 @@ namespace Public_Bot
                     LogLevel = LogSeverity.Debug,
                     DefaultRetryMode = RetryMode.RetryRatelimit,
                     TotalShards = 1,
+                    MessageCacheSize = 100,
                     //ShardId = 0,
                 });
                 _client.Log += _client_Log;

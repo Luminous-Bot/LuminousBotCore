@@ -18,6 +18,7 @@ namespace Public_Bot
         public ulong MutedRoleID { get; set; } = 0;
         public bool Leveling { get; set; } = true;
         public ulong LogChannel { get; set; } = 0;
+        public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
         public GuildSettings() { }
 
