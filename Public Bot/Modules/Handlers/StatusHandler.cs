@@ -35,7 +35,6 @@ namespace Public_Bot.Modules.Handlers
                 $"Opening a new socket to the gateway",
                 $"Searching for clide",
                 $"Crying in binary",
-                $"C# > js",
                 $"Admiring Amaribot",
                 $"Watching Coding train",
                 $"Serching for the singularity",
