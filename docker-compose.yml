@@ -1,0 +1,8 @@
+version: "3.4"
+
+services:
+    publicbot:
+        image: luminous-beta-test:0.0.1
+        restart: always
+        volumes:
+            - ~/luminous-data:/app/Data
