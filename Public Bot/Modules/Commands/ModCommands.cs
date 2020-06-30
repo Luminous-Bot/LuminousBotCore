@@ -111,7 +111,7 @@ namespace Public_Bot.Modules.Commands
             Voicebanned,
             Tempbanned
         }
-        [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficent with this module, you can keep track of users modlogs and keep your server in order!")]
+        [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficent with this module, you can keep track of user infractions and keep your server in order!")]
         public class ModCommandsModule : CommandModuleBase
         {
             public async Task CreateAction(string[] args, Action action, ICommandContext context)

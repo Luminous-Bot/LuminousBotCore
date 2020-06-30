@@ -66,8 +66,11 @@ namespace Public_Bot.Modules.Commands
                 var g = RoundedRect(new Rectangle(20, 312 - 60, (int)(913 - 60), 30), 15);
                 //draw lvl
                 var mxWidth = (int)(913 - 60);
+                var mnWidth = 30;
                 var prc = (double)curXP / (double)nxtXP;
                 var fnl = Math.Ceiling(mxWidth * prc);
+                if (fnl < mnWidth)
+                    fnl = mnWidth;
                 var prg = RoundedRect(new Rectangle(20, 312 - 60, (int)fnl, 30), 15);
                 canv.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(50, 50, 50)), g);
                 canv.FillPath(new SolidBrush(embc), prg);
