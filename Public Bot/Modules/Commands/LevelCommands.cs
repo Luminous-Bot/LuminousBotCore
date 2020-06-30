@@ -3,12 +3,18 @@ using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using static Public_Bot.Modules.Handlers.LevelHandler;
 using static Public_Bot.Modules.Handlers.LevelHandler.GuildLevelSettings;
+using Color = Discord.Color;
 
 namespace Public_Bot.Modules.Commands
 {
@@ -40,8 +46,148 @@ namespace Public_Bot.Modules.Commands
                 ThumbnailUrl = Context.Guild.IconUrl
             }.WithCurrentTimestamp().Build());
         }
+        public class RankBuilder
+        {
+            public static System.Drawing.Image MakeRank(string username, string avtr, int level, int curXP, int nxtXP, System.Drawing.Color embc, int Rank, System.Drawing.Color bgc)
+            {
+                WebClient wc = new WebClient();
+                byte[] bytes = wc.DownloadData(avtr);
+                MemoryStream ms = new MemoryStream(bytes);
+                System.Drawing.Image pfp = System.Drawing.Image.FromStream(ms);
+                pfp = ResizeImage(pfp, 200, 200);
+                var btmp = new Bitmap(913, 312);
+                var canv = Graphics.FromImage(btmp);
+                canv.SmoothingMode = SmoothingMode.AntiAlias;
+                canv.FillPath(new SolidBrush(bgc), RoundedRect(new Rectangle(0, 0, 913, 312), 30));
+                //draw pfp
+                var rpfp = ClipToCircle(pfp, new PointF(pfp.Width / 2, pfp.Height / 2), pfp.Width / 2, bgc);
+                canv.DrawImage(rpfp, 40, 25);
+                //draw progressbar
+                var g = RoundedRect(new Rectangle(20, 312 - 60, (int)(913 - 60), 30), 15);
+                //draw lvl
+                var mxWidth = (int)(913 - 60);
+                var prc = (double)curXP / (double)nxtXP;
+                var fnl = Math.Ceiling(mxWidth * prc);
+                var prg = RoundedRect(new Rectangle(20, 312 - 60, (int)fnl, 30), 15);
+                canv.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(50, 50, 50)), g);
+                canv.FillPath(new SolidBrush(embc), prg);
+
+                //draw username
+                var usrnam = username.Split('#');
+                var usr = string.Join("#", usrnam.Take(usrnam.Length - 1));
+                var tag = "#" + usrnam[usrnam.Length - 1];
+                if (usr.Length >= 17)
+                    usr = new string(usr.Take(14).ToArray()) + "...";
+                canv.DrawString(usr + tag, new Font("Bahnschrift", 42), new SolidBrush(System.Drawing.Color.White), new PointF(260, 32));
+                //draw Rank
+                canv.DrawString("Rank #" + Rank, new Font("Bahnschrift", 30), new SolidBrush(System.Drawing.Color.Gold), new PointF(260, 100));
+                //draw xp
+                canv.DrawString($"XP:  {KiloFormat(curXP)} / {KiloFormat(nxtXP)}", new Font("Bahnschrift", 20), new SolidBrush(System.Drawing.Color.White), new PointF(btmp.Width - 60, btmp.Height - 100), new StringFormat(StringFormatFlags.DirectionRightToLeft));
+                //draw level
+                canv.DrawString("Level " + level, new Font("Bahnschrift", 30), new SolidBrush(System.Drawing.Color.White), new PointF(260, 150));
+                canv.Save();
+                return btmp;
+            }
+            public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
+            {
+                var destRect = new Rectangle(0, 0, width, height);
+                var destImage = new Bitmap(width, height);
+
+                destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+                using (var graphics = Graphics.FromImage(destImage))
+                {
+                    graphics.CompositingMode = CompositingMode.SourceCopy;
+                    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                    using (var wrapMode = new ImageAttributes())
+                    {
+                        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                    }
+                }
+
+                return destImage;
+            }
+            public static GraphicsPath RoundedRect(Rectangle bounds, int radius)
+            {
+                int diameter = radius * 2;
+                Size size = new Size(diameter, diameter);
+                Rectangle arc = new Rectangle(bounds.Location, size);
+                GraphicsPath path = new GraphicsPath();
+
+                if (radius == 0)
+                {
+                    path.AddRectangle(bounds);
+                    return path;
+                }
+
+                // top left arc  
+                path.AddArc(arc, 180, 90);
+
+                // top right arc  
+                arc.X = bounds.Right - diameter;
+                path.AddArc(arc, 270, 90);
+
+                // bottom right arc  
+                arc.Y = bounds.Bottom - diameter;
+                path.AddArc(arc, 0, 90);
+
+                // bottom left arc 
+                arc.X = bounds.Left;
+                path.AddArc(arc, 90, 90);
+
+                path.CloseFigure();
+                return path;
+            }
+            public static System.Drawing.Image ClipToCircle(System.Drawing.Image srcImage, PointF center, float radius, System.Drawing.Color backGround)
+            {
+                System.Drawing.Image dstImage = new Bitmap(srcImage.Width, srcImage.Height, srcImage.PixelFormat);
+
+                using (Graphics g = Graphics.FromImage(dstImage))
+                {
+                    RectangleF r = new RectangleF(center.X - radius, center.Y - radius,
+                                                             radius * 2, radius * 2);
+
+                    // enables smoothing of the edge of the circle (less pixelated)
+                    //g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                    // fills background color
+                    using (Brush br = new SolidBrush(backGround))
+                    {
+                        g.FillRectangle(br, 0, 0, dstImage.Width, dstImage.Height);
+                    }
+
+                    // adds the new ellipse & draws the image again 
+                    GraphicsPath path = new GraphicsPath();
+                    path.AddEllipse(r);
+                    g.SetClip(path);
+                    g.DrawImage(srcImage, 0, 0);
+
+                    return dstImage;
+                }
+            }
+            public static string KiloFormat(int num)
+            {
+                if (num >= 100000000)
+                    return (num / 1000000).ToString("#,0M");
+
+                if (num >= 10000000)
+                    return (num / 1000000).ToString("0.#") + "M";
+
+                if (num >= 100000)
+                    return (num / 1000).ToString("#,0K");
+
+                if (num >= 10000)
+                    return (num / 1000).ToString("0.#") + "K";
+
+                return num.ToString("#,0");
+            }
+        }
         [DiscordCommand("rank", description = "Shows your current rank!", commandHelp = "Usage - `(PREFIX)rank`, `(PREFIX)rank <user>`")]
-        
         public async Task rank(params string[] args)
         {
             var user = Context.User;
@@ -53,7 +199,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     Title = "Invalid User!",
                     Description = $"The user \"{args[0]}\" is invalid",
-                    Color = Color.Red
+                    Color = Discord.Color.Red
                 }.WithCurrentTimestamp().Build());
                 return;
             }
@@ -62,34 +208,9 @@ namespace Public_Bot.Modules.Commands
             {
                 var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
                 var userlvl = cu.Find(x => x.UserID == user.Id);
-                var usrIndx = cu.IndexOf(userlvl);
-                string usrTop = "Leaderboards";
-                string usrMid = $"**{(cu[usrIndx].Username == "" ? Context.Guild.GetUser(cu[usrIndx].UserID).ToString() : cu[usrIndx].Username)}**~~".PadRight(32, '-') + $"~~> Rank: {usrIndx + 1} Level: {cu[usrIndx].CurrentLevel} XP: {(uint)cu[usrIndx].CurrentXP}/{(uint)cu[usrIndx].NextLevelXP}";
-                string userBtm = "Wow you're at the bottom buddy :(";
-                if (usrIndx > 0)
-                    usrTop = $"{(cu[usrIndx - 1].Username == "" ? Context.Guild.GetUser(cu[usrIndx - 1].UserID).ToString() : cu[usrIndx - 1].Username)}~~".PadRight(30, '-') + $"~~> Rank: {usrIndx} Level: {cu[usrIndx - 1].CurrentLevel} XP: {(uint)cu[usrIndx - 1].CurrentXP}/{(uint)cu[usrIndx - 1].NextLevelXP}";
-                if(usrIndx < cu.Count - 1)
-                    userBtm = $"{(cu[usrIndx + 1].Username == "" ? Context.Guild.GetUser(cu[usrIndx + 1].UserID).ToString() : cu[usrIndx + 1].Username)}~~".PadRight(30, '-') + $"~~> Rank: {usrIndx + 2} Level: {cu[usrIndx + 1].CurrentLevel} XP: {(uint)cu[usrIndx + 1].CurrentXP}/{(uint)cu[usrIndx + 1].NextLevelXP}";
-
-                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                {
-                    Title = $"{user}",
-                    ThumbnailUrl = user.GetAvatarUrl(),
-                    Fields = new List<EmbedFieldBuilder>()
-                    {
-                        new EmbedFieldBuilder()
-                        {
-                            Name = usrTop,
-                            Value = usrMid
-                        },
-                        new EmbedFieldBuilder()
-                        {
-                            Name = userBtm,
-                            Value = "__\n__"
-                        }
-                    },
-                    Color = gl.Settings.EmbedColor.Get(),
-                }.WithCurrentTimestamp().Build());
+                var img = RankBuilder.MakeRank(userlvl.Username, Context.Guild.GetUser(userlvl.UserID).GetAvatarUrl(), (int)userlvl.CurrentLevel, (int)userlvl.CurrentXP, (int)userlvl.NextLevelXP, System.Drawing.Color.FromArgb(gl.Settings.EmbedColor.R, gl.Settings.EmbedColor.G, gl.Settings.EmbedColor.B), gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1, System.Drawing.Color.FromArgb(gl.Settings.RankBackgound.R, gl.Settings.RankBackgound.G, gl.Settings.RankBackgound.B));
+                img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png", System.Drawing.Imaging.ImageFormat.Png);
+                await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png");
             }
             else
             {
@@ -806,6 +927,62 @@ namespace Public_Bot.Modules.Commands
                             {
                                 Title = "Invalid parameters",
                                 Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings color 25 255 0`",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Invalid parameters",
+                            Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings color 25 255 0`",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    break;
+                case "backgroundcolor":
+                    if (args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Level Embed Background Color",
+                            Description = $"The current Level Embed Background Color is this embeds color (R:{ls.RankBackgound.R} G:{ls.RankBackgound.G} B:{ls.RankBackgound.B}\nTo change the Level Embeds Background Color Run `{GuildSettings.Prefix}levelsettings backgroundcolor <R> <G> <B>`",
+                            Color = new Color(ls.RankBackgound.R, ls.RankBackgound.G, ls.RankBackgound.B)
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (args.Length == 4)
+                    {
+                        if (int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
+                        {
+                            if (R > 255 || G > 255 || B > 255)
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid parameters",
+                                    Description = $"Please use the RGB format values between 0 and 255, for example: `{GuildSettings.Prefix}levelsettings backgoundcolor 25 255 0`",
+                                    Color = Color.Red
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            gl.Settings.RankBackgound = new color(R, G, B);
+                            gl.SaveCurrent();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Level Embed Background Color",
+                                Description = $"The current Level Embed Background Color is now set to this embeds color (R:{gl.Settings.RankBackgound.R} G:{gl.Settings.RankBackgound.G} B:{gl.Settings.RankBackgound.B})",
+                                Color = new Color(ls.RankBackgound.R, ls.RankBackgound.G, ls.RankBackgound.B)
+                            }.WithCurrentTimestamp().Build());
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid parameters",
+                                Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings backgoundcolor 25 255 0`",
                                 Color = Color.Red
                             }.WithCurrentTimestamp().Build());
                             return;

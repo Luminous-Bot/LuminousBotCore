@@ -131,6 +131,11 @@ namespace Public_Bot.Modules.Handlers
                         return;
                     if (logchan != null)
                     {
+                        if (arg1.HasValue)
+                            if (arg1.Value.Embeds.Count > 0)
+                                return;
+                        if (arg2.Embeds.Count > 0)
+                            return;
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Message Edited ⚡",

@@ -115,10 +115,7 @@ namespace Public_Bot.Modules.Handlers
                     else
                         HelpPagesStaff[item.ModuleName] += $"\n{item.CommandName}"/*.PadRight(item.ModuleName.Length)*/;
             }
-            
-            HelpPagesPublic["👨🏼‍💻 General 👨🏼‍💻"] += "\nhelp";
-            HelpPagesStaff["👨🏼‍💻 General 👨🏼‍💻"] += "\nhelp";
-
+          
             HelpPagesPublicCount = (int)Math.Ceiling((double)HelpPagesPublic.Count / (double)HelpmsgPerPage);
             HelpPagesStaffCount = (int)Math.Ceiling((double)HelpPagesStaff.Count / (double)HelpmsgPerPage);
         }
@@ -136,7 +133,7 @@ namespace Public_Bot.Modules.Handlers
                 //var rs = HelpPagesPublic.Skip((page - 1) * HelpmsgPerPage).Take(HelpmsgPerPage);
                 var em = new EmbedBuilder()
                 {
-                    Title = $"**Help ({page}/{HelpPagesPublicCount})**",
+                    Title = $"**Help**",
                     Color = Color.Green,
                     Description = "Here are the commands!",
                     Footer = new EmbedFooterBuilder()
@@ -158,7 +155,7 @@ namespace Public_Bot.Modules.Handlers
                     page = page - 1;
                 var em = new EmbedBuilder()
                 {
-                    Title = $"**Help ({page}/{HelpPagesStaffCount})**",
+                    Title = $"**Help**",
                     Color = Color.Green,
                     Description = "Here are the commands!",
                     Fields = new List<EmbedFieldBuilder>(),
@@ -169,7 +166,7 @@ namespace Public_Bot.Modules.Handlers
                 };
                 foreach (var h in HelpPagesStaff.OrderBy(x => x.Value.Split('\n').Length * -1))
                 {
-                    em.Fields.Add(new EmbedFieldBuilder() { Name = h.Key, Value = $"```{h.Value}```", IsInline = true });
+                    em.Fields.Add(new EmbedFieldBuilder() { Name = h.Key, Value = $"```\n{h.Value}```", IsInline = true });
                 }
                 return em.Build();
             }

@@ -157,6 +157,18 @@ namespace Public_Bot.Modules.Commands
                     }.Build());
                     return;
                 }
+                var sgu = Context.Guild.GetUser(context.User.Id);
+                if(user.Hierarchy >= sgu.Hierarchy)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**Not gonna happen**",
+                        Description = @$"You cant {actionString} someone whos rank is above yours ¯\_(ツ)_/¯",
+                        Color = Color.Red,
+                        Timestamp = DateTimeOffset.Now,
+                    }.Build());
+                    return;
+                }
                 if (args.Length == 1)
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()

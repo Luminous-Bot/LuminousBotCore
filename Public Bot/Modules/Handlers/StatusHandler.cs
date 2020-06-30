@@ -35,14 +35,13 @@ namespace Public_Bot.Modules.Handlers
                 $"Opening a new socket to the gateway",
                 $"Searching for clide",
                 $"Crying in binary",
-                $"C# > js",
                 $"Admiring Amaribot",
                 $"Watching Coding train",
                 $"Serching for the singularity",
                 $"Chilling with kazoo kid",
                 $"Compiling the bee movie script"
             };
-            await client.SetGameAsync($"[0.2.0] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.2.5] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
         }
     }
 }
