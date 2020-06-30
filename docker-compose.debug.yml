@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  publicbot:
+    image: publicbot
+    build:
+      context: .
+      dockerfile: Public Bot/Dockerfile
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw
