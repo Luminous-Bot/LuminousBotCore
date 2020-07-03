@@ -27,7 +27,7 @@ namespace Public_Bot.Modules.Handlers
             string[] status = new string[]
             {
                 $"Active in {client.Guilds.Count} unique servers!",
-                $"Serving {alusr} Users in {client.Guilds.Count} Different Guilds",
+                $"Serving {alusr} Users in {client.Guilds.Count} Guilds",
                 $"Executing commands..",
                 $"Running the batch file",
                 $"Handling exceptions",
