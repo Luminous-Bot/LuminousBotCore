@@ -118,7 +118,6 @@ namespace Public_Bot.Modules.Handlers
 "A Discord server can have up to 500 channels.",
 "A user cannot be on more than 100 servers.",
 "A Discord server is limited to a size maximum of 250,000 - 500,000 members.",
-"Dyno bots on Discord are fully customizable.",
 "Canary is Discord’s alpha testing program.",
 "Discord has over 750 verified servers.",
 "The official Fortnite server has more than 180,000 members.",
