@@ -59,7 +59,15 @@ namespace Public_Bot
                 if (!CurrentGuildSettings.Any(x => x.GuildID == guild.Id))
                     new GuildSettings(guild);
         }
-
+        public static bool IsBotRole(IRole role)
+        {
+            var guild = client.GetGuild(role.Guild.Id);
+            var users = guild.Users.Where(x => x.Roles.Contains(role));
+            if (users.Count() == 1)
+                if (users.First().IsBot)
+                    return true;
+            return false;
+        }
         private async Task CheckCommandAsync(SocketMessage arg)
         {
             var msg = arg as SocketUserMessage;
@@ -69,7 +77,7 @@ namespace Public_Bot
                 return;
 
             var s = CurrentGuildSettings.Find(x => x.GuildID == context.Guild.Id);
-            if (arg.Content.StartsWith(s.Prefix))
+            if (arg.Content.StartsWith(s.Prefix) || arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
             {
                 var resp = await service.ExecuteAsync(context, s);
                 Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");

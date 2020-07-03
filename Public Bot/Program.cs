@@ -46,6 +46,8 @@ namespace Public_Bot
                     DefaultRetryMode = RetryMode.RetryRatelimit,
                     TotalShards = 1,
                     MessageCacheSize = 100,
+                    ExclusiveBulkDelete = true,
+                    AlwaysDownloadUsers = true,                    
                     //ShardId = 0,
                 });
                 _client.Log += _client_Log;

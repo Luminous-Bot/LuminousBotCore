@@ -51,19 +51,27 @@ namespace Public_Bot.Modules.Handlers
                         {
                             IsInline = true,
                             Name = "Bot Permissions",
-                            Value = $"Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\nSome Modules like the moderation module need kick and ban permissions."
+                            Value = $"> Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Modules",
-                            Value = $"This is the current Module Settings with there status\n```{string.Join('\n', md)}```\nYou can Enable/Disable Modules with the {s.Prefix}modules command."
+                            Value = $"> This is the current Module Settings with there status\n```{string.Join('\n', md)}```\n> You can Enable/Disable Modules with the {s.Prefix}modules command."
                         },
+                        s.PermissionRoles.Count > 0 ? 
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Permission roles",
-                            Value = $"These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", s.PermissionRoles)}>\n\nTo add one use `{s.Prefix}addpermission <@role>`\nTo remove one use `{s.Prefix}removepermission <@role>`"
+                            Value = $">>> These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", s.PermissionRoles)}>\n\nTo add one use `{s.Prefix}addpermission <@role>`\nTo remove one use `{s.Prefix}removepermission <@role>`"
+                        }
+                        :
+                        new EmbedFieldBuilder()
+                        {
+                            IsInline = true,
+                            Name = "Permission roles",
+                            Value = $">>> Please set up some roles with permissions because right now only the guilds owner can setup Luminous.\nTo add one use `{s.Prefix}addpermission <@role>`\nTo remove one use `{s.Prefix}removepermission <@role>`"
                         }
                     },
                 Footer = new EmbedFooterBuilder()

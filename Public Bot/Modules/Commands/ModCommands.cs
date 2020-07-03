@@ -117,12 +117,12 @@ namespace Public_Bot.Modules.Commands
             public async Task CreateAction(string[] args, Action action, ICommandContext context)
             {
                 var curUser = await context.Guild.GetCurrentUserAsync();
-                if (!curUser.GuildPermissions.Administrator)
+                if (!(curUser.GuildPermissions.BanMembers && curUser.GuildPermissions.KickMembers && curUser.GuildPermissions.ManageMessages && curUser.GuildPermissions.ManageRoles))
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "**The bot need better permissions!**",
-                        Description = @"The bot needs the `Administrator` permission to use this command!",
+                        Description = @$"The bot doesnt have the correct permissions for this module, run `{GuildSettings.Prefix}help setup` to see the bots permissions",
                         Color = Color.Red,
                         Timestamp = DateTimeOffset.Now,
                     }.Build());
@@ -780,6 +780,123 @@ namespace Public_Bot.Modules.Commands
                 await Task.Delay(delay);
                 await m.DeleteAsync();
 
+            }
+
+            [DiscordCommand("slowmode", RequiredPermission = true)]
+            public async Task slowmode(params string[] args)
+            {
+                if(args.Length == 0)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "How much slowmode?",
+                        Description = "Prove some arguments!",
+                        Color = Color.Orange,
+                    }.WithCurrentTimestamp().Build());
+                    return;
+
+                }
+                if (uint.TryParse(args[0], out var t))
+                {
+                    var chan = (SocketTextChannel)Context.Channel;
+                    try
+                    {
+                        await chan.ModifyAsync(x => x.SlowModeInterval = (int)t);
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Success!",
+                            Description = $"{Context.User.Mention} set the slowmode of <%{Context.Channel.Id}> to {t} Seconds!",
+                            Color = Color.Green,
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "That didn't work!",
+                            Description = $"Heres why: {ex.Message}",
+                            Color = Color.Red,
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                }
+                else
+                {
+                    //check timespan
+                    var regex = new Regex(@"^(\d*)([a-z])$");
+                    if (regex.IsMatch(args[0].ToLower()))
+                    {
+                        var match = regex.Match(args[0].ToLower());
+                        TimeSpan timespan;
+                        switch (match.Groups[2].Value)
+                        {
+                            case "m":
+                                timespan = TimeSpan.FromMinutes(int.Parse(match.Groups[1].Value));
+                                break;
+                            case "h":
+                                timespan = TimeSpan.FromHours(int.Parse(match.Groups[1].Value));
+                                break;
+                            case "s":
+                                timespan = TimeSpan.FromSeconds(int.Parse(match.Groups[1].Value));
+                                break;
+                            default:
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid format",
+                                    Description = $"The format of `{match.Groups[2].Value}` is invalid, please use either `m` `h` `s` (minutes, hours, seconds)",
+                                    Color = Color.Orange,
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                        }
+                        var chan = (SocketTextChannel)Context.Channel;
+                        try
+                        {
+                            await chan.ModifyAsync(x => x.SlowModeInterval = (int)timespan.TotalSeconds);
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"{Context.User.Mention} set the slowmode of <%{Context.Channel.Id}> to {timespan.TotalSeconds} Seconds!",
+                                Color = Color.Green,
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        catch (Exception ex)
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "That didn't work!",
+                                Description = $"Heres why: {ex.Message}",
+                                Color = Color.Red,
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        var chan = (SocketTextChannel)Context.Channel;
+                        if(chan.SlowModeInterval > 0)
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"{Context.User.Mention} turned off slowmode for <%{Context.Channel.Id}>",
+                                Color = Color.Green,
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid Parameters!",
+                                Description = $"Please see `{GuildSettings.Prefix}help slowmode`",
+                                Color = Color.Orange,
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                }
             }
         }
     }

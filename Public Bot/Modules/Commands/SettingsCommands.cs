@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Public_Bot.Modules.Commands
@@ -34,7 +35,7 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "What do you want to do?",
-                    Description = $"Please use the format `{GuildSettings.Prefix}modules <enable/disable/list> <modulename>",
+                    Description = $"Please use the format `{GuildSettings.Prefix}modules <enable/disable/list> <modulename>`",
                     Color = Color.Orange
                 }.WithCurrentTimestamp().Build());
                 return;
@@ -282,7 +283,7 @@ namespace Public_Bot.Modules.Commands
                     Color = Color.Blue,
                     Timestamp = DateTime.Now
                 }.Build());
-                MuteHandler.SetupMutedRole(Context.Guild, Context.Channel.Id, Context.User.Id);
+                new Thread(async () => await MuteHandler.SetupMutedRole(Context.Guild, Context.Channel.Id, Context.User.Id)).Start();
             }
         }
         [DiscordCommand("permissions", RequiredPermission = true, commandHelp = "`(PREFIX)permissions", description = "Lists all roles with elevated permissions for this bot")]

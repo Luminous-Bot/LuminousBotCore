@@ -22,8 +22,10 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task C_ShardLatencyUpdated(int arg1, int arg2, DiscordSocketClient arg3)
         {
-            ulong alusr = 0;
-            client.Guilds.ToList().ForEach(x => alusr = alusr + (ulong)x.Users.Count);
+            int alusr = 0;
+            foreach (var g in client.Guilds)
+                alusr += g.MemberCount;
+            Logger.Write($"Count of {alusr}");
             string[] status = new string[]
             {
                 $"Active in {client.Guilds.Count} unique servers!",
@@ -39,9 +41,14 @@ namespace Public_Bot.Modules.Handlers
                 $"Watching Coding train",
                 $"Serching for the singularity",
                 $"Chilling with kazoo kid",
-                $"Compiling the bee movie script"
+                $"Compiling the bee movie script",
+                $"Fixing bugs",
+                $"Programming somthing",
+                $"Checking your messages for commands",
+                $"Upgraded!",
+                $"Some body once told me!"
             };
-            await client.SetGameAsync($"[0.2.5] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.2.8] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
         }
     }
 }

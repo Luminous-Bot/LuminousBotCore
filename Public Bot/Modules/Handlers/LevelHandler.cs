@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Public_Bot.Modules.Commands;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -399,6 +400,7 @@ namespace Public_Bot.Modules.Handlers
                     Color = Color.Green 
                 }.WithCurrentTimestamp().Build()).Result;
             }
+            LevelCommands.CurrentRF.Remove(gl.GuildID);
         }
         public async Task RemoveFromRole(GuildLeaderboards gl, SocketRole role)
         {

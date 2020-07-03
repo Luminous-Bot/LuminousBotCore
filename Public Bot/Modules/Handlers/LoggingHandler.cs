@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace Public_Bot.Modules.Handlers
 {
     [DiscordHandler]
-    class LogginHandler
+    class LoggingHandler
     {
         public static DiscordShardedClient client;
-        public LogginHandler(DiscordShardedClient c)
+        public LoggingHandler(DiscordShardedClient c)
         {
             client = c;
             //subscribe
@@ -26,6 +26,28 @@ namespace Public_Bot.Modules.Handlers
             client.RoleUpdated += Client_RoleUpdated;
             client.UserBanned += Client_UserBanned;
             client.UserUnbanned += Client_UserUnbanned;
+            client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
+        }
+
+        private async Task Client_MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> arg1, ISocketMessageChannel arg2)
+        {
+            if (arg2.GetType() == typeof(SocketTextChannel))
+            {
+                var sgc = arg2 as SocketTextChannel;
+                var gs = GuildSettings.Get(sgc.Guild.Id);
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = sgc.Guild.GetTextChannel(gs.LogChannel);
+                    if (logchan != null)
+                    {
+                        await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "⚡ Bulk Messages Deleted ⚡",
+                            Description = $"{arg1.Count} Messages were deleted in {sgc.Mention}",
+                        }.WithCurrentTimestamp().Build());
+                    }
+                }
+            }
         }
 
         private async Task Client_UserUnbanned(SocketUser arg1, SocketGuild arg2)
@@ -93,7 +115,7 @@ namespace Public_Bot.Modules.Handlers
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "⚡ Role Deleted ⚡",
-                        Description = $"The role {arg.Mention} was Deleted.",
+                        Description = $"The role {arg.Name} was Deleted.",
                         Color = Color.Red
                     }.WithCurrentTimestamp().Build());
                 }

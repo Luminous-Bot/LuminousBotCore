@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static Public_Bot.Modules.Handlers.LevelHandler;
 using static Public_Bot.Modules.Handlers.LevelHandler.GuildLevelSettings;
@@ -21,6 +22,8 @@ namespace Public_Bot.Modules.Commands
     [DiscordCommandClass("🧪 Levels 🧪", "Add ranks and leaderboards for your server with Levels!")]
     class LevelCommands : CommandModuleBase
     {
+        [Alt("lb")]
+        [Alt("leaderboards")]
         [DiscordCommand("leaderboard", commandHelp = "Usage - `(PREFIX)leaderboard`", description = "Shows the leaderboard for the server")]
         public async Task Leaderboard()
         {
@@ -93,27 +96,28 @@ namespace Public_Bot.Modules.Commands
             }
             public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
             {
-                var destRect = new Rectangle(0, 0, width, height);
-                var destImage = new Bitmap(width, height);
+                return new Bitmap(image, new Size(width, height));
+                //var destRect = new Rectangle(0, 0, width, height);
+                //using(Bitmap destImage = new Bitmap(width, height, PixelFormat.Format32bppArgb))
+                //{
+                //    Console.WriteLine($"W:{width} H:{height} Null?: {(destImage == null ? "True" : "false")}");
+                //    destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                //    var graphics = Graphics.FromImage(destImage);
+                //    graphics.CompositingMode = CompositingMode.SourceCopy;
+                //    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                //    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                //    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                //    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-                using (var graphics = Graphics.FromImage(destImage))
-                {
-                    graphics.CompositingMode = CompositingMode.SourceCopy;
-                    graphics.CompositingQuality = CompositingQuality.HighQuality;
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.SmoothingMode = SmoothingMode.HighQuality;
-                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                    using (var wrapMode = new ImageAttributes())
-                    {
-                        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                    }
-                }
-
-                return destImage;
+                //    using (var wrapMode = new ImageAttributes())
+                //    {
+                //        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                //        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                //    }
+                //    graphics.Save();
+                //    return destImage;
+                //}
+                
             }
             public static GraphicsPath RoundedRect(Rectangle bounds, int radius)
             {
@@ -590,6 +594,7 @@ namespace Public_Bot.Modules.Commands
                 }
             }
         }
+        public static List<ulong> CurrentRF = new List<ulong>();
         [DiscordCommand("levelsettings", RequiredPermission = true, description = "Change how the level settings works!", commandHelp = "Usage:" +
             "`(PREFIX)levelsettings list`\n" +
             "`(PREFIX)levelsettings maxlevel/messagexp/voicexp/defaultxp/levelmultiplier/color/blacklist/ranks/refresh`")]
@@ -1238,6 +1243,17 @@ namespace Public_Bot.Modules.Commands
                             }.WithCurrentTimestamp().Build());
                             return;
                         }
+                        if(CurrentRF.Contains(Context.Guild.Id))
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Theres a refresh already happening!",
+                                Description = "Please wait untill the previous refresh completes",
+                                Color = Color.Red,
+
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Are you sure?",
@@ -1249,6 +1265,17 @@ namespace Public_Bot.Modules.Commands
                     {
                         if(args[2].ToLower() == "confirm")
                         {
+                            if (CurrentRF.Contains(Context.Guild.Id))
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Theres a refresh already happening!",
+                                    Description = "Please wait untill the previous refresh completes",
+                                    Color = Color.Red,
+
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
                             var role = GetRole(args[1]);
                             if (role == null)
                             {
@@ -1268,7 +1295,8 @@ namespace Public_Bot.Modules.Commands
                                     Description = "We are working on giving the users there roles! I'l send a message here when the process is finnished",
                                     Color = Color.Green
                                 }.WithCurrentTimestamp().Build());
-                                LevelHandler.GiveForNewRole(gl, role, ls.RankRoles.First(x => x.Value == role.Id).Key, Context.User as SocketGuildUser, Context.Channel as SocketTextChannel);
+                                CurrentRF.Add(Context.Guild.Id);
+                                new Thread(() => LevelHandler.GiveForNewRole(gl, role, ls.RankRoles.First(x => x.Value == role.Id).Key, Context.User as SocketGuildUser, Context.Channel as SocketTextChannel)).Start();
                             }
                         }
                     }

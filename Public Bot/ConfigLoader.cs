@@ -27,6 +27,7 @@ namespace Public_Bot
             Dictionary<string, object> Config = JsonConvert.DeserializeObject<Dictionary<string, object>>(configContent);
 
             Token = Config["Token"].ToString();
+
         }
     }
 }

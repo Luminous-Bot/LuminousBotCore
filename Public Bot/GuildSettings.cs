@@ -63,7 +63,7 @@ namespace Public_Bot
             foreach (var itm in CustomCommandService.Modules)
                     if (!ModulesSettings.ContainsKey(itm.Key))
                         ModulesSettings.Add(itm.Key, true);
-            PermissionRoles.AddRange(guild.Roles.Where(x => x.Permissions.Administrator).Select(x => x.Id));
+            PermissionRoles.AddRange(guild.Roles.Where(x => x.Permissions.Administrator && !CommandHandler.IsBotRole(x)).Select(x => x.Id));
 
             if (Leveling)
                 new GuildLeaderboards(guild);
@@ -71,5 +71,6 @@ namespace Public_Bot
             CommandHandler.CurrentGuildSettings.Add(this);
             StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CommandHandler.CurrentGuildSettings);
         }
+        
     }
 }

@@ -4,10 +4,16 @@ using Newtonsoft.Json;
 using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Color = Discord.Color;
 
 namespace Public_Bot.Modules.Commands
 {
@@ -52,31 +58,31 @@ namespace Public_Bot.Modules.Commands
                         {
                             IsInline = true,
                             Name = "Bot Permissions",
-                            Value = $"Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\nSome Modules like the moderation module need kick and ban permissions."
+                            Value = $"> Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Modules",
-                            Value = $"This is the current Module Settings with there status\n```{string.Join('\n', md)}```\nYou can Enable/Disable Modules with the `{GuildSettings.Prefix}modules` command."
+                            Value = $"> This is the current Module Settings with there status\n```{string.Join('\n', md)}```\n> You can Enable/Disable Modules with the `{GuildSettings.Prefix}modules` command."
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Permission roles",
-                            Value = $"These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", GuildSettings.PermissionRoles)}>\n\nTo add one use `{GuildSettings.Prefix}addpermission <@role>`\nTo remove one use `{GuildSettings.Prefix}removepermission <@role>`"
+                            Value = $">>> These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", GuildSettings.PermissionRoles)}>\n\nTo add one use `{GuildSettings.Prefix}addpermission <@role>`\nTo remove one use `{GuildSettings.Prefix}removepermission <@role>`"
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Levels",
-                            Value = $"This bot features a leveling system where users can obtain roles with levels, its currently {(GuildSettings.ModulesSettings["🧪 Levels 🧪"] ? $"Enabled, You can configure it with `{GuildSettings.Prefix}levelsettings list`, if your stuck with setting up levels try `{GuildSettings.Prefix}help levelsettings`" : $"Disabled, You can enable it with `{GuildSettings.Prefix}modules enable Levels`")}"
+                            Value = $">>> This bot features a leveling system where users can obtain roles with levels, its currently {(GuildSettings.ModulesSettings["🧪 Levels 🧪"] ? $"Enabled, You can configure it with `{GuildSettings.Prefix}levelsettings list`, if your stuck with setting up levels try `{GuildSettings.Prefix}help levelsettings`" : $"Disabled, You can enable it with `{GuildSettings.Prefix}modules enable Levels`")}"
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Logs",
-                            Value = $"This bot has logging, You can set a channel for logs with `{GuildSettings.Prefix}logs channel <channel>`" //`(PREFIX)logs channel <channel>`, `(PREFIX)logs on/off`
+                            Value = $">>> This bot has logging, You can set a channel for logs with `{GuildSettings.Prefix}logs channel <channel>`" //`(PREFIX)logs channel <channel>`, `(PREFIX)logs on/off`
                         },
 
                     },
@@ -87,14 +93,14 @@ namespace Public_Bot.Modules.Commands
             {
                 var cmds = ReadCurrentCommands(GuildSettings.Prefix);
                 var perm = HelpMessageHandler.CalcHelpPage(Context.User as SocketGuildUser, GuildSettings);
-                if (cmds.Any(x => x.CommandName == args[0]))
+                if (cmds.Any(x => x.HasName(args[0].ToLower())))
                 {
-                    var cmd = cmds.Find(x => x.CommandName == args[0]);
+                    var cmd = cmds.Find(x => x.HasName(args[0].ToLower()));
                     if (perm == HelpMessageHandler.HelpPages.Public && cmd.RequiresPermission)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
-                            Title = "**You cant access this command!**",
+                            Title = "**You can't access this Command!**",
                             Description = "You dont have permission to use this command, therefor were not gonna show you how.",
                             Color = Color.Red,
                         }.WithCurrentTimestamp().Build());
@@ -103,7 +109,30 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = $"**{GuildSettings.Prefix}{cmd.CommandName}**",
-                        Description = $"{cmd.CommandDescription}\n{cmd.CommandHelpMessage}",
+                        Description = $"Heres some info about the command {cmd.CommandName}",
+                        Fields = new List<EmbedFieldBuilder>()
+                        {
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Command Description",
+                                Value = $"```\n{cmd.CommandDescription}```",
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Command Help",
+                                Value = $"\n{cmd.CommandHelpMessage}",
+                            },
+                            cmd.Alts.Count > 0 ? new EmbedFieldBuilder()
+                            {
+                                Name = "Alternative Command Names (alts)",
+                                Value = $"```{string.Join(", ", cmd.Alts) }```",
+                            } : new EmbedFieldBuilder() 
+                            {
+                                Name = "Alternative Command Names (alts)",
+                                Value = "None",
+                            },
+
+                        },
                         Color = Color.Green
                     }.WithCurrentTimestamp().Build());
                     return;
@@ -117,7 +146,7 @@ namespace Public_Bot.Modules.Commands
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Heres my invite!",
-                Description = "You can invite me [Here](https://discord.com/api/oauth2/authorize?client_id=722435272532426783&permissions=8&scope=bot)",
+                Description = "You can invite me [Here](https://discord.com/api/oauth2/authorize?client_id=722435272532426783&permissions=427683062&scope=bot)",
                 Color = Color.Green
             }.WithCurrentTimestamp().Build());
         }
@@ -185,8 +214,8 @@ namespace Public_Bot.Modules.Commands
             {
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
-                Description = $"You can view Discord's status page [Here](https://status.discord.com/]\n)" +
-                              $"```Gateway:     Fetching...\n" +
+                Description = $"You can view Discord's status page [Here](https://status.discord.com/)\n" +
+                              $"```\nGateway:     Fetching...\n" +
                               $"Api Latest:  Fetching...\n" +
                               $"Api Average: Fetching...```",
                 Footer = new EmbedFooterBuilder()
@@ -205,7 +234,7 @@ namespace Public_Bot.Modules.Commands
             {
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
-                Description = $"You can view Discord's status page [Here](https://status.discord.com/]\n)" +
+                Description = $"You can view Discord's status page [Here](https://status.discord.com/)" +
                               $"```Gateway:     {this.Context.Client.Latency}\n" +
                               $"Api Latest:  {data.Summary.Last}\n" +
                               $"Api Average: {data.Summary.Mean}```",
@@ -216,6 +245,89 @@ namespace Public_Bot.Modules.Commands
                 }
             }.Build());
         }
-       
+        public class GuildStatBuilder
+        {
+            public static System.Drawing.Image MakeServerCard(string servername, string serverlogo, string bannerurl, string owner, string users, string nitroboosts, DateTime Created)
+            {
+                WebClient wc = new WebClient();
+                //createbackgound with graphic
+                var baseImg = new Bitmap(960, 540);
+                var g = Graphics.FromImage(baseImg);
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                if (bannerurl == null)
+                    g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(40, 40, 40)), LevelCommands.RankBuilder.RoundedRect(new Rectangle(0, 0, 960, 540), 30));
+                else
+                {
+                    byte[] bytes = wc.DownloadData(bannerurl);
+                    MemoryStream ms = new MemoryStream(bytes);
+                    System.Drawing.Image bannr = System.Drawing.Image.FromStream(ms);
+                    g.DrawImage(RoundCorners(bannr, 30), new PointF(0, 0));
+                    g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(200, 40, 40, 40)), LevelCommands.RankBuilder.RoundedRect(new Rectangle(30, 30, 900, 480), 30));
+
+                }
+                if(serverlogo != null)
+                {
+                    byte[] bytes2 = wc.DownloadData(serverlogo);
+                    MemoryStream ms2 = new MemoryStream(bytes2);
+                    var img = System.Drawing.Image.FromStream(ms2);
+                    var Icon = LevelCommands.RankBuilder.ResizeImage(img, 150, 150);
+                    img.Dispose();
+
+                    g.DrawImage(LevelCommands.RankBuilder.ClipToCircle(Icon, new PointF(Icon.Width / 2, Icon.Height / 2), Icon.Width / 2, System.Drawing.Color.Transparent), new PointF(baseImg.Width / 2 - Icon.Width / 2, 120));
+                }
+                StringFormat stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
+                
+                RectangleF StringRect = new RectangleF(40, 180, baseImg.Width - 80, baseImg.Height - 100);
+                var font = new Font("Bahnschrift", 30, FontStyle.Regular);
+                var brush = new SolidBrush(System.Drawing.Color.White);
+                g.DrawString(servername, new Font("Bahnschrift", 40), new SolidBrush(System.Drawing.Color.White), new RectangleF(60, 40, baseImg.Width - 120, 60), stringFormat);
+
+                g.DrawString($"Owner: {owner}", font, brush, new PointF(baseImg.Width / 2, 310), stringFormat);
+                g.DrawString($"Users: {users}", font, brush, new PointF(baseImg.Width / 2, 360), stringFormat);
+                g.DrawString($"Nitro Boosters: {nitroboosts}", font, brush, new PointF(baseImg.Width / 2, 410), stringFormat);
+                g.DrawString($"Created on: {Created.ToString("r")}", font, brush, new PointF(baseImg.Width / 2, 460), stringFormat);
+
+                //g.DrawString($"Owner: {owner}\nUsers: {users}\nNitro Boosters: {nitroboosts}\nCreated on: {Created.ToString("r")}", font, new SolidBrush(System.Drawing.Color.White), StringRect, stringFormat);
+
+
+                g.Save();
+                return baseImg;
+            }
+            private static System.Drawing.Image RoundCorners(System.Drawing.Image image, int cornerRadius)
+            {
+                cornerRadius *= 2;
+                Bitmap roundedImage = new Bitmap(960, 540);
+                GraphicsPath gp = new GraphicsPath();
+                gp.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
+                gp.AddArc(0 + roundedImage.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
+                gp.AddArc(0 + roundedImage.Width - cornerRadius, 0 + roundedImage.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                gp.AddArc(0, 0 + roundedImage.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+                using (Graphics g = Graphics.FromImage(roundedImage))
+                {
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    g.SetClip(gp);
+                    g.DrawImage(LevelCommands.RankBuilder.ResizeImage(image, 960, 540), Point.Empty);
+                }
+                return roundedImage;
+            }
+        }
+
+        [Alt("guildstats")]
+        [DiscordCommand("guild", description = "Shows the current guilds stats", commandHelp = "Usage - `(PREFIX)guild`")]
+        public async Task stats()
+        {
+            var iconurl = Context.Guild.IconUrl;
+            if(iconurl != null)
+                iconurl = iconurl.Replace("webp", "jpg");
+            var bannerirl = Context.Guild.BannerUrl;
+            if(bannerirl != null)
+                bannerirl = bannerirl.Replace("webp", "jpg");
+            var img = GuildStatBuilder.MakeServerCard(Context.Guild.Name, iconurl, bannerirl, Context.Guild.Owner.ToString(), Context.Guild.MemberCount.ToString(), Context.Guild.PremiumSubscriptionCount.ToString(), Context.Guild.CreatedAt.DateTime);
+            img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}gld.png", System.Drawing.Imaging.ImageFormat.Png);
+            await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}gld.png");
+        }
     }
 }
