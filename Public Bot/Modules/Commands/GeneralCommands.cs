@@ -50,7 +50,7 @@ namespace Public_Bot.Modules.Commands
                     final.Add(itm.Key.PadRight(leng) + " " + itm.Value);
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
-                    Title = "Heres some tips to setup this bot",
+                    Title = "Here are some tips to setup this bot",
                     Description = "You can join our [Discord](https://discord.gg/KDErQR) for more help setting up the bot in your server",
                     Fields = new List<EmbedFieldBuilder>()
                     {
@@ -58,31 +58,31 @@ namespace Public_Bot.Modules.Commands
                         {
                             IsInline = true,
                             Name = "Bot Permissions",
-                            Value = $"> Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
+                            Value = $"> Here's the bot's current Discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module require kick and ban permissions."
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Modules",
-                            Value = $"> This is the current Module Settings with there status\n```{string.Join('\n', md)}```\n> You can Enable/Disable Modules with the `{GuildSettings.Prefix}modules` command."
+                            Value = $"> These are the current Module Settings with their statuses\n```{string.Join('\n', md)}```\n> You can Enable/Disable Modules with the `{GuildSettings.Prefix}modules` command."
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Permission roles",
-                            Value = $">>> These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", GuildSettings.PermissionRoles)}>\n\nTo add one use `{GuildSettings.Prefix}addpermission <@role>`\nTo remove one use `{GuildSettings.Prefix}removepermission <@role>`"
+                            Value = $">>> These roles have elevated permissions and have access to all commands within the bot\n\n<@&{string.Join(">\n<@&", GuildSettings.PermissionRoles)}>\n\nTo add one, use `{GuildSettings.Prefix}addpermission <@role>`\nTo remove one, use `{GuildSettings.Prefix}removepermission <@role>`"
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Levels",
-                            Value = $">>> This bot features a leveling system where users can obtain roles with levels, its currently {(GuildSettings.ModulesSettings["🧪 Levels 🧪"] ? $"Enabled, You can configure it with `{GuildSettings.Prefix}levelsettings list`, if your stuck with setting up levels try `{GuildSettings.Prefix}help levelsettings`" : $"Disabled, You can enable it with `{GuildSettings.Prefix}modules enable Levels`")}"
+                            Value = $">>> This bot features a leveling system where users can obtain roles with levels. It's currently {(GuildSettings.ModulesSettings["🧪 Levels 🧪"] ? $"Enabled - you can configure it with `{GuildSettings.Prefix}levelsettings list`. If you are stuck with setting up levels, try `{GuildSettings.Prefix}help levelsettings`" : $"Disabled - you can enable it with `{GuildSettings.Prefix}modules enable Levels`")}"
                         },
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
                             Name = "Logs",
-                            Value = $">>> This bot has logging, You can set a channel for logs with `{GuildSettings.Prefix}logs channel <channel>`" //`(PREFIX)logs channel <channel>`, `(PREFIX)logs on/off`
+                            Value = $">>> This bot has logging; You can set a channel for logs with `{GuildSettings.Prefix}logs channel <channel>`" //`(PREFIX)logs channel <channel>`, `(PREFIX)logs on/off`
                         },
 
                     },
@@ -100,8 +100,8 @@ namespace Public_Bot.Modules.Commands
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
-                            Title = "**You can't access this Command!**",
-                            Description = "You dont have permission to use this command, therefor were not gonna show you how.",
+                            Title = "**You can't access this command!**",
+                            Description = "You don't have permission to use this command, therefore we're not gonna show you how.",
                             Color = Color.Red,
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -109,7 +109,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = $"**{GuildSettings.Prefix}{cmd.CommandName}**",
-                        Description = $"Heres some info about the command {cmd.CommandName}",
+                        Description = $"Here's some info about the command {cmd.CommandName}",
                         Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
@@ -145,8 +145,8 @@ namespace Public_Bot.Modules.Commands
         {
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
-                Title = "Heres my invite!",
-                Description = "You can invite me [Here](https://discord.com/api/oauth2/authorize?client_id=722435272532426783&permissions=427683062&scope=bot)",
+                Title = "Here's my invite!",
+                Description = "You can invite me [here](https://discord.com/api/oauth2/authorize?client_id=722435272532426783&permissions=427683062&scope=bot)",
                 Color = Color.Green
             }.WithCurrentTimestamp().Build());
         }
@@ -207,14 +207,14 @@ namespace Public_Bot.Modules.Commands
                 public long Last { get; set; }
             }
         }
-        [DiscordCommand("ping", description = "Gets the bots ping to discord", commandHelp = "Usage `(PREFIX)ping`")]
+        [DiscordCommand("ping", description = "Gets the bot's ping to Discord", commandHelp = "Usage `(PREFIX)ping`")]
         public async Task ping()
         {
             var msg = await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
-                Description = $"You can view Discord's status page [Here](https://status.discord.com/)\n" +
+                Description = $"You can view Discord's status page [here](https://status.discord.com/)\n" +
                               $"```\nGateway:     Fetching...\n" +
                               $"Api Latest:  Fetching...\n" +
                               $"Api Average: Fetching...```",
@@ -234,7 +234,7 @@ namespace Public_Bot.Modules.Commands
             {
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
-                Description = $"You can view Discord's status page [Here](https://status.discord.com/)" +
+                Description = $"You can view Discord's status page [here](https://status.discord.com/)" +
                               $"```Gateway:     {this.Context.Client.Latency}\n" +
                               $"Api Latest:  {data.Summary.Last}\n" +
                               $"Api Average: {data.Summary.Mean}```",
@@ -316,7 +316,7 @@ namespace Public_Bot.Modules.Commands
         }
 
         [Alt("guildstats")]
-        [DiscordCommand("guild", description = "Shows the current guilds stats", commandHelp = "Usage - `(PREFIX)guild`")]
+        [DiscordCommand("guild", description = "Shows the current guild's stats", commandHelp = "Usage - `(PREFIX)guild`")]
         public async Task stats()
         {
             var iconurl = Context.Guild.IconUrl;
