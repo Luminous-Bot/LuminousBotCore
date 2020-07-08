@@ -114,7 +114,7 @@ namespace Public_Bot
                 {
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "**You didnt provide enough parameters!**",
+                        Title = "**You didn't provide enough parameters!**",
                         Description = @$"Heres how to use the command",
                         Fields = new List<EmbedFieldBuilder>()
                         {
@@ -139,7 +139,7 @@ namespace Public_Bot
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "**The parameters you provided were invalid!**",
-                        Description = @$"Heres how to use the command",
+                        Description = @$"Here's how to use the command",
                         Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
