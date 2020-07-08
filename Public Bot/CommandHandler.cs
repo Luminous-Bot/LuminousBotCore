@@ -16,6 +16,7 @@ namespace Public_Bot
         static DiscordShardedClient client;
         static CustomCommandService service;
         static HandlerService handlerService;
+        bool isReady = false;
         public static List<GuildSettings> CurrentGuildSettings { get; set; } = new List<GuildSettings>();
         public CommandHandler(CustomCommandService _service, DiscordShardedClient _client, HandlerService handler)
         {
@@ -28,11 +29,17 @@ namespace Public_Bot
             client.MessageReceived += CheckCommandAsync;
             
             client.ShardReady += Ready;
-
+            client.ShardDisconnected += Client_ShardDisconnected;
             LoadGuildSettings();
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
+
+        private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
+        {
+            isReady = false;
+        }
+
         public static GuildSettings GetGuildSettings(ulong guildID)
         {
             if (CurrentGuildSettings.Any(x => x.GuildID == guildID))
@@ -58,6 +65,7 @@ namespace Public_Bot
             foreach (var guild in arg.Guilds)
                 if (!CurrentGuildSettings.Any(x => x.GuildID == guild.Id))
                     new GuildSettings(guild);
+            isReady = true;
         }
         public static bool IsBotRole(IRole role)
         {
@@ -70,6 +78,9 @@ namespace Public_Bot
         }
         private async Task CheckCommandAsync(SocketMessage arg)
         {
+            if (!isReady)
+                return;
+
             var msg = arg as SocketUserMessage;
             if (msg == null) return;
             ShardedCommandContext context = new ShardedCommandContext(client, msg);

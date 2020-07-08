@@ -21,6 +21,17 @@ namespace Public_Bot.Modules.Handlers
         public static List<string> facts { get; set; }
         public static List<GuildLeaderboards> GuildLevels { get; set; }
         public static int Update = 0;
+        public class color
+        {
+            public int R { get; set; }
+            public int G { get; set; }
+            public int B { get; set; }
+            public Color Get()
+                => new Color(this.R, this.G, this.B);
+            public color() { }
+            public color(int r, int g, int b) { this.R = r; this.G = g; this.B = b; }
+
+        }
         public class GuildLevelSettings
         {
             public Dictionary<uint, ulong> RankRoles { get; set; } = new Dictionary<uint, ulong>();
@@ -30,20 +41,7 @@ namespace Public_Bot.Modules.Handlers
             public double XpPerMessage { get; set; } = 1;
             public double XpPerVCMinute { get; set; } = 5;
             public ulong LevelUpChan { get; set; }
-            public color EmbedColor { get; set; } = new color(0, 255, 0);
-            public color RankBackgound { get; set; } = new color(40, 40, 40);
             public List<ulong> BlacklistedChannels { get; set; } = new List<ulong>();
-            public class color
-            {
-                public int R { get; set; }
-                public int G { get; set; }
-                public int B { get; set; }
-                public Color Get()
-                    => new Color(this.R, this.G, this.B);
-                public color() { }
-                public color(int r, int g, int b) { this.R = r; this.G = g; this.B = b; }
-
-            }
             public static GuildLevelSettings Get(ulong id)
             {
                 return GuildLevels.Any(x => x.GuildID == id) ? GuildLevels.Find(x => x.GuildID == id).Settings : null;
@@ -55,9 +53,8 @@ namespace Public_Bot.Modules.Handlers
             public GuildLevelSettings Settings { get; set; } = new GuildLevelSettings();
             public List<LevelUser> CurrentUsers { get; set; } = new List<LevelUser>();
             public static GuildLeaderboards Get(ulong id)
-            {
-                return GuildLevels.Any(x => x.GuildID == id) ? GuildLevels.Find(x => x.GuildID == id) : null;
-            }
+                => GuildLevels.Any(x => x.GuildID == id) ? GuildLevels.Find(x => x.GuildID == id) : null;
+
             public static void Save() => SaveLevels();
             public void SaveCurrent() => SaveLevels();
 
@@ -81,6 +78,10 @@ namespace Public_Bot.Modules.Handlers
             public uint CurrentLevel { get; set; } = 0;
             public double CurrentXP { get; set; } = 0;
             public double NextLevelXP { get; set; } = 30;
+            public color EmbedColor { get; set; } = new color(0, 255, 0);
+            public color RankBackgound { get; set; } = new color(40, 40, 40);
+            public bool MentionLevelup { get; set; } = false;
+
             public LevelUser() { }
             public LevelUser(SocketGuildUser user)
             {
@@ -295,21 +296,28 @@ namespace Public_Bot.Modules.Handlers
                     var chan = client.GetGuild(user.GuildID).GetTextChannel(gu.Settings.LevelUpChan);
                     if (chan != null)
                     {
-                        await chan.SendMessageAsync($"<@{user.UserID}>", false, new EmbedBuilder()
+                        try
                         {
-                            Title = $"You Reached Level {user.CurrentLevel}!",
-                            Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.UserID).Username}, only {gu.Settings.maxlevel - user.CurrentLevel} more levels to go!",
-                            Fields = new List<EmbedFieldBuilder>()
-                        {
-                            new EmbedFieldBuilder()
+                            await chan.SendMessageAsync(user.MentionLevelup == true ? $"<@{user.UserID}>" : "", false, new EmbedBuilder()
                             {
-                                Name = "Heres a discord fact:",
-                                Value = facts[new Random().Next(0, 99)],
-                            }
-                        },
-                            ThumbnailUrl = client.GetUser(user.UserID).GetAvatarUrl(),
-                            Color = new Color(gu.Settings.EmbedColor.R, gu.Settings.EmbedColor.G, gu.Settings.EmbedColor.B)
-                        }.WithCurrentTimestamp().Build());
+                                Title = $"You Reached Level {user.CurrentLevel}!",
+                                Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.UserID).Username}, only {gu.Settings.maxlevel - user.CurrentLevel} more levels to go!",
+                                Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Heres a discord fact:",
+                                    Value = facts[new Random().Next(0, 99)],
+                                }
+                            },
+                                ThumbnailUrl = client.GetUser(user.UserID).GetAvatarUrl(),
+                                Color = new Color(user.EmbedColor.R, user.EmbedColor.G, user.EmbedColor.B)
+                            }.WithCurrentTimestamp().Build());
+                        }
+                        catch(Exception ex)
+                        {
+                            Logger.WriteError($"Failed to send message, Channel: {chan.Name} Guild: {chan.Guild.Name}", ex, Logger.Severity.Error);
+                        }
                     }
                     else
                         await client.GetGuild(user.GuildID).DefaultChannel.SendMessageAsync("", false, new EmbedBuilder()

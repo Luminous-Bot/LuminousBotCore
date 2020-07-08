@@ -45,7 +45,7 @@ namespace Public_Bot.Modules.Commands
             {
                 Title = $"{Context.Guild.Name}",
                 Description = $"```{string.Join('\n', lm)}```" + (rl.Count > 0 ? $"\n\nAchievable roles:\n{string.Join('\n', rl)}" : ""),
-                Color = gl.Settings.EmbedColor.Get(),
+                Color = Color.Green,
                 ThumbnailUrl = Context.Guild.IconUrl
             }.WithCurrentTimestamp().Build());
         }
@@ -215,7 +215,16 @@ namespace Public_Bot.Modules.Commands
             {
                 var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
                 var userlvl = cu.Find(x => x.UserID == user.Id);
-                var img = RankBuilder.MakeRank(userlvl.Username, Context.Guild.GetUser(userlvl.UserID).GetAvatarUrl(), (int)userlvl.CurrentLevel, (int)userlvl.CurrentXP, (int)userlvl.NextLevelXP, System.Drawing.Color.FromArgb(gl.Settings.EmbedColor.R, gl.Settings.EmbedColor.G, gl.Settings.EmbedColor.B), gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1, System.Drawing.Color.FromArgb(gl.Settings.RankBackgound.R, gl.Settings.RankBackgound.G, gl.Settings.RankBackgound.B));
+
+                var img = RankBuilder.MakeRank(userlvl.Username, 
+                    Context.Guild.GetUser(userlvl.UserID).GetAvatarUrl(), 
+                    (int)userlvl.CurrentLevel, 
+                    (int)userlvl.CurrentXP, 
+                    (int)userlvl.NextLevelXP, 
+                    System.Drawing.Color.FromArgb(userlvl.EmbedColor.R, userlvl.EmbedColor.G, userlvl.EmbedColor.B), 
+                    gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1, 
+                    System.Drawing.Color.FromArgb(userlvl.RankBackgound.R, userlvl.RankBackgound.G, userlvl.RankBackgound.B));
+                
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png", System.Drawing.Imaging.ImageFormat.Png);
                 await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png");
             }
@@ -227,6 +236,213 @@ namespace Public_Bot.Modules.Commands
                     Description = "That user doesnt have any levels or XP in this guild!",
                     Color = Color.Orange
                 }.WithCurrentTimestamp().Build());
+            }
+        }
+        [DiscordCommand("rankcard", description = "Change your Rank Card's settings!", commandHelp = "Usage:\n`(PREFIX)rankcard ping <on/off>`\n`(PREFIX)rankcard color <R> <G> <B>`\n`(PREFIX)rankcard backgroundcolor <R> <G> <B>`")]
+        public async Task rc(params string[] args)
+        {
+            //get the guilds level settings
+            var levelsettings = LevelHandler.GuildLeaderboards.Get(Context.Guild.Id);
+            if (levelsettings == null)
+                return;
+
+            LevelUser usr;
+            if (!levelsettings.CurrentUsers.Any(x => x.UserID == Context.User.Id))
+            {
+                usr = new LevelUser(Context.Guild.GetUser(Context.User.Id));
+                levelsettings.CurrentUsers.Add(usr);
+            }
+            else
+                usr = levelsettings.CurrentUsers.Find(x => x.UserID == Context.User.Id);
+
+            if (args.Length == 0)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Your Rank Card",
+                    Description = $"Heres your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                    Color = Discord.Color.Green
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            
+            switch (args[0].ToLower())
+            {
+                case "list":
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Your Rank Card",
+                        Description = $"Heres your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                        Color = Discord.Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                case "ping":
+                    {
+                        if(args.Length == 1)
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "What do you want to change?",
+                                Description = $"Either use `on` or `off`\nExample: `{GuildSettings.Prefix}rankcard ping off`",
+                                Color = Discord.Color.Orange
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        switch (args[1].ToLower())
+                        {
+                            case "on":
+                                {
+                                    usr.MentionLevelup = true;
+                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                    {
+                                        Title = "Success!",
+                                        Description = $"The bot will now mention you on levelup's!",
+                                        Color = Discord.Color.Green
+                                    }.WithCurrentTimestamp().Build());
+                                    return;
+                                }
+                            case "off":
+                                {
+                                    usr.MentionLevelup = false;
+                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                    {
+                                        Title = "Success!",
+                                        Description = $"The bot will no longer mention you on levelup's!",
+                                        Color = Discord.Color.Green
+                                    }.WithCurrentTimestamp().Build());
+                                    return;
+                                }
+                            default:
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "What do you want to change?",
+                                    Description = $"Either use `on` or `off`\nExample: `{GuildSettings.Prefix}rankcard ping off`",
+                                    Color = Discord.Color.Orange
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                        }
+                    }
+                    break;
+                case "color":
+                    if (args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Rank Card Color",
+                            Description = $"The current Rank Card Color is this embeds color (R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nTo change the Rank Cards color Run `{GuildSettings.Prefix}rankcard color <R> <G> <B>`",
+                            Color = new Color(usr.EmbedColor.R, usr.EmbedColor.G, usr.EmbedColor.B)
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (args.Length == 4)
+                    {
+                        if (int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
+                        {
+                            if (R > 255 || G > 255 || B > 255)
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid parameters",
+                                    Description = $"Please use the RGB format values between 0 and 255, for example: `{GuildSettings.Prefix}rankcard color 25 255 0`",
+                                    Color = Color.Red
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            usr.EmbedColor = new color(R, G, B);
+                            levelsettings.SaveCurrent();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Rank Card Color to this embeds color (R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B})",
+                                Color = new Color(usr.EmbedColor.R, usr.EmbedColor.G, usr.EmbedColor.B)
+                            }.WithCurrentTimestamp().Build());
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid parameters",
+                                Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}rankcard color 25 255 0`",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Invalid parameters",
+                            Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}rankcard color 25 255 0`",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    break;
+                case "backgroundcolor":
+                    if (args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Rank Card Background Color",
+                            Description = $"The current Rank Cards Background Color is this embeds color (R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                            Color = new Color(usr.RankBackgound.R, usr.RankBackgound.G, usr.RankBackgound.B)
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (args.Length == 4)
+                    {
+                        if (int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
+                        {
+                            if (R > 255 || G > 255 || B > 255)
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid parameters",
+                                    Description = $"Please use the RGB format values between 0 and 255, for example: `{GuildSettings.Prefix}rankcard backgoundcolor 25 255 0`",
+                                    Color = Color.Red
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            usr.RankBackgound = new color(R, G, B);
+                            levelsettings.SaveCurrent();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Rank Card Background Color",
+                                Description = $"The current Rank Cards Background Color is now set to this embeds color (R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B})",
+                                Color = new Color(usr.RankBackgound.R, usr.RankBackgound.G, usr.RankBackgound.B)
+                            }.WithCurrentTimestamp().Build());
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid parameters",
+                                Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}rankcard backgoundcolor 25 255 0`",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Invalid parameters",
+                            Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}rankcard color 25 255 0`",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    break;
+                default:
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "What do you want to change?",
+                        Description = $"The arguements you provided are not recognized!",
+                        Color = Discord.Color.Orange
+                    }.WithCurrentTimestamp().Build());
+                    return;
             }
         }
 
@@ -640,7 +856,6 @@ namespace Public_Bot.Modules.Commands
                     gnrl.Add("XP Per Minute in VC:", ls.XpPerVCMinute.ToString());
                     gnrl.Add("Max Level:", ls.maxlevel.ToString());
                     gnrl.Add("Levelup Channel:", ch.Name);
-                    gnrl.Add("Color:", $"R:{ls.EmbedColor.R} G:{ls.EmbedColor.G} B:{ls.EmbedColor.B}");
                     gnrl.Add("Default XP", ls.DefaultBaseLevelXp.ToString());
                     int leng = gnrl.Keys.Max(x => x.Length);
                     List<string> final = new List<string>();
@@ -893,118 +1108,6 @@ namespace Public_Bot.Modules.Commands
                             gl.SaveCurrent();
                             return;
                         }
-                    }
-                    break;
-                case "color":
-                    if (args.Length == 1)
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "Level Embed Color",
-                            Description = $"The current Level Embed Color is this embeds color (R:{ls.EmbedColor.R} G:{ls.EmbedColor.G} B:{ls.EmbedColor.B}\nTo change the Level Embeds color Run `{GuildSettings.Prefix}levelsettings color <R> <G> <B>`",
-                            Color = new Color(ls.EmbedColor.R, ls.EmbedColor.G, ls.EmbedColor.B)
-                        }.WithCurrentTimestamp().Build());
-                        return;
-                    }
-                    if (args.Length == 4)
-                    {
-                        if(int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
-                        {
-                            if(R > 255 || G > 255 || B > 255)
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Invalid parameters",
-                                    Description = $"Please use the RGB format values between 0 and 255, for example: `{GuildSettings.Prefix}levelsettings color 25 255 0`",
-                                    Color = Color.Red
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                            gl.Settings.EmbedColor = new color(R, G, B);
-                            gl.SaveCurrent();
-                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                            {
-                                Title = "Level Embed Color",
-                                Description = $"The current Level Embed Color is now set to this embeds color (R:{gl.Settings.EmbedColor.R} G:{gl.Settings.EmbedColor.G} B:{gl.Settings.EmbedColor.B})",
-                                Color = new Color(ls.EmbedColor.R, ls.EmbedColor.G, ls.EmbedColor.B)
-                            }.WithCurrentTimestamp().Build());
-                        }
-                        else
-                        {
-                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                            {
-                                Title = "Invalid parameters",
-                                Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings color 25 255 0`",
-                                Color = Color.Red
-                            }.WithCurrentTimestamp().Build());
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "Invalid parameters",
-                            Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings color 25 255 0`",
-                            Color = Color.Red
-                        }.WithCurrentTimestamp().Build());
-                        return;
-                    }
-                    break;
-                case "backgroundcolor":
-                    if (args.Length == 1)
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "Level Embed Background Color",
-                            Description = $"The current Level Embed Background Color is this embeds color (R:{ls.RankBackgound.R} G:{ls.RankBackgound.G} B:{ls.RankBackgound.B}\nTo change the Level Embeds Background Color Run `{GuildSettings.Prefix}levelsettings backgroundcolor <R> <G> <B>`",
-                            Color = new Color(ls.RankBackgound.R, ls.RankBackgound.G, ls.RankBackgound.B)
-                        }.WithCurrentTimestamp().Build());
-                        return;
-                    }
-                    if (args.Length == 4)
-                    {
-                        if (int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
-                        {
-                            if (R > 255 || G > 255 || B > 255)
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Invalid parameters",
-                                    Description = $"Please use the RGB format values between 0 and 255, for example: `{GuildSettings.Prefix}levelsettings backgoundcolor 25 255 0`",
-                                    Color = Color.Red
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                            gl.Settings.RankBackgound = new color(R, G, B);
-                            gl.SaveCurrent();
-                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                            {
-                                Title = "Level Embed Background Color",
-                                Description = $"The current Level Embed Background Color is now set to this embeds color (R:{gl.Settings.RankBackgound.R} G:{gl.Settings.RankBackgound.G} B:{gl.Settings.RankBackgound.B})",
-                                Color = new Color(ls.RankBackgound.R, ls.RankBackgound.G, ls.RankBackgound.B)
-                            }.WithCurrentTimestamp().Build());
-                        }
-                        else
-                        {
-                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                            {
-                                Title = "Invalid parameters",
-                                Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings backgoundcolor 25 255 0`",
-                                Color = Color.Red
-                            }.WithCurrentTimestamp().Build());
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "Invalid parameters",
-                            Description = $"Please use the RGB format, for example: `{GuildSettings.Prefix}levelsettings color 25 255 0`",
-                            Color = Color.Red
-                        }.WithCurrentTimestamp().Build());
-                        return;
                     }
                     break;
                 case "blacklist":
