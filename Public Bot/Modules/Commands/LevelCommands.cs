@@ -117,7 +117,7 @@ namespace Public_Bot.Modules.Commands
                 //    graphics.Save();
                 //    return destImage;
                 //}
-                
+
             }
             public static GraphicsPath RoundedRect(Rectangle bounds, int radius)
             {
@@ -132,18 +132,18 @@ namespace Public_Bot.Modules.Commands
                     return path;
                 }
 
-                // top left arc  
+                // top left arc
                 path.AddArc(arc, 180, 90);
 
-                // top right arc  
+                // top right arc
                 arc.X = bounds.Right - diameter;
                 path.AddArc(arc, 270, 90);
 
-                // bottom right arc  
+                // bottom right arc
                 arc.Y = bounds.Bottom - diameter;
                 path.AddArc(arc, 0, 90);
 
-                // bottom left arc 
+                // bottom left arc
                 arc.X = bounds.Left;
                 path.AddArc(arc, 90, 90);
 
@@ -168,7 +168,7 @@ namespace Public_Bot.Modules.Commands
                         g.FillRectangle(br, 0, 0, dstImage.Width, dstImage.Height);
                     }
 
-                    // adds the new ellipse & draws the image again 
+                    // adds the new ellipse & draws the image again
                     GraphicsPath path = new GraphicsPath();
                     path.AddEllipse(r);
                     g.SetClip(path);
@@ -200,7 +200,7 @@ namespace Public_Bot.Modules.Commands
             var user = Context.User;
             if (args.Length == 1)
                 user = GetUser(args[0]);
-            if(user == null)
+            if (user == null)
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
@@ -216,15 +216,15 @@ namespace Public_Bot.Modules.Commands
                 var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
                 var userlvl = cu.Find(x => x.UserID == user.Id);
 
-                var img = RankBuilder.MakeRank(userlvl.Username, 
-                    Context.Guild.GetUser(userlvl.UserID).GetAvatarUrl(), 
-                    (int)userlvl.CurrentLevel, 
-                    (int)userlvl.CurrentXP, 
-                    (int)userlvl.NextLevelXP, 
-                    System.Drawing.Color.FromArgb(userlvl.EmbedColor.R, userlvl.EmbedColor.G, userlvl.EmbedColor.B), 
-                    gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1, 
+                var img = RankBuilder.MakeRank(userlvl.Username,
+                    Context.Guild.GetUser(userlvl.UserID).GetAvatarUrl(),
+                    (int)userlvl.CurrentLevel,
+                    (int)userlvl.CurrentXP,
+                    (int)userlvl.NextLevelXP,
+                    System.Drawing.Color.FromArgb(userlvl.EmbedColor.R, userlvl.EmbedColor.G, userlvl.EmbedColor.B),
+                    gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1,
                     System.Drawing.Color.FromArgb(userlvl.RankBackgound.R, userlvl.RankBackgound.G, userlvl.RankBackgound.B));
-                
+
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png", System.Drawing.Imaging.ImageFormat.Png);
                 await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png");
             }
@@ -260,25 +260,25 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "Your Rank Card",
-                    Description = $"Heres your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                    Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
                     Color = Discord.Color.Green
                 }.WithCurrentTimestamp().Build());
                 return;
             }
-            
+
             switch (args[0].ToLower())
             {
                 case "list":
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "Your Rank Card",
-                        Description = $"Heres your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                        Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
                         Color = Discord.Color.Green
                     }.WithCurrentTimestamp().Build());
                     return;
                 case "ping":
                     {
-                        if(args.Length == 1)
+                        if (args.Length == 1)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
@@ -499,14 +499,14 @@ namespace Public_Bot.Modules.Commands
                     if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
                     {
                         lusr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
-                        if(res > lusr.CurrentLevel)
+                        if (res > lusr.CurrentLevel)
                         {
                             for (uint i = lusr.CurrentLevel; i != res; i++)
                             {
                                 lusr.NextLevelXP *= gl.Settings.LevelMultiplier;
                             }
                         }
-                        if(res < lusr.CurrentLevel)
+                        if (res < lusr.CurrentLevel)
                         {
                             for (uint i = lusr.CurrentLevel; i != res; i--)
                             {
@@ -631,7 +631,7 @@ namespace Public_Bot.Modules.Commands
         [DiscordCommand("givelevel", RequiredPermission = true, commandHelp = "Usage `(PREFIX)givelevel <user> <ammount>`", description = "Gives a user Levels")]
         public async Task gl(params string[] args)
         {
-            if(args.Length == 0)
+            if (args.Length == 0)
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
@@ -642,7 +642,7 @@ namespace Public_Bot.Modules.Commands
                 return;
             }
             var user = GetUser(args[0]);
-            if(user == null)
+            if (user == null)
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
@@ -652,7 +652,7 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
                 return;
             }
-            if(args.Length == 1)
+            if (args.Length == 1)
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
@@ -662,9 +662,9 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
                 return;
             }
-            if(args.Length == 2)
+            if (args.Length == 2)
             {
-                if(uint.TryParse(args[1], out var res))
+                if (uint.TryParse(args[1], out var res))
                 {
                     var gl = GuildLeaderboards.Get(Context.Guild.Id);
                     if (res > gl.Settings.maxlevel)
@@ -678,7 +678,7 @@ namespace Public_Bot.Modules.Commands
                         return;
                     }
                     LevelUser lusr = null;
-                    if(gl.CurrentUsers.Any(x => x.UserID == user.Id))
+                    if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
                     {
                         lusr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
                         if (res > lusr.CurrentLevel)
@@ -816,9 +816,9 @@ namespace Public_Bot.Modules.Commands
             "`(PREFIX)levelsettings maxlevel/messagexp/voicexp/defaultxp/levelmultiplier/color/blacklist/ranks/refresh`")]
         public async Task LevelSettings(params string[] args)
         {
-            if(args.Length == 0)
+            if (args.Length == 0)
             {
-                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = $"What setting do you want to change?",
                     Description = $"Run the command `{GuildSettings.Prefix}help levelsettings` to see how to customize levels",
@@ -835,14 +835,14 @@ namespace Public_Bot.Modules.Commands
             {
                 case "list":
                     var ch = Context.Guild.GetTextChannel(ls.LevelUpChan);
-                   
+
                     List<string> bc = new List<string>();
-                    foreach(var chan in ls.BlacklistedChannels)
+                    foreach (var chan in ls.BlacklistedChannels)
                     {
                         var rch = Context.Guild.GetChannel(chan);
                         if (rch.GetType() == typeof(SocketTextChannel))
                             bc.Add($"⌨️ - {rch.Name}");
-                        if(rch.GetType() == typeof(SocketVoiceChannel))
+                        if (rch.GetType() == typeof(SocketVoiceChannel))
                             bc.Add($"🔊 - {rch.Name}");
                     }
                     List<string> rl = new List<string>();
@@ -863,7 +863,7 @@ namespace Public_Bot.Modules.Commands
                         final.Add(itm.Key.PadRight(leng) + " " + itm.Value);
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "Heres your guilds Level settings",
+                        Title = "Here's your guilds Level settings",
                         Description = $"Run the command `{GuildSettings.Prefix}help levelsettings` to see how to customize levels",
                         Fields = new List<EmbedFieldBuilder>()
                         {
@@ -890,7 +890,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                     break;
                 case "channel":
-                    if(args.Length == 1)
+                    if (args.Length == 1)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -901,7 +901,7 @@ namespace Public_Bot.Modules.Commands
                         return;
                     }
                     var channel = GetChannel(args[1]);
-                    if(channel == null)
+                    if (channel == null)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -921,7 +921,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                     break;
                 case "maxlevel":
-                    if(args.Length == 1)
+                    if (args.Length == 1)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -931,7 +931,7 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    if(args.Length == 2)
+                    if (args.Length == 2)
                     {
                         if (uint.TryParse(args[1], out var res))
                         {
@@ -959,7 +959,7 @@ namespace Public_Bot.Modules.Commands
                     }
                     break;
                 case "messagexp":
-                    if(args.Length == 1)
+                    if (args.Length == 1)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -1134,7 +1134,7 @@ namespace Public_Bot.Modules.Commands
                     {
                         var name = string.Join(' ', args.Skip(2));
                         var chan = GetChannel(name);
-                        if(chan == null)
+                        if (chan == null)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
@@ -1144,9 +1144,9 @@ namespace Public_Bot.Modules.Commands
                             }.WithCurrentTimestamp().Build());
                             return;
                         }
-                        if(args[1] == "add")
+                        if (args[1] == "add")
                         {
-                            if(gl.Settings.BlacklistedChannels.Contains(chan.Id))
+                            if (gl.Settings.BlacklistedChannels.Contains(chan.Id))
                             {
                                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                 {
@@ -1191,7 +1191,7 @@ namespace Public_Bot.Modules.Commands
                     }
                     break;
                 case "ranks":
-                    if(args.Length == 1)
+                    if (args.Length == 1)
                     {
                         List<string> ranks = new List<string>();
                         foreach (var chan in ls.RankRoles.OrderBy(x => x.Key * -1))
@@ -1206,7 +1206,7 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    if(args.Length == 3)
+                    if (args.Length == 3)
                     {
                         if (args[1].ToLower() == "remove")
                         {
@@ -1253,10 +1253,10 @@ namespace Public_Bot.Modules.Commands
                             }
                         }
                     }
-                    if(args.Length == 4)
+                    if (args.Length == 4)
                     {
                         var role = GetRole(args[2]);
-                        if(role == null)
+                        if (role == null)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
@@ -1266,11 +1266,11 @@ namespace Public_Bot.Modules.Commands
 
                             }.WithCurrentTimestamp().Build());
                         }
-                        if(uint.TryParse(args[3], out var res))
+                        if (uint.TryParse(args[3], out var res))
                         {
-                            if(args[1].ToLower() == "add")
+                            if (args[1].ToLower() == "add")
                             {
-                                if (ls.RankRoles.ContainsValue(role.Id)) 
+                                if (ls.RankRoles.ContainsValue(role.Id))
                                 {
                                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                     {
@@ -1321,7 +1321,7 @@ namespace Public_Bot.Modules.Commands
                     }
                     break;
                 case "refresh":
-                    if(args.Length == 1)
+                    if (args.Length == 1)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -1332,7 +1332,7 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    if(args.Length == 2)
+                    if (args.Length == 2)
                     {
                         var role = GetRole(args[1]);
                         if (role == null)
@@ -1346,11 +1346,11 @@ namespace Public_Bot.Modules.Commands
                             }.WithCurrentTimestamp().Build());
                             return;
                         }
-                        if(CurrentRF.Contains(Context.Guild.Id))
+                        if (CurrentRF.Contains(Context.Guild.Id))
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
-                                Title = "Theres a refresh already happening!",
+                                Title = "THere's a refresh already happening!",
                                 Description = "Please wait untill the previous refresh completes",
                                 Color = Color.Red,
 
@@ -1364,15 +1364,15 @@ namespace Public_Bot.Modules.Commands
                             Color = Color.Orange
                         }.WithCurrentTimestamp().Build());
                     }
-                    if(args.Length == 3)
+                    if (args.Length == 3)
                     {
-                        if(args[2].ToLower() == "confirm")
+                        if (args[2].ToLower() == "confirm")
                         {
                             if (CurrentRF.Contains(Context.Guild.Id))
                             {
                                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                 {
-                                    Title = "Theres a refresh already happening!",
+                                    Title = "THere's a refresh already happening!",
                                     Description = "Please wait untill the previous refresh completes",
                                     Color = Color.Red,
 
@@ -1403,7 +1403,7 @@ namespace Public_Bot.Modules.Commands
                             }
                         }
                     }
-                    break; 
+                    break;
             }
         }
     }

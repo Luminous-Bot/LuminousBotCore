@@ -61,7 +61,7 @@ namespace Public_Bot.Modules.Commands
             else
             {
                 var guildLogs = CurrentGuildModLogs.Find(x => x.GuildID == log.GuildID);
-                if(!guildLogs.Users.Any(x => x.UserID == log.UserID))
+                if (!guildLogs.Users.Any(x => x.UserID == log.UserID))
                 {
                     guildLogs.Users.Add(new Users()
                     {
@@ -128,11 +128,11 @@ namespace Public_Bot.Modules.Commands
                     }.Build());
                     return;
                 }
-                
-                string actionString = 
-                    action == Action.Warned 
-                    ? "Warn" : action == Action.Kicked 
-                    ? "Kick" : action == Action.Banned 
+
+                string actionString =
+                    action == Action.Warned
+                    ? "Warn" : action == Action.Kicked
+                    ? "Kick" : action == Action.Banned
                     ? "Ban" : $"{action}";
                 if (args.Length == 0)
                 {
@@ -158,7 +158,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var sgu = Context.Guild.GetUser(context.User.Id);
-                if(user.Hierarchy >= sgu.Hierarchy)
+                if (user.Hierarchy >= sgu.Hierarchy)
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
@@ -202,7 +202,7 @@ namespace Public_Bot.Modules.Commands
                     await user.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = $"**You have been {action} on {context.Guild.Name}**",
-                        Fields = new List<EmbedFieldBuilder>() 
+                        Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
                             {
@@ -225,13 +225,13 @@ namespace Public_Bot.Modules.Commands
                 {
                     Dmed = false;
                 }
-                if(action == Action.Kicked)
+                if (action == Action.Kicked)
                 {
                     try
                     {
                         await user.KickAsync($"{m.Reason} - {m.Moderator.UserName}");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -264,7 +264,7 @@ namespace Public_Bot.Modules.Commands
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = $"Successfully {action} user {user.Username}",
-                    Fields = new List<EmbedFieldBuilder>() 
+                    Fields = new List<EmbedFieldBuilder>()
                     {
                         new EmbedFieldBuilder()
                         {
@@ -320,7 +320,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var user = GetUser(args[0]);
-                if(user == null)
+                if (user == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -360,7 +360,7 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                         {
                             Title = "**There was an Error**",
-                            Description = $"Looks like we faild trying to remove the muted role, Heres the error message: {ex.Message}",
+                            Description = $"Looks like we faild trying to remove the muted role, Here's the error message: {ex.Message}",
                             Color = Color.Red,
                             Timestamp = DateTime.Now
                         }.Build());
@@ -510,7 +510,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
                         Title = "**Welp, that didnt work!**",
-                        Description = $"We couldn't add the muted role to {user}, heres the reason: {ex.Message}",
+                        Description = $"We couldn't add the muted role to {user}, Here's the reason: {ex.Message}",
                         Color = Color.Red,
                         Timestamp = DateTime.Now
                     }.Build());
@@ -586,7 +586,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("modlogs", RequiredPermission = true, description = "View a users modlogs", commandHelp = "Usage `(PREFIX)modlogs <@user>`")]
             public async Task modlogs(params string[] args)
             {
-                if(args.Length == 0)
+                if (args.Length == 0)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -598,7 +598,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var user = GetUser(args[0]);
-                if(user == null)
+                if (user == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -612,7 +612,7 @@ namespace Public_Bot.Modules.Commands
                 if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
                 {
                     var modlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
-                    if(modlogs.Users.Any(x => x.UserID == user.Id && x.ModLogs.Count > 0))
+                    if (modlogs.Users.Any(x => x.UserID == user.Id && x.ModLogs.Count > 0))
                     {
                         var userlog = modlogs.Users.Find(x => x.UserID == user.Id);
                         var pg = ModlogsPageHandler.BuildHelpPage(userlog.ModLogs, 0, user.Id, Context.Guild.Id, Context.User.Id);
@@ -621,7 +621,7 @@ namespace Public_Bot.Modules.Commands
                         pg.MessageID = msg.Id;
                         ModlogsPageHandler.CurrentPages.Add(pg);
                         ModlogsPageHandler.SaveMLPages();
-                        await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1")});
+                        await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1") });
                     }
                     else
                     {
@@ -639,7 +639,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("clearlogs", description = "Clears a users logs", commandHelp = "Usage - `(PREFIX)clearlogs <@user>`, `(PREFIX)clearlogs <@user> <log_number>`", RequiredPermission = true)]
             public async Task ClearLogs(params string[] args)
             {
-                if(args.Length == 0)
+                if (args.Length == 0)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -650,7 +650,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var usr = GetUser(args[0]);
-                if(usr == null)
+                if (usr == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -663,7 +663,7 @@ namespace Public_Bot.Modules.Commands
                 if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
                 {
                     var Gmodlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
-                    if(Gmodlogs.Users.Any(x => x.UserID == usr.Id && x.ModLogs.Count > 0))
+                    if (Gmodlogs.Users.Any(x => x.UserID == usr.Id && x.ModLogs.Count > 0))
                     {
                         var usrlogs = Gmodlogs.Users.Find(x => x.UserID == usr.Id);
                         if (args.Length == 1)
@@ -672,7 +672,7 @@ namespace Public_Bot.Modules.Commands
                         }
                         if (args.Length == 2)
                         {
-                            if (args[1] == "all" || args[1] == "clear") 
+                            if (args[1] == "all" || args[1] == "clear")
                             {
                                 usrlogs.ModLogs.Clear();
                                 SaveModlogs();
@@ -689,7 +689,7 @@ namespace Public_Bot.Modules.Commands
                             {
                                 if (uint.TryParse(args[1], out var res))
                                 {
-                                    usrlogs.ModLogs.RemoveAt((int)res -1);
+                                    usrlogs.ModLogs.RemoveAt((int)res - 1);
                                     SaveModlogs();
                                     var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.ModLogs, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
                                     var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
@@ -710,7 +710,7 @@ namespace Public_Bot.Modules.Commands
                                     return;
                                 }
                             }
-                            
+
                         }
                     }
                     else
@@ -750,7 +750,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("purge")]
             public async Task purge(string usr, uint ammount)
             {
-                
+
                 var user = GetUser(usr);
                 if (user == null)
                 {
@@ -785,7 +785,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("slowmode", RequiredPermission = true)]
             public async Task slowmode(params string[] args)
             {
-                if(args.Length == 0)
+                if (args.Length == 0)
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
@@ -815,7 +815,7 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "That didn't work!",
-                            Description = $"Heres why: {ex.Message}",
+                            Description = $"Here's why: {ex.Message}",
                             Color = Color.Red,
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -866,7 +866,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "That didn't work!",
-                                Description = $"Heres why: {ex.Message}",
+                                Description = $"Here's why: {ex.Message}",
                                 Color = Color.Red,
                             }.WithCurrentTimestamp().Build());
                             return;
@@ -875,7 +875,7 @@ namespace Public_Bot.Modules.Commands
                     else
                     {
                         var chan = (SocketTextChannel)Context.Channel;
-                        if(chan.SlowModeInterval > 0)
+                        if (chan.SlowModeInterval > 0)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
