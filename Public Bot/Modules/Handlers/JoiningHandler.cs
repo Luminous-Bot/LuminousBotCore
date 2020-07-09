@@ -17,9 +17,14 @@ namespace Public_Bot.Modules.Handlers
 
             client.JoinedGuild += Client_JoinedGuild;
         }
-
+        public async Task CreateGuildgql(SocketGuild arg)
+        {
+            string request = $"mutation{{ createGuild(Name: {arg.Name} Id: {arg.Id}) {{ Id }} }}";
+            await StateHandler.Postgql(request);
+        }
         private async Task Client_JoinedGuild(SocketGuild arg)
         {
+            await CreateGuildgql(arg);
             GuildSettings s = new GuildSettings(arg);
             var perms = arg.CurrentUser.GuildPermissions;
             List<string> md = new List<string>();

@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -38,6 +40,31 @@ namespace Public_Bot.Modules.Handlers
                 throw new Exception("State object was null.");
             Logger.Write($"Loaded the object \"{name}\"!", Logger.Severity.Log);
             return returnObject;
+        }
+
+
+        private static HttpClient gqlClient = new HttpClient();
+        private const string endpoint = "";
+        public static async Task<T> Postgql<T>(string json)
+        {
+            var res = await gqlClient.PostAsync(endpoint, new StringContent(json));
+            if (res.IsSuccessStatusCode)
+            {
+                var data = JsonConvert.DeserializeObject<gqlBase<T>>(await res.Content.ReadAsStringAsync());
+                return data.data.First();
+            }    
+            else
+                throw new Exception($"Failed to post, got status {res.StatusCode}");
+        }
+        public static async Task Postgql(string json)
+        {
+            var res = await gqlClient.PostAsync(endpoint, new StringContent(json));
+            if (!res.IsSuccessStatusCode)
+                throw new Exception($"Failed to post, got status {res.StatusCode}");
+        }
+        public class gqlBase<Type>
+        {
+            public List<Type> data { get; set; }
         }
     }
 }

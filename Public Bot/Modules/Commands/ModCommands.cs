@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
+using Public_Bot.State.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,45 @@ namespace Public_Bot.Modules.Commands
         public ModCommands(DiscordShardedClient _client)
         {
             client = _client;
-            try
+            LoadInfracs();
+        }
+        public async void LoadInfracs()
+        {
+            CurrentGuildModLogs = new List<GuildModLogs>();
+            //query the gql
+            var res = await StateHandler.Postgql<List<Guilds>>("{ guilds{ Id Name GuildMembers{ GuildID UserID User{ Usernames { Name } } Infractions{ UserID GuildID Action Reason Time Moderator{ UserID User{ Usernames { Name } } } } } } }");
+            foreach(var guild in res)
             {
-                CurrentGuildModLogs = Public_Bot.Modules.Handlers.StateHandler.LoadObject<List<GuildModLogs>>("GuildLogs");
-            }
-            catch
-            {
-                CurrentGuildModLogs = new List<GuildModLogs>();
+                if (!guild.GuildMembers.Any(x => x.Infractions.Count > 0))
+                    continue;
+                var gml = new GuildModLogs();
+                gml.GuildID = ulong.Parse(guild.GuildID);
+                gml.GuildName = guild.GuildName;
+                gml.Users = new List<Users>();
+                foreach (var member in guild.GuildMembers.Where(x => x.Infractions.Count > 0))
+                {
+                    Users u = new Users();
+                    u.UserID = ulong.Parse(member.UserID);
+                    u.UserName = member.User.Usernames.First().Name;
+                    u.ModLogs = new List<ModLog>();
+
+                    member.Infractions.ForEach(x => u.ModLogs.Add(new ModLog()
+                    {
+                        Action = x.Action,
+                        GuildID = gml.GuildID,
+                        Moderator = new Moderator()
+                        {
+                            UserID = ulong.Parse(x.Moderator.UserID),
+                            UserName = x.Moderator.User.Usernames.First().Name
+                        },
+                        Reason = x.Reason,
+                        Time = x.Time,
+                        UserID = u.UserID
+                    }));
+
+                    gml.Users.Add(u);
+                }
+                CurrentGuildModLogs.Add(gml);
             }
         }
         public static void SaveModlogs()
@@ -75,32 +108,6 @@ namespace Public_Bot.Modules.Commands
                     guildLogs.Users.Find(x => x.UserID == log.UserID).ModLogs.Add(log);
                 }
             }
-        }
-        public class GuildModLogs
-        {
-            public string GuildName { get; set; }
-            public ulong GuildID { get; set; }
-            public List<Users> Users { get; set; } = new List<Users>();
-        }
-        public class Users
-        {
-            public string UserName { get; set; }
-            public ulong UserID { get; set; }
-            public List<ModLog> ModLogs { get; set; }
-        }
-        public class ModLog
-        {
-            public Moderator Moderator { get; set; }
-            public ulong GuildID { get; set; }
-            public ulong UserID { get; set; }
-            public Action Action { get; set; }
-            public DateTime Time { get; set; }
-            public string Reason { get; set; }
-        }
-        public class Moderator
-        {
-            public string UserName { get; set; }
-            public ulong UserID { get; set; }
         }
         public enum Action
         {
@@ -782,7 +789,7 @@ namespace Public_Bot.Modules.Commands
 
             }
 
-            [DiscordCommand("slowmode", RequiredPermission = true)]
+            [DiscordCommand("slowmode", RequiredPermission = true, description = "Change the slowmode for a channel", commandHelp = "Usage - `(PREFIX)slowmode <time>`\nTimes:\n`10m` - Ten minutes\n`1h` - One hour\n`45s` - Forty five seconds\n")]
             public async Task slowmode(params string[] args)
             {
                 if(args.Length == 0)

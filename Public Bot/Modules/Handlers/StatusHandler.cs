@@ -46,9 +46,16 @@ namespace Public_Bot.Modules.Handlers
                 $"Programming somthing",
                 $"Checking your messages for commands",
                 $"Upgraded!",
-                $"Some body once told me!"
+                $"Some body once told me!",
+                $"Xua hua piao piao (<3 -belle)",
+                $"Watching memes",
+                $"Writing my own compiler",
+                $"Sneezing in brail",
+                $"Understanding stupitity",
+                $"Plotting the destruction of humanity",
+                $"Tiktok is a social malware"
             };
-            await client.SetGameAsync($"[0.2.8] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.2.9] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
         }
     }
 }
