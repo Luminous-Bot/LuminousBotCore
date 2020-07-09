@@ -150,12 +150,12 @@ namespace Public_Bot.Modules.Handlers
 
         private void GiveVCPoints(object sender, ElapsedEventArgs e)
         {
-            foreach(var guild in client.Guilds)
+            foreach (var guild in client.Guilds)
             {
                 if (GuildLevels.Any(x => x.GuildID == guild.Id))
                 {
                     var gs = GuildSettings.Get(guild.Id);
-                    if (gs.ModulesSettings["🧪 Levels 🧪"]) 
+                    if (gs.ModulesSettings["🧪 Levels 🧪"])
                     {
                         foreach (var user in guild.Users.Where(x => x.VoiceChannel != null))
                         {
@@ -185,7 +185,7 @@ namespace Public_Bot.Modules.Handlers
 
                         }
                     }
-                    
+
                 }
             }
         }
@@ -217,7 +217,7 @@ namespace Public_Bot.Modules.Handlers
                     {
                         if (gu.Settings.RankRoles.Keys.Any(x => x <= user.CurrentLevel))
                         {
-                            foreach(var rid in gu.Settings.RankRoles.Where(x => x.Key <= user.CurrentLevel))
+                            foreach (var rid in gu.Settings.RankRoles.Where(x => x.Key <= user.CurrentLevel))
                             {
                                 try
                                 {
@@ -246,7 +246,7 @@ namespace Public_Bot.Modules.Handlers
                             {
                                 new EmbedFieldBuilder()
                                 {
-                                    Name = "Heres a discord fact:",
+                                    Name = "Here's a discord fact:",
                                     Value = facts[new Random().Next(0, 99)],
                                 }
                             },
@@ -254,7 +254,7 @@ namespace Public_Bot.Modules.Handlers
                                 Color = new Color(user.EmbedColor.R, user.EmbedColor.G, user.EmbedColor.B)
                             }.WithCurrentTimestamp().Build());
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Logger.WriteError($"Failed to send message, Channel: {chan.Name} Guild: {chan.Guild.Name}", ex, Logger.Severity.Error);
                         }
@@ -320,18 +320,18 @@ namespace Public_Bot.Modules.Handlers
         {
             var guild = client.GetGuild(gl.GuildID);
             int count = 0;
-            foreach(var user in guild.Users.Where(x => gl.CurrentUsers.Find(y => y.UserID == x.Id) != null && gl.CurrentUsers.Find(y => y.UserID == x.Id).CurrentLevel >= level))
+            foreach (var user in guild.Users.Where(x => gl.CurrentUsers.Find(y => y.UserID == x.Id) != null && gl.CurrentUsers.Find(y => y.UserID == x.Id).CurrentLevel >= level))
             {
-                if(!user.Roles.Contains(role))
+                if (!user.Roles.Contains(role))
                 {
                     user.AddRoleAsync(role).GetAwaiter().GetResult();
                     count++;
                     Thread.Sleep(3000);
                 }
             }
-            if(count > 0)
+            if (count > 0)
             {
-                _=chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
+                _ = chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
                 {
                     Title = "Finnished adding Roles!",
                     Description = $"We added the {role.Mention} to {count} different users who had a level equal or greater than {level}",
@@ -340,11 +340,11 @@ namespace Public_Bot.Modules.Handlers
             }
             else
             {
-                _=chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
+                _ = chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
                 {
                     Title = "That was easy!",
                     Description = $"Looks like there was no one to give {role.Mention} to.",
-                    Color = Color.Green 
+                    Color = Color.Green
                 }.WithCurrentTimestamp().Build()).Result;
             }
             LevelCommands.CurrentRF.Remove(gl.GuildID);
