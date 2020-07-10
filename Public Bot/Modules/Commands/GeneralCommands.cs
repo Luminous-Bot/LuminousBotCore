@@ -297,14 +297,10 @@ namespace Public_Bot.Modules.Commands
                 g.Save();
                 return baseImg;
             }
-            public static System.Drawing.Image RoundCorners(System.Drawing.Image image, int cornerRadius, int x = 0, int y = 0)
+            private static System.Drawing.Image RoundCorners(System.Drawing.Image image, int cornerRadius)
             {
                 cornerRadius *= 2;
-                Bitmap roundedImage;
-                if (x != 0 && y != 0)
-                    roundedImage = new Bitmap(x, y);
-                else
-                    roundedImage = new Bitmap(960, 540);
+                Bitmap roundedImage = new Bitmap(960, 540);
                 GraphicsPath gp = new GraphicsPath();
                 gp.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
                 gp.AddArc(0 + roundedImage.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);

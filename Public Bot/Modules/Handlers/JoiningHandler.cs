@@ -17,14 +17,9 @@ namespace Public_Bot.Modules.Handlers
 
             client.JoinedGuild += Client_JoinedGuild;
         }
-        public async Task CreateGuildgql(SocketGuild arg)
-        {
-            string request = $"mutation{{ createGuild(Name: {arg.Name} Id: {arg.Id}) {{ Id }} }}";
-            await StateHandler.Postgql(request);
-        }
+
         private async Task Client_JoinedGuild(SocketGuild arg)
         {
-            await CreateGuildgql(arg);
             GuildSettings s = new GuildSettings(arg);
             var perms = arg.CurrentUser.GuildPermissions;
             List<string> md = new List<string>();
@@ -56,7 +51,7 @@ namespace Public_Bot.Modules.Handlers
                         {
                             IsInline = true,
                             Name = "Bot Permissions",
-                            Value = $"> Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
+                            Value = $"> Here's the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
                         },
                         new EmbedFieldBuilder()
                         {
@@ -64,7 +59,7 @@ namespace Public_Bot.Modules.Handlers
                             Name = "Modules",
                             Value = $"> This is the current Module Settings with there status\n```{string.Join('\n', md)}```\n> You can Enable/Disable Modules with the {s.Prefix}modules command."
                         },
-                        s.PermissionRoles.Count > 0 ? 
+                        s.PermissionRoles.Count > 0 ?
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,

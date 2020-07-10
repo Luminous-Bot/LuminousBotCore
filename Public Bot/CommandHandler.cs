@@ -27,7 +27,7 @@ namespace Public_Bot
             handlerService = handler;
 
             client.MessageReceived += CheckCommandAsync;
-            
+
             client.ShardReady += Ready;
             client.ShardDisconnected += Client_ShardDisconnected;
             LoadGuildSettings();
@@ -65,12 +65,14 @@ namespace Public_Bot
             foreach (var guild in arg.Guilds)
                 if (!CurrentGuildSettings.Any(x => x.GuildID == guild.Id))
                     new GuildSettings(guild);
+
             isReady = true;
         }
         public static bool IsBotRole(IRole role)
         {
             var guild = client.GetGuild(role.Guild.Id);
             var users = guild.Users.Where(x => x.Roles.Contains(role));
+
             if (users.Count() == 1)
                 if (users.First().IsBot)
                     return true;
@@ -88,21 +90,13 @@ namespace Public_Bot
                 return;
 
             var s = CurrentGuildSettings.Find(x => x.GuildID == context.Guild.Id);
-            if(arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
-            {
-                await context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
-                {
-                    Title = "Prefix",
-                    Description = $"My current prefix is `{s.Prefix}`\nYou can also mention me instead of using a prefix.",
-                    Color = Color.Green,
-                }.WithCurrentTimestamp().Build());
-                return;
-            }
+
             if (arg.Content.StartsWith(s.Prefix) || arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
             {
                 var resp = await service.ExecuteAsync(context, s);
                 Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");
-                if(resp.Result == CommandStatus.InvalidPermissions)
+
+                if (resp.Result == CommandStatus.InvalidPermissions)
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "**You do not have permission**",
@@ -110,7 +104,8 @@ namespace Public_Bot
                         Color = Color.Red,
                         Timestamp = DateTimeOffset.Now,
                     }.Build());
-                else if(resp.Result == CommandStatus.Disabled)
+
+                else if (resp.Result == CommandStatus.Disabled)
                 {
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
@@ -120,12 +115,13 @@ namespace Public_Bot
                         Timestamp = DateTimeOffset.Now,
                     }.Build());
                 }
-                else if(resp.Result == CommandStatus.NotEnoughParams)
+
+                else if (resp.Result == CommandStatus.NotEnoughParams)
                 {
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "**You didnt provide enough parameters!**",
-                        Description = @$"Heres how to use the command",
+                        Title = "**You didn't provide enough parameters!**",
+                        Description = @$"Here's how to use the command",
                         Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
@@ -144,12 +140,13 @@ namespace Public_Bot
                         Timestamp = DateTimeOffset.Now,
                     }.Build());
                 }
-                else if(resp.Result == CommandStatus.InvalidParams)
+
+                else if (resp.Result == CommandStatus.InvalidParams)
                 {
                     await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "**The parameters you provided were invalid!**",
-                        Description = @$"Heres how to use the command",
+                        Description = @$"Here's how to use the command",
                         Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()

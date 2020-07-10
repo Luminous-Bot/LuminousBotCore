@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
-using Public_Bot.State.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,45 +19,13 @@ namespace Public_Bot.Modules.Commands
         public ModCommands(DiscordShardedClient _client)
         {
             client = _client;
-            LoadInfracs();
-        }
-        public async void LoadInfracs()
-        {
-            CurrentGuildModLogs = new List<GuildModLogs>();
-            //query the gql
-            var res = await StateHandler.Postgql<List<Guilds>>("{ guilds{ Id Name GuildMembers{ GuildID UserID User{ Usernames { Name } } Infractions{ UserID GuildID Action Reason Time Moderator{ UserID User{ Usernames { Name } } } } } } }");
-            foreach(var guild in res)
+            try
             {
-                if (!guild.GuildMembers.Any(x => x.Infractions.Count > 0))
-                    continue;
-                var gml = new GuildModLogs();
-                gml.GuildID = ulong.Parse(guild.GuildID);
-                gml.GuildName = guild.GuildName;
-                gml.Users = new List<Users>();
-                foreach (var member in guild.GuildMembers.Where(x => x.Infractions.Count > 0))
-                {
-                    Users u = new Users();
-                    u.UserID = ulong.Parse(member.UserID);
-                    u.UserName = member.User.Usernames.First().Name;
-                    u.ModLogs = new List<ModLog>();
-
-                    member.Infractions.ForEach(x => u.ModLogs.Add(new ModLog()
-                    {
-                        Action = x.Action,
-                        GuildID = gml.GuildID,
-                        Moderator = new Moderator()
-                        {
-                            UserID = ulong.Parse(x.Moderator.UserID),
-                            UserName = x.Moderator.User.Usernames.First().Name
-                        },
-                        Reason = x.Reason,
-                        Time = x.Time,
-                        UserID = u.UserID
-                    }));
-
-                    gml.Users.Add(u);
-                }
-                CurrentGuildModLogs.Add(gml);
+                CurrentGuildModLogs = Public_Bot.Modules.Handlers.StateHandler.LoadObject<List<GuildModLogs>>("GuildLogs");
+            }
+            catch
+            {
+                CurrentGuildModLogs = new List<GuildModLogs>();
             }
         }
         public static void SaveModlogs()
@@ -94,7 +61,7 @@ namespace Public_Bot.Modules.Commands
             else
             {
                 var guildLogs = CurrentGuildModLogs.Find(x => x.GuildID == log.GuildID);
-                if(!guildLogs.Users.Any(x => x.UserID == log.UserID))
+                if (!guildLogs.Users.Any(x => x.UserID == log.UserID))
                 {
                     guildLogs.Users.Add(new Users()
                     {
@@ -108,6 +75,32 @@ namespace Public_Bot.Modules.Commands
                     guildLogs.Users.Find(x => x.UserID == log.UserID).ModLogs.Add(log);
                 }
             }
+        }
+        public class GuildModLogs
+        {
+            public string GuildName { get; set; }
+            public ulong GuildID { get; set; }
+            public List<Users> Users { get; set; } = new List<Users>();
+        }
+        public class Users
+        {
+            public string UserName { get; set; }
+            public ulong UserID { get; set; }
+            public List<ModLog> ModLogs { get; set; }
+        }
+        public class ModLog
+        {
+            public Moderator Moderator { get; set; }
+            public ulong GuildID { get; set; }
+            public ulong UserID { get; set; }
+            public Action Action { get; set; }
+            public DateTime Time { get; set; }
+            public string Reason { get; set; }
+        }
+        public class Moderator
+        {
+            public string UserName { get; set; }
+            public ulong UserID { get; set; }
         }
         public enum Action
         {
@@ -135,11 +128,11 @@ namespace Public_Bot.Modules.Commands
                     }.Build());
                     return;
                 }
-                
-                string actionString = 
-                    action == Action.Warned 
-                    ? "Warn" : action == Action.Kicked 
-                    ? "Kick" : action == Action.Banned 
+
+                string actionString =
+                    action == Action.Warned
+                    ? "Warn" : action == Action.Kicked
+                    ? "Kick" : action == Action.Banned
                     ? "Ban" : $"{action}";
                 if (args.Length == 0)
                 {
@@ -165,7 +158,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var sgu = Context.Guild.GetUser(context.User.Id);
-                if(user.Hierarchy >= sgu.Hierarchy)
+                if (user.Hierarchy >= sgu.Hierarchy)
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
@@ -209,7 +202,7 @@ namespace Public_Bot.Modules.Commands
                     await user.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = $"**You have been {action} on {context.Guild.Name}**",
-                        Fields = new List<EmbedFieldBuilder>() 
+                        Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
                             {
@@ -232,13 +225,13 @@ namespace Public_Bot.Modules.Commands
                 {
                     Dmed = false;
                 }
-                if(action == Action.Kicked)
+                if (action == Action.Kicked)
                 {
                     try
                     {
                         await user.KickAsync($"{m.Reason} - {m.Moderator.UserName}");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -271,7 +264,7 @@ namespace Public_Bot.Modules.Commands
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = $"Successfully {action} user {user.Username}",
-                    Fields = new List<EmbedFieldBuilder>() 
+                    Fields = new List<EmbedFieldBuilder>()
                     {
                         new EmbedFieldBuilder()
                         {
@@ -327,7 +320,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var user = GetUser(args[0]);
-                if(user == null)
+                if (user == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -367,7 +360,7 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                         {
                             Title = "**There was an Error**",
-                            Description = $"Looks like we faild trying to remove the muted role, Heres the error message: {ex.Message}",
+                            Description = $"Looks like we faild trying to remove the muted role, Here's the error message: {ex.Message}",
                             Color = Color.Red,
                             Timestamp = DateTime.Now
                         }.Build());
@@ -517,7 +510,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
                         Title = "**Welp, that didnt work!**",
-                        Description = $"We couldn't add the muted role to {user}, heres the reason: {ex.Message}",
+                        Description = $"We couldn't add the muted role to {user}, Here's the reason: {ex.Message}",
                         Color = Color.Red,
                         Timestamp = DateTime.Now
                     }.Build());
@@ -593,7 +586,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("modlogs", RequiredPermission = true, description = "View a users modlogs", commandHelp = "Usage `(PREFIX)modlogs <@user>`")]
             public async Task modlogs(params string[] args)
             {
-                if(args.Length == 0)
+                if (args.Length == 0)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -605,7 +598,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var user = GetUser(args[0]);
-                if(user == null)
+                if (user == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -619,7 +612,7 @@ namespace Public_Bot.Modules.Commands
                 if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
                 {
                     var modlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
-                    if(modlogs.Users.Any(x => x.UserID == user.Id && x.ModLogs.Count > 0))
+                    if (modlogs.Users.Any(x => x.UserID == user.Id && x.ModLogs.Count > 0))
                     {
                         var userlog = modlogs.Users.Find(x => x.UserID == user.Id);
                         var pg = ModlogsPageHandler.BuildHelpPage(userlog.ModLogs, 0, user.Id, Context.Guild.Id, Context.User.Id);
@@ -628,7 +621,7 @@ namespace Public_Bot.Modules.Commands
                         pg.MessageID = msg.Id;
                         ModlogsPageHandler.CurrentPages.Add(pg);
                         ModlogsPageHandler.SaveMLPages();
-                        await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1")});
+                        await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1") });
                     }
                     else
                     {
@@ -646,7 +639,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("clearlogs", description = "Clears a users logs", commandHelp = "Usage - `(PREFIX)clearlogs <@user>`, `(PREFIX)clearlogs <@user> <log_number>`", RequiredPermission = true)]
             public async Task ClearLogs(params string[] args)
             {
-                if(args.Length == 0)
+                if (args.Length == 0)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -657,7 +650,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var usr = GetUser(args[0]);
-                if(usr == null)
+                if (usr == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
@@ -670,7 +663,7 @@ namespace Public_Bot.Modules.Commands
                 if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
                 {
                     var Gmodlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
-                    if(Gmodlogs.Users.Any(x => x.UserID == usr.Id && x.ModLogs.Count > 0))
+                    if (Gmodlogs.Users.Any(x => x.UserID == usr.Id && x.ModLogs.Count > 0))
                     {
                         var usrlogs = Gmodlogs.Users.Find(x => x.UserID == usr.Id);
                         if (args.Length == 1)
@@ -679,7 +672,7 @@ namespace Public_Bot.Modules.Commands
                         }
                         if (args.Length == 2)
                         {
-                            if (args[1] == "all" || args[1] == "clear") 
+                            if (args[1] == "all" || args[1] == "clear")
                             {
                                 usrlogs.ModLogs.Clear();
                                 SaveModlogs();
@@ -696,7 +689,7 @@ namespace Public_Bot.Modules.Commands
                             {
                                 if (uint.TryParse(args[1], out var res))
                                 {
-                                    usrlogs.ModLogs.RemoveAt((int)res -1);
+                                    usrlogs.ModLogs.RemoveAt((int)res - 1);
                                     SaveModlogs();
                                     var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.ModLogs, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
                                     var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
@@ -717,7 +710,7 @@ namespace Public_Bot.Modules.Commands
                                     return;
                                 }
                             }
-                            
+
                         }
                     }
                     else
@@ -757,7 +750,7 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("purge")]
             public async Task purge(string usr, uint ammount)
             {
-                
+
                 var user = GetUser(usr);
                 if (user == null)
                 {
@@ -789,10 +782,10 @@ namespace Public_Bot.Modules.Commands
 
             }
 
-            [DiscordCommand("slowmode", RequiredPermission = true, description = "Change the slowmode for a channel", commandHelp = "Usage - `(PREFIX)slowmode <time>`\nTimes:\n`10m` - Ten minutes\n`1h` - One hour\n`45s` - Forty five seconds\n")]
+            [DiscordCommand("slowmode", RequiredPermission = true)]
             public async Task slowmode(params string[] args)
             {
-                if(args.Length == 0)
+                if (args.Length == 0)
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
@@ -822,7 +815,7 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "That didn't work!",
-                            Description = $"Heres why: {ex.Message}",
+                            Description = $"Here's why: {ex.Message}",
                             Color = Color.Red,
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -873,7 +866,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "That didn't work!",
-                                Description = $"Heres why: {ex.Message}",
+                                Description = $"Here's why: {ex.Message}",
                                 Color = Color.Red,
                             }.WithCurrentTimestamp().Build());
                             return;
@@ -882,7 +875,7 @@ namespace Public_Bot.Modules.Commands
                     else
                     {
                         var chan = (SocketTextChannel)Context.Channel;
-                        if(chan.SlowModeInterval > 0)
+                        if (chan.SlowModeInterval > 0)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
