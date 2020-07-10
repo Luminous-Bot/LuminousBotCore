@@ -56,7 +56,7 @@ namespace Public_Bot.Modules.Handlers
                         {
                             IsInline = true,
                             Name = "Bot Permissions",
-                            Value = $"> Here's the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
+                            Value = $"> Heres the bots current discord permissions:\n```{string.Join('\n', final)}```\n> Some Modules like the moderation module need kick and ban permissions."
                         },
                         new EmbedFieldBuilder()
                         {
@@ -64,7 +64,7 @@ namespace Public_Bot.Modules.Handlers
                             Name = "Modules",
                             Value = $"> This is the current Module Settings with there status\n```{string.Join('\n', md)}```\n> You can Enable/Disable Modules with the {s.Prefix}modules command."
                         },
-                        s.PermissionRoles.Count > 0 ?
+                        s.PermissionRoles.Count > 0 ? 
                         new EmbedFieldBuilder()
                         {
                             IsInline = true,
