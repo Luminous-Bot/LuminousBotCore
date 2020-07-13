@@ -78,10 +78,23 @@ namespace Public_Bot.Modules.Handlers
             public uint CurrentLevel { get; set; } = 0;
             public double CurrentXP { get; set; } = 0;
             public double NextLevelXP { get; set; } = 30;
-            public color EmbedColor { get; set; } = new color(0, 255, 0);
-            public color RankBackgound { get; set; } = new color(40, 40, 40);
-            public bool MentionLevelup { get; set; } = false;
+            public string EmbedColor { get; set; } = "00ff00";
+            public string RankBackgound { get; set; } = "262626";
+            public bool MentionLevelup { get; set; } = true;
+            public string bkurl { get; set; } = null;
 
+            public string HexFromColor(System.Drawing.Color c)
+                => $"{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}";
+            public string HexFromColor(Discord.Color c)
+                => $"{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}";
+            public System.Drawing.Color ColorFromHex(string hex)
+                => System.Drawing.ColorTranslator.FromHtml($"#{hex}");
+            public Discord.Color DiscordColorFromHex(string hex)
+            {
+                var c = System.Drawing.ColorTranslator.FromHtml($"#{hex}");
+                var fin = new Discord.Color(c.R, c.G, c.B);
+                return fin;
+            }
             public LevelUser() { }
             public LevelUser(SocketGuildUser user)
             {
@@ -303,15 +316,15 @@ namespace Public_Bot.Modules.Handlers
                                 Title = $"You Reached Level {user.CurrentLevel}!",
                                 Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.UserID).Username}, only {gu.Settings.maxlevel - user.CurrentLevel} more levels to go!",
                                 Fields = new List<EmbedFieldBuilder>()
-                            {
-                                new EmbedFieldBuilder()
                                 {
-                                    Name = "Here's a discord fact:",
-                                    Value = facts[new Random().Next(0, 99)],
-                                }
-                            },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Here's a discord fact:",
+                                        Value = facts[new Random().Next(0, 99)],
+                                    }
+                                },
                                 ThumbnailUrl = client.GetUser(user.UserID).GetAvatarUrl(),
-                                Color = new Color(user.EmbedColor.R, user.EmbedColor.G, user.EmbedColor.B)
+                                Color = user.DiscordColorFromHex(user.EmbedColor)
                             }.WithCurrentTimestamp().Build());
                         }
                         catch (Exception ex)

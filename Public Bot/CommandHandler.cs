@@ -90,7 +90,16 @@ namespace Public_Bot
                 return;
 
             var s = CurrentGuildSettings.Find(x => x.GuildID == context.Guild.Id);
-
+            if (arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
+            {
+                await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Prefix",
+                    Description = $"My current prefix is `{s.Prefix}`\nYou can also mention me instead of using a prefix.",
+                    Color = Color.Green,
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
             if (arg.Content.StartsWith(s.Prefix) || arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
             {
                 var resp = await service.ExecuteAsync(context, s);

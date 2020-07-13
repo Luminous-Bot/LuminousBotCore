@@ -11,10 +11,10 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static Public_Bot.Modules.Handlers.LevelHandler;
-using static Public_Bot.Modules.Handlers.LevelHandler.GuildLevelSettings;
 using Color = Discord.Color;
 
 namespace Public_Bot.Modules.Commands
@@ -51,7 +51,7 @@ namespace Public_Bot.Modules.Commands
         }
         public class RankBuilder
         {
-            public static System.Drawing.Image MakeRank(string username, string avtr, int level, int curXP, int nxtXP, System.Drawing.Color embc, int Rank, System.Drawing.Color bgc)
+            public static System.Drawing.Image MakeRank(string username, string avtr, int level, int curXP, int nxtXP, System.Drawing.Color embc, int Rank, System.Drawing.Color bgc, string bkurl = null)
             {
                 WebClient wc = new WebClient();
                 byte[] bytes = wc.DownloadData(avtr);
@@ -61,9 +61,18 @@ namespace Public_Bot.Modules.Commands
                 var btmp = new Bitmap(913, 312);
                 var canv = Graphics.FromImage(btmp);
                 canv.SmoothingMode = SmoothingMode.AntiAlias;
-                canv.FillPath(new SolidBrush(bgc), RoundedRect(new Rectangle(0, 0, 913, 312), 30));
+                if (bkurl == null)
+                    canv.FillPath(new SolidBrush(bgc), RoundedRect(new Rectangle(0, 0, 913, 312), 30));
+                else
+                {
+                    byte[] btz = wc.DownloadData(bkurl);
+                    MemoryStream mems = new MemoryStream(btz);
+                    System.Drawing.Image bannr = System.Drawing.Image.FromStream(mems);
+                    var fin = ResizeImage(bannr, 913, 312);
+                    canv.DrawImage(GeneralCommands.GuildStatBuilder.RoundCorners(fin, 30, 913, 312), new Point(0, 0));
+                }
                 //draw pfp
-                var rpfp = ClipToCircle(pfp, new PointF(pfp.Width / 2, pfp.Height / 2), pfp.Width / 2, bgc);
+                var rpfp = ClipToCircle(pfp, new PointF(pfp.Width / 2, pfp.Height / 2), pfp.Width / 2, System.Drawing.Color.Transparent);
                 canv.DrawImage(rpfp, 40, 25);
                 //draw progressbar
                 var g = RoundedRect(new Rectangle(20, 312 - 60, (int)(913 - 60), 30), 15);
@@ -132,18 +141,18 @@ namespace Public_Bot.Modules.Commands
                     return path;
                 }
 
-                // top left arc
+                // top left arc  
                 path.AddArc(arc, 180, 90);
 
-                // top right arc
+                // top right arc  
                 arc.X = bounds.Right - diameter;
                 path.AddArc(arc, 270, 90);
 
-                // bottom right arc
+                // bottom right arc  
                 arc.Y = bounds.Bottom - diameter;
                 path.AddArc(arc, 0, 90);
 
-                // bottom left arc
+                // bottom left arc 
                 arc.X = bounds.Left;
                 path.AddArc(arc, 90, 90);
 
@@ -168,7 +177,7 @@ namespace Public_Bot.Modules.Commands
                         g.FillRectangle(br, 0, 0, dstImage.Width, dstImage.Height);
                     }
 
-                    // adds the new ellipse & draws the image again
+                    // adds the new ellipse & draws the image again 
                     GraphicsPath path = new GraphicsPath();
                     path.AddEllipse(r);
                     g.SetClip(path);
@@ -192,6 +201,31 @@ namespace Public_Bot.Modules.Commands
                     return (num / 1000).ToString("0.#") + "K";
 
                 return num.ToString("#,0");
+            }
+        }
+        [DiscordCommand("bk")]
+        public async Task bk(string usr, string url)
+        {
+            if (Context.User.Id != 259053800755691520)
+                return;
+
+            try
+            {
+                var user = GetUser(usr);
+                var guildlvl = GuildLeaderboards.Get(Context.Guild.Id);
+                var leveluser = guildlvl.CurrentUsers.Find(x => x.UserID == user.Id);
+                if (url == "none")
+                    leveluser.bkurl = null;
+                else
+                    leveluser.bkurl = url;
+                guildlvl.SaveCurrent();
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError("BK failed,", ex);
+                await Context.Message.AddReactionAsync(new Emoji("❌"));
+
             }
         }
         [DiscordCommand("rank", description = "Shows your current rank!", commandHelp = "Usage - `(PREFIX)rank`, `(PREFIX)rank <user>`")]
@@ -223,7 +257,8 @@ namespace Public_Bot.Modules.Commands
                     (int)userlvl.NextLevelXP,
                     System.Drawing.Color.FromArgb(userlvl.EmbedColor.R, userlvl.EmbedColor.G, userlvl.EmbedColor.B),
                     gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1,
-                    System.Drawing.Color.FromArgb(userlvl.RankBackgound.R, userlvl.RankBackgound.G, userlvl.RankBackgound.B));
+                    System.Drawing.Color.FromArgb(userlvl.RankBackgound.R, userlvl.RankBackgound.G, userlvl.RankBackgound.B),
+                    userlvl.bkurl);
 
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png", System.Drawing.Imaging.ImageFormat.Png);
                 await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png");
@@ -238,11 +273,11 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
             }
         }
-        [DiscordCommand("rankcard", description = "Change your Rank Card's settings!", commandHelp = "Usage:\n`(PREFIX)rankcard ping <on/off>`\n`(PREFIX)rankcard color <R> <G> <B>`\n`(PREFIX)rankcard backgroundcolor <R> <G> <B>`")]
+        [DiscordCommand("rankcard", description = "Change your Rank Card's settings!", commandHelp = "Usage:\n`(PREFIX)rankcard ping <on/off>`\n`(PREFIX)rankcard color <color_hex>`\n`(PREFIX)rankcard backgroundcolor <color_hex>`")]
         public async Task rc(params string[] args)
         {
             //get the guilds level settings
-            var levelsettings = LevelHandler.GuildLeaderboards.Get(Context.Guild.Id);
+            var levelsettings = GuildLeaderboards.Get(Context.Guild.Id);
             if (levelsettings == null)
                 return;
 
@@ -260,7 +295,7 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "Your Rank Card",
-                    Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                    Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nBar Color: #{usr.EmbedColor}\nBackground Color: #{usr.RankBackgound}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <color_hex>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <color_hex>`",
                     Color = Discord.Color.Green
                 }.WithCurrentTimestamp().Build());
                 return;
@@ -272,7 +307,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "Your Rank Card",
-                        Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nColor: R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nBackground Color: R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <R> <G> <B>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                        Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nBar Color: #{usr.EmbedColor}\nBackground Color: #{usr.RankBackgound}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <color_hex>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <color_hex>`",
                         Color = Discord.Color.Green
                     }.WithCurrentTimestamp().Build());
                     return;
@@ -293,6 +328,7 @@ namespace Public_Bot.Modules.Commands
                             case "on":
                                 {
                                     usr.MentionLevelup = true;
+                                    await usr.Save();
                                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                     {
                                         Title = "Success!",
@@ -304,6 +340,7 @@ namespace Public_Bot.Modules.Commands
                             case "off":
                                 {
                                     usr.MentionLevelup = false;
+                                    await usr.Save();
                                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                     {
                                         Title = "Success!",
@@ -329,10 +366,37 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Rank Card Color",
-                            Description = $"The current Rank Card Color is this embeds color (R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B}\nTo change the Rank Cards color Run `{GuildSettings.Prefix}rankcard color <R> <G> <B>`",
-                            Color = new Color(usr.EmbedColor.R, usr.EmbedColor.G, usr.EmbedColor.B)
+                            Description = $"The current Rank Card's Color is this Embed's Color ({usr.EmbedColor})\nTo change the Rank Cards color Run `{GuildSettings.Prefix}rankcard color <hex_color>`",
+                            Color = usr.DiscordColorFromHex(usr.EmbedColor)
                         }.WithCurrentTimestamp().Build());
                         return;
+                    }
+                    if (args.Length == 2)
+                    {
+                        string hexColor = args[1];
+                        var regex = new Regex(@"(\d|[a-f]){6}");
+                        if (regex.IsMatch(args[1]))
+                        {
+                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            usr.EmbedColor = hex;
+                            await usr.Save();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Rank Card Color's to this Embed's Color ({usr.EmbedColor})",
+                                Color = usr.DiscordColorFromHex(hex)
+                            }.WithCurrentTimestamp().Build());
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid Hex Code!",
+                                Description = $"The hex code you provided was invalid!",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
                     }
                     if (args.Length == 4)
                     {
@@ -348,13 +412,13 @@ namespace Public_Bot.Modules.Commands
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
-                            usr.EmbedColor = new color(R, G, B);
-                            levelsettings.SaveCurrent();
+                            usr.EmbedColor = usr.HexFromColor(new Color(R, G, B));
+                            usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"Set the Rank Card Color to this embeds color (R:{usr.EmbedColor.R} G:{usr.EmbedColor.G} B:{usr.EmbedColor.B})",
-                                Color = new Color(usr.EmbedColor.R, usr.EmbedColor.G, usr.EmbedColor.B)
+                                Description = $"Set the Rank Card's Color to this Embed's Color ({usr.EmbedColor})",
+                                Color = usr.DiscordColorFromHex(usr.EmbedColor)
                             }.WithCurrentTimestamp().Build());
                         }
                         else
@@ -385,10 +449,38 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Rank Card Background Color",
-                            Description = $"The current Rank Cards Background Color is this embeds color (R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B}\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
-                            Color = new Color(usr.RankBackgound.R, usr.RankBackgound.G, usr.RankBackgound.B)
+                            Description = $"The current Rank Cards Background Color is this embeds color ({usr.EmbedColor})\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                            Color = usr.DiscordColorFromHex(usr.RankBackgound)
                         }.WithCurrentTimestamp().Build());
                         return;
+                    }
+                    if (args.Length == 2)
+                    {
+                        string hexColor = args[1];
+                        var regex = new Regex(@"(\d|[a-f]){6}");
+                        if (regex.IsMatch(args[1]))
+                        {
+                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            usr.RankBackgound = hex;
+                            await usr.Save();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Rank Card's Backgound Color to this Embed's Color ({usr.EmbedColor})",
+                                Color = usr.DiscordColorFromHex(hex)
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid Hex Code!",
+                                Description = $"The hex code you provided was invalid!",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
                     }
                     if (args.Length == 4)
                     {
@@ -404,13 +496,13 @@ namespace Public_Bot.Modules.Commands
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
-                            usr.RankBackgound = new color(R, G, B);
-                            levelsettings.SaveCurrent();
+                            usr.RankBackgound = usr.HexFromColor(new Color(R, G, B));
+                            await usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Rank Card Background Color",
-                                Description = $"The current Rank Cards Background Color is now set to this embeds color (R:{usr.RankBackgound.R} G:{usr.RankBackgound.G} B:{usr.RankBackgound.B})",
-                                Color = new Color(usr.RankBackgound.R, usr.RankBackgound.G, usr.RankBackgound.B)
+                                Description = $"The current Rank Cards Background Color is now set to this embeds color ({usr.EmbedColor})",
+                                Color = usr.DiscordColorFromHex(usr.RankBackgound)
                             }.WithCurrentTimestamp().Build());
                         }
                         else
@@ -826,9 +918,9 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
                 return;
             }
-            var ls = LevelHandler.GuildLevelSettings.Get(Context.Guild.Id);
+            var ls = GuildLevelSettings.Get(Context.Guild.Id);
             if (ls == null)
-                ls = new LevelHandler.GuildLevelSettings();
+                ls = new GuildLevelSettings();
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
 
             switch (args[0].ToLower())
@@ -863,7 +955,7 @@ namespace Public_Bot.Modules.Commands
                         final.Add(itm.Key.PadRight(leng) + " " + itm.Value);
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "Here's your guilds Level settings",
+                        Title = "Heres your guilds Level settings",
                         Description = $"Run the command `{GuildSettings.Prefix}help levelsettings` to see how to customize levels",
                         Fields = new List<EmbedFieldBuilder>()
                         {
@@ -1350,7 +1442,7 @@ namespace Public_Bot.Modules.Commands
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
-                                Title = "THere's a refresh already happening!",
+                                Title = "Theres a refresh already happening!",
                                 Description = "Please wait untill the previous refresh completes",
                                 Color = Color.Red,
 
@@ -1372,7 +1464,7 @@ namespace Public_Bot.Modules.Commands
                             {
                                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                 {
-                                    Title = "THere's a refresh already happening!",
+                                    Title = "Theres a refresh already happening!",
                                     Description = "Please wait untill the previous refresh completes",
                                     Color = Color.Red,
 

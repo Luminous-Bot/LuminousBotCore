@@ -12,6 +12,35 @@ namespace Public_Bot.Modules.Handlers
     class StatusHandler
     {
         public DiscordShardedClient client;
+        public static string[] status = new string[]
+            {
+                $"Active in (GC) unique servers!",
+                $"Serving (UC) Users in (GC) Guilds",
+                $"Executing commands..",
+                $"Running the batch file",
+                $"Handling exceptions",
+                $"Talking to (UC) different users!",
+                $"Opening a new socket to the gateway",
+                $"Searching for clide",
+                $"Crying in binary",
+                $"Admiring Amaribot",
+                $"Watching Coding train",
+                $"Serching for the singularity",
+                $"Chilling with kazoo kid",
+                $"Compiling the bee movie script",
+                $"Fixing bugs",
+                $"Programming somthing",
+                $"Checking your messages for commands",
+                $"Upgraded!",
+                $"Some body once told me!",
+                $"Xua hua piao piao (<3 -belle)",
+                $"Watching memes",
+                $"Writing my own compiler",
+                $"Sneezing in brail",
+                $"Understanding stupitity",
+                $"Plotting the destruction of humanity",
+                $"Tiktok is a social malware"
+            };
         public StatusHandler(DiscordShardedClient c)
         {
             client = c;
@@ -26,29 +55,8 @@ namespace Public_Bot.Modules.Handlers
             foreach (var g in client.Guilds)
                 alusr += g.MemberCount;
             Logger.Write($"Count of {alusr}");
-            string[] status = new string[]
-            {
-                $"Active in {client.Guilds.Count} unique servers!",
-                $"Serving {alusr} Users in {client.Guilds.Count} Guilds",
-                $"Executing commands..",
-                $"Running the batch file",
-                $"Handling exceptions",
-                $"Talking to {alusr} different users!",
-                $"Opening a new socket to the gateway",
-                $"Searching for clide",
-                $"Crying in binary",
-                $"Admiring Amaribot",
-                $"Watching Coding train",
-                $"Serching for the singularity",
-                $"Chilling with kazoo kid",
-                $"Compiling the bee movie script",
-                $"Fixing bugs",
-                $"Programming somthing",
-                $"Checking your messages for commands",
-                $"Upgraded!",
-                $"Some body once told me!"
-            };
-            await client.SetGameAsync($"[0.2.8] - {status[new Random().Next(0, status.Length -1)]}", null, ActivityType.Playing);
+            
+            await client.SetGameAsync($"[0.2.8] - {status[new Random().Next(0, status.Length - 1)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
         }
     }
 }

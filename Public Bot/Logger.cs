@@ -71,7 +71,7 @@ namespace Public_Bot
                 Console.WriteLine(message);
             }
         }
-        public static void WriteError(object msg, Exception ex = null, Severity s = Severity.Log, ICommandContext context = null)
+        public static void WriteError(string msg, Exception ex = null, Severity s = Severity.Log, ICommandContext context = null)
         {
             if (!File.Exists(ErrorLogFile))
                 File.Create(ErrorLogFile).Close();
@@ -93,6 +93,7 @@ namespace Public_Bot
                         break;
                 }
                 string errormsg = $"<----------{DateTime.UtcNow.ToString("o")}---------->\n";
+                errormsg += $"{msg}\n";
                 if (context != null)
                     errormsg += $"Command: {context.Message.Content}\n";
                 errormsg += $"Message: {ex.Message}\n";
