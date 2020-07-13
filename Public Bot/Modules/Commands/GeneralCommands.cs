@@ -207,29 +207,49 @@ namespace Public_Bot.Modules.Commands
                 public long Last { get; set; }
             }
         }
-        
-        [Command("whois")]
-        public async Task ServerInfo(SocketGuildUser userAccount = null)
+
+
+        //liege and quin coded this shit ;)
+        [DiscordCommand("whois")]
+        public async Task ServerInfo(params string[] user)
         {
-            var user = Context.User as SocketGuildUser;
+            SocketGuildUser userAccount; 
 
-            //if(Context.Message.Equals($"whois {userAccount}"))
+            if (user.Length == 0)
+            {
+                userAccount = Context.User as SocketGuildUser;
+            }
+            else
+            {
+                userAccount = GetUser(user.First());
 
-            var info = new EmbedBuilder();
-            //info.WithTitle($"{userAccount} Info");
-            info.WithAuthor(userAccount);
-            info.WithDescription(userAccount.Mention);
-            info.AddField("Roles", $"{userAccount.Roles.Count}", true);
-            info.AddField("User ID", $"{userAccount.Id}", true);
-            info.AddField("Status", $"{userAccount.Status}", true);
-            //info.AddField("Playing", $"{userAccount.Activity}", true);
-            info.AddField("Joined", $"{userAccount.JoinedAt}", true);
-            info.AddField("Created", $"{userAccount.CreatedAt}", true);
-            info.WithColor(Color.Orange);
+                if(userAccount == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Invalid User",
+                        Description = "The user you provided is invalid",
+                        Color = Color.Red
+                    }.Build());
+                    return;
+                }
+            }       
+                var info = new EmbedBuilder();
+                //info.WithTitle($"{userAccount} Info");
+                info.WithAuthor(userAccount);
+                info.WithDescription(userAccount.Mention);
+                info.AddField("Roles", $"{userAccount.Roles.Count}", true);
+                info.AddField("User ID", $"{userAccount.Id}", true);
+                info.AddField("Status", $"{userAccount.Status}", true);
+                //info.AddField("Playing", $"{userAccount.Activity}", true);
+                info.AddField("Joined", $"{userAccount.JoinedAt}", true);
+                info.AddField("Created", $"{userAccount.CreatedAt}", true);
+                info.WithColor(Color.Orange);
 
-            await ReplyAsync("", false, info.Build());
-
+                await Context.Channel.SendMessageAsync("", false, info.Build());           
         }
+
+
         
         [DiscordCommand("ping", description = "Gets the bot's ping to Discord", commandHelp = "Usage `(PREFIX)ping`")]
         public async Task ping()
