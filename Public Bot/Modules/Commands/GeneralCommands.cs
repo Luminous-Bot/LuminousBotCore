@@ -20,15 +20,15 @@ namespace Public_Bot.Modules.Commands
     [DiscordCommandClass("👨🏼‍💻 General 👨🏼‍💻", "General bot commands for everyone!")]
     class GeneralCommands : CommandModuleBase
     {
-        [DiscordCommand("help", description = "shows all help messages for all enabled modules", commandHelp = "Usage: `(PREFIX)help`, `(PREFIX)help <command_name>`")]
+        [DiscordCommand("help", description = "shows all help messages for all enabled modules", commandHelp = "Usage: `(PREFIX)help`, `(PREFIX)help <command_name>`" )]
         public async Task help(params string[] args)
         {
-            if (args.Length == 0)
+            if(args.Length == 0)
             {
                 HelpMessageHandler.BuildHelpPages(GuildSettings);
                 var msg = await Context.Channel.SendMessageAsync("", false, HelpMessageHandler.HelpEmbedBuilder(1, HelpMessageHandler.CalcHelpPage(Context.Guild.GetUser(Context.Message.Author.Id), GuildSettings)));
             }
-            else if (args[0] == "setup")
+            else if(args[0] == "setup")
             {
                 var perms = Context.Guild.GetUser(Context.Client.CurrentUser.Id).GuildPermissions;
                 var pdin = GuildSettings.ModulesSettings.Keys.Max(x => string.Join(' ', x.Split(' ').Skip(1).Take(x.Split(' ').Length - 2)).Length) + 2;
@@ -89,7 +89,7 @@ namespace Public_Bot.Modules.Commands
                     Color = Color.Green
                 }.Build());
             }
-            else if (args.Length == 1)
+            else if(args.Length == 1)
             {
                 var cmds = ReadCurrentCommands(GuildSettings.Prefix);
                 var perm = HelpMessageHandler.CalcHelpPage(Context.User as SocketGuildUser, GuildSettings);
@@ -126,7 +126,7 @@ namespace Public_Bot.Modules.Commands
                             {
                                 Name = "Alternative Command Names (alts)",
                                 Value = $"```{string.Join(", ", cmd.Alts) }```",
-                            } : new EmbedFieldBuilder()
+                            } : new EmbedFieldBuilder() 
                             {
                                 Name = "Alternative Command Names (alts)",
                                 Value = "None",
@@ -208,29 +208,49 @@ namespace Public_Bot.Modules.Commands
             }
         }
 
+
+        //liege and quin coded this shit ;)
         [DiscordCommand("whois")]
-        public async Task ServerInfo(SocketGuildUser userAccount = null)
+        public async Task ServerInfo(params string[] user)
         {
-            var user = Context.User as SocketGuildUser;
+            SocketGuildUser userAccount; 
 
-            //if(Context.Message.Equals($"whois {userAccount}"))
+            if (user.Length == 0)
+            {
+                userAccount = Context.User as SocketGuildUser;
+            }
+            else
+            {
+                userAccount = GetUser(user.First());
 
-            var info = new EmbedBuilder();
-            //info.WithTitle($"{userAccount} Info");
-            info.WithAuthor(userAccount);
-            info.WithDescription(userAccount.Mention);
-            info.AddField("Roles", $"{userAccount.Roles.Count}", true);
-            info.AddField("User ID", $"{userAccount.Id}", true);
-            info.AddField("Status", $"{userAccount.Status}", true);
-            //info.AddField("Playing", $"{userAccount.Activity}", true);
-            info.AddField("Joined", $"{userAccount.JoinedAt}", true);
-            info.AddField("Created", $"{userAccount.CreatedAt}", true);
-            info.WithColor(Color.Orange);
+                if(userAccount == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Invalid User",
+                        Description = "The user you provided is invalid",
+                        Color = Color.Red
+                    }.Build());
+                    return;
+                }
+            }       
+                var info = new EmbedBuilder();
+                //info.WithTitle($"{userAccount} Info");
+                info.WithAuthor(userAccount);
+                info.WithDescription(userAccount.Mention);
+                info.AddField("Roles", $"{userAccount.Roles.Count}", true);
+                info.AddField("User ID", $"{userAccount.Id}", true);
+                info.AddField("Status", $"{userAccount.Status}", true);
+                //info.AddField("Playing", $"{userAccount.Activity}", true);
+                info.AddField("Joined", $"{userAccount.JoinedAt}", true);
+                info.AddField("Created", $"{userAccount.CreatedAt}", true);
+                info.WithColor(Color.Orange);
 
-            await Context.Channel.SendMessageAsync("", false, info.Build());
-
+                await Context.Channel.SendMessageAsync("", false, info.Build());           
         }
 
+
+        
         [DiscordCommand("ping", description = "Gets the bot's ping to Discord", commandHelp = "Usage `(PREFIX)ping`")]
         public async Task ping()
         {
@@ -247,7 +267,7 @@ namespace Public_Bot.Modules.Commands
                     Text = "Last Updated: Fetching..."
                 }
             }.Build());
-
+            
             HttpClient c = new HttpClient();
             var resp = await c.GetAsync("https://discord.statuspage.io/metrics-display/ztt4777v23lf/day.json");
             var cont = await resp.Content.ReadAsStringAsync();
@@ -291,7 +311,7 @@ namespace Public_Bot.Modules.Commands
                     g.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(200, 40, 40, 40)), LevelCommands.RankBuilder.RoundedRect(new Rectangle(30, 30, 900, 480), 30));
 
                 }
-                if (serverlogo != null)
+                if(serverlogo != null)
                 {
                     byte[] bytes2 = wc.DownloadData(serverlogo);
                     MemoryStream ms2 = new MemoryStream(bytes2);
@@ -304,7 +324,7 @@ namespace Public_Bot.Modules.Commands
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Center;
                 stringFormat.LineAlignment = StringAlignment.Center;
-
+                
                 RectangleF StringRect = new RectangleF(40, 180, baseImg.Width - 80, baseImg.Height - 100);
                 var font = new Font("Bahnschrift", 30, FontStyle.Regular);
                 var brush = new SolidBrush(System.Drawing.Color.White);
@@ -350,10 +370,10 @@ namespace Public_Bot.Modules.Commands
         public async Task stats()
         {
             var iconurl = Context.Guild.IconUrl;
-            if (iconurl != null)
+            if(iconurl != null)
                 iconurl = iconurl.Replace("webp", "jpg");
             var bannerirl = Context.Guild.BannerUrl;
-            if (bannerirl != null)
+            if(bannerirl != null)
                 bannerirl = bannerirl.Replace("webp", "jpg");
             var img = GuildStatBuilder.MakeServerCard(Context.Guild.Name, iconurl, bannerirl, Context.Guild.Owner.ToString(), Context.Guild.MemberCount.ToString(), Context.Guild.PremiumSubscriptionCount.ToString(), Context.Guild.CreatedAt.DateTime);
             img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}gld.png", System.Drawing.Imaging.ImageFormat.Png);
