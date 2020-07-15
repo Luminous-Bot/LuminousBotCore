@@ -15,7 +15,8 @@ namespace Public_Bot
             Warn, 
             Error,
             Critical,
-            DiscordAPI
+            DiscordAPI,
+            State
         }
         public static void Write(object msg, Severity s = Severity.Log, ICommandContext context = null)
         {
@@ -43,6 +44,10 @@ namespace Public_Bot
                 case Severity.Warn:
                     Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.BackgroundColor = ConsoleColor.Black;
+                    break;
+                case Severity.State:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.BackgroundColor = ConsoleColor.DarkGray;
                     break;
             }
             if (s == Severity.Error || s == Severity.Critical)

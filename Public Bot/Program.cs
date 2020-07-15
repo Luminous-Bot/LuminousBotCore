@@ -4,6 +4,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Public_Bot;
+using Public_Bot.Modules.Handlers;
 
 namespace Public_Bot
 {
@@ -11,6 +12,7 @@ namespace Public_Bot
     {
         static void Main(string[] args)
         {
+            GuildLeaderboards.Fetch(123);
             while (true)
             {
                 try

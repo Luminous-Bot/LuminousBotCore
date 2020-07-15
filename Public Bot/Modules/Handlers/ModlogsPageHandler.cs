@@ -21,7 +21,7 @@ namespace Public_Bot.Modules.Handlers
             public ulong MessageID { get; set; }
             public int page { get; set; }
             public ulong pageOwner { get; set; }
-            public List<ModCommands.ModLog> Modlogs { get; set; }
+            public List<Infraction> Modlogs { get; set; }
         }
         public static List<ModlogHelpPage> CurrentPages { get; set; }
            
@@ -40,7 +40,7 @@ namespace Public_Bot.Modules.Handlers
 
             client.ReactionAdded += HandleModlogsPage;
         }
-        public static ModlogHelpPage BuildHelpPage(List<ModCommands.ModLog> logs, ulong mID, ulong uID, ulong gID, ulong pOwn)
+        public static ModlogHelpPage BuildHelpPage(List<Infraction> logs, ulong mID, ulong uID, ulong gID, ulong pOwn)
         {
             ModlogHelpPage page = new ModlogHelpPage()
             {
