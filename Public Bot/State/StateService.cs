@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,13 +17,14 @@ namespace Public_Bot
             => QueryAsync<T>(q).GetAwaiter().GetResult();
         public static async Task<T> QueryAsync<T>(string q)
         {
-            Logger.Write("Sending Gql Query", Logger.Severity.State);
+            Logger.Write($"Sending Gql Query for {typeof(T).Name}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             if (res.IsSuccessStatusCode)
             {
-                var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(await res.Content.ReadAsStringAsync());
+                string cntnt = await res.Content.ReadAsStringAsync();
+                var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cntnt);
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
-                return rtn.Data;
+                return rtn.data.First().Value;
             }
             else
             {
@@ -34,13 +36,13 @@ namespace Public_Bot
             => MutateAsync<T>(q).GetAwaiter().GetResult();
         public static async Task<T> MutateAsync<T>(string q)
         {
-            Logger.Write("Sending Gql Mutation", Logger.Severity.State);
+            Logger.Write($"Sending Gql Mutation for {typeof(T).Name}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             if (res.IsSuccessStatusCode)
             {
                 var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(await res.Content.ReadAsStringAsync());
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
-                return rtn.Data;
+                return rtn.data.First().Value;
             }
             else
             {
@@ -57,7 +59,8 @@ namespace Public_Bot
         }
         private class GqlBase<T>
         {
-            public T Data { get; set; }
+            public Dictionary<string, T> data { get; set; }
+            
         }
     }
 }

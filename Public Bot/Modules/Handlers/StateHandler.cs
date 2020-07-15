@@ -13,7 +13,7 @@ namespace Public_Bot.Modules.Handlers
     class StateHandler
     {
         public static string StateFolder = $"{ConfigLoader.DataDirectoryPath}{Path.DirectorySeparatorChar}State";
-        
+
         public static void SaveObject<T>(string name, T value)
         {
             string path = $"{StateFolder}{Path.DirectorySeparatorChar}{name}.state";

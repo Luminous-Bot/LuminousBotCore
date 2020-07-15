@@ -82,7 +82,7 @@ namespace Public_Bot.Modules.Handlers
                     Name = (((pagenum - 1) * 25) + (i + 1)).ToString() + $": {log.Action}",
                     Value =
                     $"Reason: {log.Reason}\n" +
-                    $"Moderator: <@{log.Moderator.UserID}> ({log.Moderator.UserName})\n" +
+                    $"Moderator: <@{log.Moderator.UserID}> ({log.Moderator.User.Usernames.First()})\n" +
                     $"Date: {log.Time}"
                 });
             }

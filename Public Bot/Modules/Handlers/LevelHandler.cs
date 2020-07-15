@@ -125,14 +125,9 @@ namespace Public_Bot.Modules.Handlers
 "Server occasions are a popular way for communities on Discord to share interests.",
 "Discord is rumored to shut down in November 2020.",
             };
-            try
-            {
-                GuildLevels = StateHandler.LoadObject<List<GuildLeaderboards>>("levels");
-            }
-            catch { GuildLevels = new List<GuildLeaderboards>(); CommandHandler.CurrentGuildSettings.Where(x => x.ModulesSettings["🧪 Levels 🧪"]).ToList().ForEach(x => GuildLevels.Add(new GuildLeaderboards(client.GetGuild(x.GuildID)))); }
+            GuildLevels = StateService.Query<List<GuildLeaderboards>>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboards"));
             new System.Timers.Timer() { AutoReset = true, Interval = 60000, Enabled = true }.Elapsed += GiveVCPoints;
             client.MessageReceived += HandleLevelAdd;
-
         }
 
         private void GiveVCPoints(object sender, ElapsedEventArgs e)

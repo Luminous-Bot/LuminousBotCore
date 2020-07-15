@@ -20,7 +20,7 @@ namespace Public_Bot
         [GraphQLSVar, GraphQLProp]
         public bool Donator { get; set; } = false;
         [GraphQLSVar, GraphQLProp]
-        public bool MentionOnLevelUp { get; set; } = true;
+        public bool MentionOnLevelup { get; set; } = true;
         [GraphQLObj]
         public List<NameRecord> Usernames { get; set; }
         [GraphQLSVar]
@@ -34,7 +34,7 @@ namespace Public_Bot
             StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "CreateUserInput!"));
         }
 
-        public User? Fetch(ulong Id)
+        public static User Fetch(ulong Id)
             => StateService.Query<User>(GraphQLParser.GenerateGQLQuery<User>("user", new KeyValuePair<string, object>("id", Id)));
         public User Save()
             => StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "CreateUserInput!"));

@@ -28,7 +28,7 @@ namespace Public_Bot
         {
             this.GuildID = user.Id;
             this.UserID = user.Id;
-            this.User = User.Fetch(user.Id);
+            this.User = UserHandler.GetUser(user.Id);
             this.CurrentNickname = user.Nickname;
             StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "CreateGuildMemberInput"));
         }

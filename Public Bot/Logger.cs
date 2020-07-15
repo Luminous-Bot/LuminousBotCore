@@ -42,12 +42,12 @@ namespace Public_Bot
                     Console.BackgroundColor = ConsoleColor.Black;
                     break;
                 case Severity.Warn:
-                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.BackgroundColor = ConsoleColor.Black;
                     break;
                 case Severity.State:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.BackgroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.BackgroundColor = ConsoleColor.Black;
                     break;
             }
             if (s == Severity.Error || s == Severity.Critical)

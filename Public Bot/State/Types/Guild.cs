@@ -9,7 +9,7 @@ namespace Public_Bot
     public class Guild
     {
         [GraphQLProp]
-        public ulong ID { get; set; }
+        public ulong Id { get; set; }
         [GraphQLProp]
         public string Name { get; set; }
         [GraphQLObj]
@@ -22,9 +22,9 @@ namespace Public_Bot
         public Guild() { }
         public Guild(IGuild g)
         {
-            this.ID = g.Id;
+            this.Id = g.Id;
             this.Name = g.Name;
-            StateService.Mutate<Guild>(GraphQLParser.GenerateGQLMutation<Guild>("createGuild", false, this, "", new KeyValuePair<string, object>("Name", this.Name), new KeyValuePair<string, object>("Id", this.ID)));
+            StateService.Mutate<Guild>(GraphQLParser.GenerateGQLMutation<Guild>("createGuild", false, this, "", new KeyValuePair<string, object>("Name", this.Name), new KeyValuePair<string, object>("Id", this.Id)));
             this.Leaderboard = new GuildLeaderboards(g);
         }
     }

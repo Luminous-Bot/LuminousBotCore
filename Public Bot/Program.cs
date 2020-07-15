@@ -12,7 +12,6 @@ namespace Public_Bot
     {
         static void Main(string[] args)
         {
-            GuildLeaderboards.Fetch(123);
             while (true)
             {
                 try

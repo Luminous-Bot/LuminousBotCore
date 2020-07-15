@@ -20,12 +20,6 @@ namespace Public_Bot.Modules.Commands
         {
             client = _client;
         }
-        public static void AddModlog(Infraction log)
-        {
-            StateService.Mutate<Infraction>(GraphQLParser.GenerateGQLMutation<Infraction>("createInfraction", true, log, "CreateInfractionInput!"));
-            //add to infrac list in guild
-        }
-
         [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficent with this module, you can keep track of user infractions and keep your server in order!")]
         public class ModCommandsModule : CommandModuleBase
         {
@@ -96,15 +90,8 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
 
-                Infraction m = new Infraction()
-                {
-                    Action = action,
-                    GuildID = context.Guild.Id,
-                    InfracId = "",
-                    Member = GuildMember
-                };
-                AddModlog(m);
-                SaveModlogs();
+                string reason = string.Join(' ', args.Skip(1));
+                Infraction m = new Infraction(user.Id, context.User.Id, context.Guild.Id, action, reason, DateTime.UtcNow);
                 bool Dmed = true;
                 try
                 {
@@ -116,7 +103,7 @@ namespace Public_Bot.Modules.Commands
                             new EmbedFieldBuilder()
                             {
                                 Name = "Moderator",
-                                Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.UserName}",
+                                Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.User.Usernames.Last()}",
                                 IsInline = true,
                             },
                             new EmbedFieldBuilder()
@@ -138,7 +125,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     try
                     {
-                        await user.KickAsync($"{m.Reason} - {m.Moderator.UserName}");
+                        await user.KickAsync($"{m.Reason} - {m.Moderator.User.Usernames.Last()}");
                     }
                     catch (Exception ex)
                     {
@@ -156,7 +143,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     try
                     {
-                        await user.BanAsync(7, $"{m.Reason} - {m.Moderator.UserName}");
+                        await user.BanAsync(7, $"{m.Reason} - {m.Moderator.User.Usernames.Last()}");
                     }
                     catch (Exception ex)
                     {
@@ -178,7 +165,7 @@ namespace Public_Bot.Modules.Commands
                         new EmbedFieldBuilder()
                         {
                             Name ="Moderator",
-                            Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.UserName}",
+                            Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.User.Usernames.Last()}",
                             IsInline = true
                         },
                         new EmbedFieldBuilder()
@@ -480,18 +467,7 @@ namespace Public_Bot.Modules.Commands
                     Color = Color.Green
                 }.Build();
                 await Context.Channel.SendMessageAsync("", false, b2);
-                AddModlog(new Infraction()
-                {
-                    //TODO: Fix infrac to work with state
-
-                    //Action = Action.Muted,
-                    //GuildID = Context.Guild.Id,
-                    //MemberID = user.Id,
-                    //Moderator = new Moderator() { UserID = Context.User.Id, UserName = Context.User.ToString() },
-                    //Reason = reason,
-                    //Time = DateTime.UtcNow
-                });
-                SaveModlogs();
+                Infraction infrac = new Infraction(user.Id, Context.User.Id, Context.Guild.Id, Action.Muted, reason, DateTime.UtcNow);
                 Handlers.MuteHandler.AddNewMuted(user.Id, datetime, GuildSettings);
             }
             [DiscordCommand("modlogs", RequiredPermission = true, description = "View a users modlogs", commandHelp = "Usage `(PREFIX)modlogs <@user>`")]
@@ -520,32 +496,30 @@ namespace Public_Bot.Modules.Commands
                     }.Build());
                     return;
                 }
-                //if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
-                //{
-                //    var modlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
-                //    if (modlogs.Members.Any(x => x.UserID == user.Id && x.ModLogs.Count > 0))
-                //    {
-                //        var userlog = modlogs.Members.Find(x => x.UserID == user.Id);
-                //        var pg = ModlogsPageHandler.BuildHelpPage(userlog.ModLogs, 0, user.Id, Context.Guild.Id, Context.User.Id);
-                //        var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
-                //        var msg = await Context.Channel.SendMessageAsync("", false, emb.Build());
-                //        pg.MessageID = msg.Id;
-                //        ModlogsPageHandler.CurrentPages.Add(pg);
-                //        ModlogsPageHandler.SaveMLPages();
-                //        await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1") });
-                //    }
-                //    else
-                //    {
-                //        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                //        {
-                //            Title = $"Modlogs for **{user}**",
-                //            Description = "This user has no logs! :D",
-                //            Color = Color.Green,
-                //            Timestamp = DateTime.Now
-                //        }.Build());
-                //        return;
-                //    }
-                //}
+                var guild = GuildHandler.GetGuild(Context.Guild.Id);
+
+                if (guild.GuildMembers.Any(x => x.UserID == user.Id && x.Infractions.Count > 0))
+                {
+                    var userlog = guild.GuildMembers.Find(x => x.UserID == user.Id);
+                    var pg = ModlogsPageHandler.BuildHelpPage(userlog.Infractions, 0, user.Id, Context.Guild.Id, Context.User.Id);
+                    var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
+                    var msg = await Context.Channel.SendMessageAsync("", false, emb.Build());
+                    pg.MessageID = msg.Id;
+                    ModlogsPageHandler.CurrentPages.Add(pg);
+                    ModlogsPageHandler.SaveMLPages();
+                    await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1") });
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = $"Modlogs for **{user}**",
+                        Description = "This user has no logs! :D",
+                        Color = Color.Green,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
             }
             [DiscordCommand("clearlogs", description = "Clears a users logs", commandHelp = "Usage - `(PREFIX)clearlogs <@user>`, `(PREFIX)clearlogs <@user> <log_number>`", RequiredPermission = true)]
             public async Task ClearLogs(params string[] args)
