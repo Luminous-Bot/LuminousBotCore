@@ -6,9 +6,9 @@ namespace Public_Bot
 {
     public class RankRole
     {
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public uint Level { get; set; }
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public ulong Role { get; set; }
     }
 }

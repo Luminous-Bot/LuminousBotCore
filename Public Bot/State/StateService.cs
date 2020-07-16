@@ -24,11 +24,14 @@ namespace Public_Bot
                 string cntnt = await res.Content.ReadAsStringAsync();
                 var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cntnt);
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                if (rtn.data == null)
+                    return default;
                 return rtn.data.First().Value;
             }
             else
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
+                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "query", res.StatusCode.ToString());
                 return default;
             }
         }
@@ -38,15 +41,18 @@ namespace Public_Bot
         {
             Logger.Write($"Sending Gql Mutation for {typeof(T).Name}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
-            if (res.IsSuccessStatusCode)
+            var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(await res.Content.ReadAsStringAsync());
+            if (res.IsSuccessStatusCode && rtn.errors == null)
             {
-                var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(await res.Content.ReadAsStringAsync());
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                if (rtn.data == null)
+                    return default;
                 return rtn.data.First().Value;
             }
             else
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
+                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), rtn.errors);
                 return default;
             }
         }
@@ -57,10 +63,19 @@ namespace Public_Bot
                 return false;
             return true;
         }
+        public static bool Exists(string q)
+        {
+            var res = Query<ExistBase>(q);
+            return res.result.Values.First();
+        }
+        private class ExistBase
+        {
+            public Dictionary<string, bool> result { get; set; }
+        }
         private class GqlBase<T>
         {
             public Dictionary<string, T> data { get; set; }
-            
+            public List<object> errors { get; set; }
         }
     }
 }

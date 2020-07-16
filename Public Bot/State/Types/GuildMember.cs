@@ -22,15 +22,17 @@ namespace Public_Bot
         public User User { get; set; }
         public static GuildMember Fetch(ulong id, ulong GuildID)
             => StateService.Query<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", new KeyValuePair<string, object>("UserID", id), new KeyValuePair<string, object>("GuildID", GuildID)));
-        
+        public static bool Exists(ulong Id, ulong GuildID)
+            => StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", new KeyValuePair<string, object>("UserID", Id), new KeyValuePair<string, object>("GuildID", GuildID)));
         public GuildMember() { }
         public GuildMember(SocketGuildUser user)
         {
-            this.GuildID = user.Id;
+            this.GuildID = user.Guild.Id;
             this.UserID = user.Id;
-            this.User = UserHandler.GetUser(user.Id);
             this.CurrentNickname = user.Nickname;
-            StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "CreateGuildMemberInput"));
+            if (!User.UserExists(user.Id))
+                this.User = new User(user);
+            StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
         }
     }
 }

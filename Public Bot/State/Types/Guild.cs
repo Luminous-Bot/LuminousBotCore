@@ -24,7 +24,7 @@ namespace Public_Bot
         {
             this.Id = g.Id;
             this.Name = g.Name;
-            StateService.Mutate<Guild>(GraphQLParser.GenerateGQLMutation<Guild>("createGuild", false, this, "", new KeyValuePair<string, object>("Name", this.Name), new KeyValuePair<string, object>("Id", this.Id)));
+            StateService.Mutate<Guild>(GraphQLParser.GenerateGQLMutation<Guild>("createGuild", false, this, "", "", new KeyValuePair<string, object>("Name", this.Name), new KeyValuePair<string, object>("Id", this.Id)));
             this.Leaderboard = new GuildLeaderboards(g);
         }
     }

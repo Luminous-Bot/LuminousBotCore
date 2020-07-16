@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,34 @@ namespace Public_Bot
             client = c;
             client.JoinedGuild += AddGuild;
             client.UserJoined += NewUser;
+            client.ShardConnected += Init;
             //load guilds
             string q = GraphQLParser.GenerateGQLQuery<Guild>("guilds");
             CurrentGuilds = StateService.Query<List<Guild>>(q);
-            CheckGuilds().GetAwaiter().GetResult();
+        }
+        bool isInitCompt = false;
+        private async Task Init(DiscordSocketClient arg)
+        {
+            if (!isInitCompt)
+            {
+                await CheckGuilds();
+                isInitCompt = true;
+            }
+        }
+        public static GuildMember CreateGuildMember(ulong Idm, ulong GuildId)
+        {
+            var gld = client.GetGuild(GuildId);
+            if (gld == null)
+                return null;
+            var usr = gld.GetUser(Idm);
+            if (usr == null)
+                return null;
+            var gm = new GuildMember(usr);
+            if (CurrentGuilds.Any(x => x.Id == GuildId))
+                CurrentGuilds.Find(x => x.Id == GuildId).GuildMembers.Add(gm);
+            else
+                Addguild(gld);
+            return gm;
         }
         public static GuildMember GetGuildMember(ulong MemberId, ulong GuildID)
         {
@@ -69,7 +94,15 @@ namespace Public_Bot
 
         private async Task AddGuild(SocketGuild arg)
         {
-            CurrentGuilds.Add(new Guild(arg));
+            var g = new Guild(arg);
+            CurrentGuilds.Add(g);
+            LevelHandler.GuildLevels.Add(g.Leaderboard);
+        }
+        public static void Addguild(SocketGuild arg)
+        {
+            var g = new Guild(arg);
+            CurrentGuilds.Add(g);
+            LevelHandler.GuildLevels.Add(g.Leaderboard);
         }
 
         public static Guild GetGuild(ulong id)

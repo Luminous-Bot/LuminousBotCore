@@ -25,18 +25,16 @@ namespace Public_Bot
         public List<NameRecord> Usernames { get; set; }
         [GraphQLSVar]
         public string CurrentUsername { get; set; }
-
         public User() { }
         public User(IUser user) 
         {
             this.Id = user.Id;
             this.CurrentUsername = user.Username;
-            StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "CreateUserInput!"));
+            StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "data", "CreateUserInput!"));
         }
-
+        public static bool UserExists(ulong Id)
+            => StateService.Exists<User>(GraphQLParser.GenerateGQLQuery<User>("user", new KeyValuePair<string, object>("id", Id)));
         public static User Fetch(ulong Id)
             => StateService.Query<User>(GraphQLParser.GenerateGQLQuery<User>("user", new KeyValuePair<string, object>("id", Id)));
-        public User Save()
-            => StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "CreateUserInput!"));
     }
 }

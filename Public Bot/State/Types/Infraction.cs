@@ -52,7 +52,7 @@ namespace Public_Bot
                         throw new Exception("User is not in guild or list!");
                 }
                 member.Infractions.Add(this);
-                StateService.Mutate<Infraction>(GraphQLParser.GenerateGQLMutation<Infraction>("createInfraction", true, this, "CreateInfractionInput!"));
+                StateService.Mutate<Infraction>(GraphQLParser.GenerateGQLMutation<Infraction>("createInfraction", true, this, "data", "CreateInfractionInput!"));
             }
             else
             {

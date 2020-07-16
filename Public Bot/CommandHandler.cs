@@ -34,6 +34,16 @@ namespace Public_Bot
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
+        public static async Task HandleFailedGql(string q, string method, string type, string StatusCode, List<object> error = null)
+        {
+            await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
+            {
+                Title = "Failed GraphQl!",
+                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{q}```" +
+                $"{(error == null ? "" : $"\n**Error**\n```json\n{string.Join("\n\n", error)}```")}",
+                Color = Color.Red
+            }.WithCurrentTimestamp().Build());
+        }
 
         private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
         {

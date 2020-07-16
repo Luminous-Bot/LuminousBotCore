@@ -9,13 +9,20 @@ namespace Public_Bot
     [DiscordHandler]
     public class UserHandler
     {
-        public DiscordShardedClient client;
+        public static DiscordShardedClient client;
         public static List<User> Users { get; set; }
         public UserHandler(DiscordShardedClient c)
         {
             client = c;
 
             Users = StateService.Query<List<User>>(GraphQLParser.GenerateGQLQuery<User>("users"));
+        }
+        public static User CreateUser(ulong Id)
+        {
+            var usr = client.GetUser(Id);
+            var u = new User(usr);
+            Users.Add(u);
+            return u;
         }
         public static User GetUser(ulong id)
         {

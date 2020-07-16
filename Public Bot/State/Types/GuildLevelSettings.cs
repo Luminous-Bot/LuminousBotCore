@@ -8,21 +8,23 @@ namespace Public_Bot
 {
     public class GuildLevelSettings
     {
-        [GraphQLObj]
+        //FIX THIS: Look at parser recurse
+        [GraphQLObj, GraphQLSObj]
         public List<RankRole> RankRoles { get; set; } = new List<RankRole>();
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public double LevelMultiplier { get; set; } = 1.10409;
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public uint MaxLevel { get; set; } = 100;
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public uint DefaultBaseLevelXp { get; set; } = 30;
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public double XpPerMessage { get; set; } = 1;
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public double XpPerVCMinute { get; set; } = 5;
-        [GraphQLProp]
+        [GraphQLProp, GraphQLSVar]
         public ulong LevelUpChan { get; set; }
-        [GraphQLProp]
+        //fix type to gen json arr
+        [GraphQLProp, GraphQLSVar]
         public List<ulong> BlacklistedChannels { get; set; } = new List<ulong>();
         public static GuildLevelSettings Get(ulong id)
             => LevelHandler.GuildLevels.Any(x => x.GuildID == id) 

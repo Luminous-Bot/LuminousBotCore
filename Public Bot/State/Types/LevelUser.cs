@@ -51,7 +51,13 @@ namespace Public_Bot
             return fin;
         }
         public LevelUser Save()
-            => StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "CreateLevelMemberInput!"));
+        {
+            if (!User.UserExists(this.UserID))
+                UserHandler.CreateUser(this.UserID);
+            if (!GuildMember.Exists(this.UserID, this.GuildID))
+                GuildHandler.CreateGuildMember(this.UserID, this.GuildID);
+            return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
+        }
         public LevelUser() { }
         public LevelUser(SocketGuildUser user)
         {

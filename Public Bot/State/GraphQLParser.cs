@@ -21,6 +21,7 @@ namespace Public_Bot
     public class GraphQLProp : Attribute { }
     public class GraphQLObj : Attribute { }
     public class GraphQLSVar : Attribute { }
+    public class GraphQLSObj : Attribute { }
     
     public class GraphQLParser
     {
@@ -28,7 +29,8 @@ namespace Public_Bot
         {
             {typeof(ulong), (object val) => $"\"{val}\"" },
             {typeof(DateTime), (object val) => { var dt = (DateTime)val; return $"\"{dt.ToString("o")}\""; } },
-            {typeof(string), (object val) => $"\"{val}\"" }
+            {typeof(string), (object val) => $"\"{val}\"" },
+            {typeof(bool), (object val) => { bool vl = (bool)val; return vl ? "true" : "false"; } }
         };
         public class gqlBase
         {
@@ -36,28 +38,68 @@ namespace Public_Bot
             public object variables { get; set; }
             public string query { get; set; }
         }
-        public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", params KeyValuePair<string, object>[] Params)
+        public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params KeyValuePair<string, object>[] Params)
         {
+            Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);
             var classtype = typeof(T);
-            var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSVar)));
+            var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSVar) || x.AttributeType == typeof(GraphQLSObj)));
             List<string> vars = new List<string>();
             foreach(var tv in typeVars)
             {
                 string name = tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName)) ? ((GraphQLName)tv.GetCustomAttribute(typeof(GraphQLName))).Name : tv.Name;
-                string val = Parser.ContainsKey(tv.PropertyType) ? Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
-                vars.Add($"\"{name}\": {val}");
+                if(tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
+                {
+                    var tvT = tv.PropertyType;
+                    var l = RecurseMutateVars(tvT, tv.GetValue(obj));
+                    vars.AddRange(l);
+                }
+                else
+                {
+                    string val = "";
+                    if (tv.PropertyType.Name.Contains("List"))
+                        val = JsonConvert.SerializeObject(tv.GetValue(obj));
+                    else
+                        val = Parser.ContainsKey(tv.PropertyType) ? Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
+                    vars.Add($"\"{name}\": {val}");
+                }
             }
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Key}: \"{p.Value.ToString()}\" ";
+                parms += $"{p.Key}: \\\"{p.Value.ToString()}\\\" ";
             string query = $"{{\"operationName\": \"{opname}\"," +
-                           $"\"variables\": {(hasVars ? $"{{ \"data\": {{ {string.Join(", ", vars)} }} }}" : "{ }")}," +
-                           $"\"query\": \"mutation {opname}({(hasVars ? $"$data: {varName} {parms}" : parms)}) {{ {opname}(data: $data) {genProps(typeof(T))} }}\" }}";
+                           $"\"variables\": {(hasVars ? $"{{ \"{varName}\": {{ {string.Join(", ", vars)} }} }}" : "{ }")}," +
+                           $"\"query\": \"mutation {opname}{(hasVars ? $"(${varName}: {varType})" : "")} {{ {opname}({( hasVars ? $"{varName}: ${varName}, {parms}" : parms)}) {genProps(typeof(T))} }}\" }}";
 
             return query;
         }
+        public static List<string> RecurseMutateVars(Type type, object obj)
+        {
+            var typeVars = type.GetProperties().Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSVar) || x.AttributeType == typeof(GraphQLSObj)));
+            List<string> vars = new List<string>();
+            foreach (var tv in typeVars)
+            {
+                string name = tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName)) ? ((GraphQLName)tv.GetCustomAttribute(typeof(GraphQLName))).Name : tv.Name;
+                if (tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)) && !tv.PropertyType.Name.Contains("List"))
+                {
+                    var tvT = tv.PropertyType;
+                    var l = RecurseMutateVars(tvT, tv.GetValue(obj));
+                    vars.AddRange(l);
+                }
+                else
+                {
+                    string val = "";
+                    if (tv.PropertyType.Name.Contains("List"))
+                        val = JsonConvert.SerializeObject(tv.GetValue(obj));
+                    else
+                        val = Parser.ContainsKey(tv.PropertyType) ? Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
+                    vars.Add($"\"{name}\": {val}");
+                }
+            }
+            return vars;
+        }
         public static string GenerateGQLQuery<T>(string method, params KeyValuePair<string, object>[] Params)
         {
+            Logger.Write($"Making Query for method {method}", Logger.Severity.State);
             string parms = "";
             foreach (var p in Params)
                 parms += $"{p.Key}: \"{p.Value.ToString()}\" ";
