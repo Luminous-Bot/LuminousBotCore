@@ -1,6 +1,8 @@
 ﻿using Discord.WebSocket;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Public_Bot
@@ -12,9 +14,9 @@ namespace Public_Bot
         public ulong GuildID { get; set; }
         [GraphQLProp]
         [GraphQLSVar]
-        [GraphQLName("MemberID")]
-        public ulong UserID { get; set; }
-        public string Username { get; set; } = "";
+        public ulong MemberID { get; set; }
+        [GraphQLProp]
+        public string Username { get; set; }
         [GraphQLProp]
         [GraphQLSVar]
         public uint CurrentLevel { get; set; } = 0;
@@ -25,18 +27,13 @@ namespace Public_Bot
         [GraphQLSVar]
         public double NextLevelXP { get; set; } = 30;
         [GraphQLProp]
-        [GraphQLName("BarColor")]
-        public string EmbedColor { get; set; } = "00ff00";
+        public string BarColor { get; set; } = "00ff00";
         [GraphQLProp]
-        [GraphQLName("BackgroundColor")]
-        public string RankBackgound { get; set; } = "262626";
+        public string BackgroundColor { get; set; } = "262626";
         [GraphQLProp]
-        [GraphQLName("MentionOnLevelup")]
-
-        public bool MentionLevelup { get; set; } = true;
+        public bool MentionOnLevelup { get; set; } = true;
         [GraphQLProp]
-        [GraphQLName("BackgroundUrl")]
-        public string bkurl { get; set; } = null;
+        public string BackgroundUrl { get; set; } = null;
 
         public string HexFromColor(System.Drawing.Color c)
             => $"{c.R.ToString("X2")}{c.G.ToString("X2")}{c.B.ToString("X2")}";
@@ -52,16 +49,18 @@ namespace Public_Bot
         }
         public LevelUser Save()
         {
-            if (!User.UserExists(this.UserID))
-                UserHandler.CreateUser(this.UserID);
-            if (!GuildMember.Exists(this.UserID, this.GuildID))
-                GuildHandler.CreateGuildMember(this.UserID, this.GuildID);
+            if(!UserHandler.Users.Any(x => x.Id == this.MemberID))
+                if (!User.UserExists(this.MemberID))
+                    UserHandler.CreateUser(this.MemberID);
+            if(!GuildHandler.GuildMemberExists(this.MemberID, this.GuildID))
+                if (!GuildMember.Exists(this.MemberID, this.GuildID))
+                    GuildHandler.CreateGuildMember(this.MemberID, this.GuildID);
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public LevelUser() { }
         public LevelUser(SocketGuildUser user)
         {
-            UserID = user.Id;
+            MemberID = user.Id;
             Username = user.ToString();
             GuildID = user.Guild.Id;
             Save();

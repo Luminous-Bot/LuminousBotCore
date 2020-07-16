@@ -23,13 +23,13 @@ namespace Public_Bot
         public bool MentionOnLevelup { get; set; } = true;
         [GraphQLObj]
         public List<NameRecord> Usernames { get; set; }
-        [GraphQLSVar]
-        public string CurrentUsername { get; set; }
+        [GraphQLSVar, GraphQLProp]
+        public string Username { get; set; }
         public User() { }
         public User(IUser user) 
         {
             this.Id = user.Id;
-            this.CurrentUsername = user.Username;
+            this.Username = user.Username + "#" + user.DiscriminatorValue;
             StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "data", "CreateUserInput!"));
         }
         public static bool UserExists(ulong Id)

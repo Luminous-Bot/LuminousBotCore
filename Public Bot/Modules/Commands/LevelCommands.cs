@@ -38,7 +38,7 @@ namespace Public_Bot.Modules.Commands
             int space = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).Take(15).Select(x => x.Username).Max(x => x.Length);
             foreach (var item in gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).Take(15))
             {
-                lm.Add($"#{rnk} - {(item.Username == "" ? Context.Guild.GetUser(item.UserID).ToString().PadRight(space) : item.Username.PadRight(space))} Level: {item.CurrentLevel} XP: {(uint)item.CurrentXP}/{(uint)item.NextLevelXP}");
+                lm.Add($"#{rnk} - {(item.Username == "" ? Context.Guild.GetUser(item.MemberID).ToString().PadRight(space) : item.Username.PadRight(space))} Level: {item.CurrentLevel} XP: {(uint)item.CurrentXP}/{(uint)item.NextLevelXP}");
                 rnk++;
             }
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -213,11 +213,11 @@ namespace Public_Bot.Modules.Commands
             {
                 var user = GetUser(usr);
                 var guildlvl = GuildLeaderboards.Get(Context.Guild.Id);
-                var leveluser = guildlvl.CurrentUsers.Find(x => x.UserID == user.Id);
+                var leveluser = guildlvl.CurrentUsers.Find(x => x.MemberID == user.Id);
                 if (url == "none")
-                    leveluser.bkurl = null;
+                    leveluser.BackgroundUrl = null;
                 else
-                    leveluser.bkurl = url;
+                    leveluser.BackgroundUrl = url;
                 leveluser.Save();
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
@@ -245,20 +245,20 @@ namespace Public_Bot.Modules.Commands
                 return;
             }
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
-            if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
+            if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
             {
                 var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
-                var userlvl = cu.Find(x => x.UserID == user.Id);
+                var userlvl = cu.Find(x => x.MemberID == user.Id);
 
                 var img = RankBuilder.MakeRank(userlvl.Username,
-                    Context.Guild.GetUser(userlvl.UserID).GetAvatarUrl(),
+                    Context.Guild.GetUser(userlvl.MemberID).GetAvatarUrl(),
                     (int)userlvl.CurrentLevel,
                     (int)userlvl.CurrentXP,
                     (int)userlvl.NextLevelXP,
-                    userlvl.ColorFromHex(userlvl.EmbedColor),
+                    userlvl.ColorFromHex(userlvl.BarColor),
                     gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1,
-                    userlvl.ColorFromHex(userlvl.RankBackgound),
-                    userlvl.bkurl);
+                    userlvl.ColorFromHex(userlvl.BackgroundColor),
+                    userlvl.BackgroundUrl);
 
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png", System.Drawing.Imaging.ImageFormat.Png);
                 await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}rank.png");
@@ -282,20 +282,20 @@ namespace Public_Bot.Modules.Commands
                 return;
 
             LevelUser usr;
-            if (!levelsettings.CurrentUsers.Any(x => x.UserID == Context.User.Id))
+            if (!levelsettings.CurrentUsers.Any(x => x.MemberID == Context.User.Id))
             {
                 usr = new LevelUser(Context.Guild.GetUser(Context.User.Id));
                 levelsettings.CurrentUsers.Add(usr);
             }
             else
-                usr = levelsettings.CurrentUsers.Find(x => x.UserID == Context.User.Id);
+                usr = levelsettings.CurrentUsers.Find(x => x.MemberID == Context.User.Id);
 
             if (args.Length == 0)
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "Your Rank Card",
-                    Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nBar Color: #{usr.EmbedColor}\nBackground Color: #{usr.RankBackgound}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <color_hex>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <color_hex>`",
+                    Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionOnLevelup}\nBar Color: #{usr.BarColor}\nBackground Color: #{usr.BackgroundColor}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <color_hex>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <color_hex>`",
                     Color = Discord.Color.Green
                 }.WithCurrentTimestamp().Build());
                 return;
@@ -307,7 +307,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "Your Rank Card",
-                        Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionLevelup}\nBar Color: #{usr.EmbedColor}\nBackground Color: #{usr.RankBackgound}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <color_hex>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <color_hex>`",
+                        Description = $"Here's your Settings for your Rank Card\n```\nMentions? {usr.MentionOnLevelup}\nBar Color: #{usr.BarColor}\nBackground Color: #{usr.BackgroundColor}```\nYou can change these settings with these commands:\n`{GuildSettings.Prefix}rankcard ping <on/off>`\n`{GuildSettings.Prefix}rankcard color <color_hex>`\n`{GuildSettings.Prefix}rankcard backgroundcolor <color_hex>`",
                         Color = Discord.Color.Green
                     }.WithCurrentTimestamp().Build());
                     return;
@@ -327,7 +327,7 @@ namespace Public_Bot.Modules.Commands
                         {
                             case "on":
                                 {
-                                    usr.MentionLevelup = true;
+                                    usr.MentionOnLevelup = true;
                                     usr.Save();
                                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                     {
@@ -339,7 +339,7 @@ namespace Public_Bot.Modules.Commands
                                 }
                             case "off":
                                 {
-                                    usr.MentionLevelup = false;
+                                    usr.MentionOnLevelup = false;
                                     usr.Save();
                                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                                     {
@@ -366,8 +366,8 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Rank Card Color",
-                            Description = $"The current Rank Card's Color is this Embed's Color ({usr.EmbedColor})\nTo change the Rank Cards color Run `{GuildSettings.Prefix}rankcard color <hex_color>`",
-                            Color = usr.DiscordColorFromHex(usr.EmbedColor)
+                            Description = $"The current Rank Card's Color is this Embed's Color ({usr.BarColor})\nTo change the Rank Cards color Run `{GuildSettings.Prefix}rankcard color <hex_color>`",
+                            Color = usr.DiscordColorFromHex(usr.BarColor)
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
@@ -378,12 +378,12 @@ namespace Public_Bot.Modules.Commands
                         if (regex.IsMatch(args[1]))
                         {
                             var hex = regex.Match(args[1]).Groups[0].Value;
-                            usr.EmbedColor = hex;
+                            usr.BarColor = hex;
                             usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"Set the Rank Card Color's to this Embed's Color ({usr.EmbedColor})",
+                                Description = $"Set the Rank Card Color's to this Embed's Color ({usr.BarColor})",
                                 Color = usr.DiscordColorFromHex(hex)
                             }.WithCurrentTimestamp().Build());
                         }
@@ -412,13 +412,13 @@ namespace Public_Bot.Modules.Commands
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
-                            usr.EmbedColor = usr.HexFromColor(new Color(R, G, B));
+                            usr.BarColor = usr.HexFromColor(new Color(R, G, B));
                             usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"Set the Rank Card's Color to this Embed's Color ({usr.EmbedColor})",
-                                Color = usr.DiscordColorFromHex(usr.EmbedColor)
+                                Description = $"Set the Rank Card's Color to this Embed's Color ({usr.BarColor})",
+                                Color = usr.DiscordColorFromHex(usr.BarColor)
                             }.WithCurrentTimestamp().Build());
                         }
                         else
@@ -449,8 +449,8 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Rank Card Background Color",
-                            Description = $"The current Rank Cards Background Color is this embeds color ({usr.EmbedColor})\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
-                            Color = usr.DiscordColorFromHex(usr.RankBackgound)
+                            Description = $"The current Rank Cards Background Color is this embeds color ({usr.BarColor})\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                            Color = usr.DiscordColorFromHex(usr.BackgroundColor)
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
@@ -461,12 +461,12 @@ namespace Public_Bot.Modules.Commands
                         if (regex.IsMatch(args[1]))
                         {
                             var hex = regex.Match(args[1]).Groups[0].Value;
-                            usr.RankBackgound = hex;
+                            usr.BackgroundColor = hex;
                             usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"Set the Rank Card's Backgound Color to this Embed's Color ({usr.EmbedColor})",
+                                Description = $"Set the Rank Card's Backgound Color to this Embed's Color ({usr.BarColor})",
                                 Color = usr.DiscordColorFromHex(hex)
                             }.WithCurrentTimestamp().Build());
                             return;
@@ -496,13 +496,13 @@ namespace Public_Bot.Modules.Commands
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
-                            usr.RankBackgound = usr.HexFromColor(new Color(R, G, B));
+                            usr.BackgroundColor = usr.HexFromColor(new Color(R, G, B));
                             usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Rank Card Background Color",
-                                Description = $"The current Rank Cards Background Color is now set to this embeds color ({usr.EmbedColor})",
-                                Color = usr.DiscordColorFromHex(usr.RankBackgound)
+                                Description = $"The current Rank Cards Background Color is now set to this embeds color ({usr.BarColor})",
+                                Color = usr.DiscordColorFromHex(usr.BackgroundColor)
                             }.WithCurrentTimestamp().Build());
                         }
                         else
@@ -588,9 +588,9 @@ namespace Public_Bot.Modules.Commands
                         return;
                     }
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
+                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
+                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                         if (res > lusr.CurrentLevel)
                         {
                             for (uint i = lusr.CurrentLevel; i != res; i++)
@@ -688,9 +688,9 @@ namespace Public_Bot.Modules.Commands
                 {
                     var gl = GuildLeaderboards.Get(Context.Guild.Id);
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
+                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
+                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                         lusr.CurrentXP = res;
                     }
                     else
@@ -770,9 +770,9 @@ namespace Public_Bot.Modules.Commands
                         return;
                     }
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
+                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
+                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                         if (res > lusr.CurrentLevel)
                         {
                             for (uint i = lusr.CurrentLevel; i != res; i++)
@@ -870,9 +870,9 @@ namespace Public_Bot.Modules.Commands
                 {
                     var gl = GuildLeaderboards.Get(Context.Guild.Id);
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
+                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
+                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                         lusr.CurrentXP += res;
                     }
                     else

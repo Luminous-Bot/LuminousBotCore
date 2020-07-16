@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
@@ -34,12 +35,17 @@ namespace Public_Bot
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
+        private static string FormatJson(string json)
+        {
+            dynamic parsedJson = JsonConvert.DeserializeObject(json);
+            return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+        }
         public static async Task HandleFailedGql(string q, string method, string type, string StatusCode, List<object> error = null)
         {
             await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Failed GraphQl!",
-                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{q}```" +
+                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{FormatJson(q)}```" +
                 $"{(error == null ? "" : $"\n**Error**\n```json\n{string.Join("\n\n", error)}```")}",
                 Color = Color.Red
             }.WithCurrentTimestamp().Build());

@@ -144,9 +144,9 @@ namespace Public_Bot.Modules.Handlers
                             var gl = GuildLevels.Find(x => x.GuildID == guild.Id);
                             if (!gl.Settings.BlacklistedChannels.Contains(user.VoiceChannel.Id))
                             {
-                                if (gl.CurrentUsers.Any(x => x.UserID == user.Id))
+                                if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
                                 {
-                                    var usr = gl.CurrentUsers.Find(x => x.UserID == user.Id);
+                                    var usr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                                     usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
@@ -193,7 +193,7 @@ namespace Public_Bot.Modules.Handlers
                             {
                                 try
                                 {
-                                    var usr = client.GetGuild(gs.GuildID).GetUser(user.UserID);
+                                    var usr = client.GetGuild(gs.GuildID).GetUser(user.MemberID);
                                     if (!usr.Roles.Any(x => x.Id == rid.Role))
                                     {
                                         await usr.AddRoleAsync(client.GetGuild(user.GuildID).GetRole(rid.Role));
@@ -210,10 +210,10 @@ namespace Public_Bot.Modules.Handlers
                     {
                         try
                         {
-                            await chan.SendMessageAsync(user.MentionLevelup == true ? $"<@{user.UserID}>" : "", false, new EmbedBuilder()
+                            await chan.SendMessageAsync(user.MentionOnLevelup == true ? $"<@{user.MemberID}>" : "", false, new EmbedBuilder()
                             {
                                 Title = $"You Reached Level {user.CurrentLevel}!",
-                                Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.UserID).Username}, only {gu.Settings.MaxLevel - user.CurrentLevel} more levels to go!",
+                                Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.MemberID).Username}, only {gu.Settings.MaxLevel - user.CurrentLevel} more levels to go!",
                                 Fields = new List<EmbedFieldBuilder>()
                                 {
                                     new EmbedFieldBuilder()
@@ -222,8 +222,8 @@ namespace Public_Bot.Modules.Handlers
                                         Value = facts[new Random().Next(0, 99)],
                                     }
                                 },
-                                ThumbnailUrl = client.GetUser(user.UserID).GetAvatarUrl(),
-                                Color = user.DiscordColorFromHex(user.EmbedColor)
+                                ThumbnailUrl = client.GetUser(user.MemberID).GetAvatarUrl(),
+                                Color = user.DiscordColorFromHex(user.BarColor)
                             }.WithCurrentTimestamp().Build());
                         }
                         catch (Exception ex)
@@ -261,9 +261,9 @@ namespace Public_Bot.Modules.Handlers
                     var gl = GuildLevels.Find(x => x.GuildID == g.Id);
                     if (!gl.Settings.BlacklistedChannels.Contains(sm.Channel.Id))
                     {
-                        if (gl.CurrentUsers.Any(x => x.UserID == sm.Author.Id))
+                        if (gl.CurrentUsers.Any(x => x.MemberID == sm.Author.Id))
                         {
-                            var usr = gl.CurrentUsers.Find(x => x.UserID == sm.Author.Id);
+                            var usr = gl.CurrentUsers.Find(x => x.MemberID == sm.Author.Id);
                             if (usr.Username != sm.Author.ToString())
                                 usr.Username = sm.Author.ToString();
                             usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
@@ -292,7 +292,7 @@ namespace Public_Bot.Modules.Handlers
         {
             var guild = client.GetGuild(gl.GuildID);
             int count = 0;
-            foreach (var user in guild.Users.Where(x => gl.CurrentUsers.Find(y => y.UserID == x.Id) != null && gl.CurrentUsers.Find(y => y.UserID == x.Id).CurrentLevel >= level))
+            foreach (var user in guild.Users.Where(x => gl.CurrentUsers.Find(y => y.MemberID == x.Id) != null && gl.CurrentUsers.Find(y => y.MemberID == x.Id).CurrentLevel >= level))
             {
                 if (!user.Roles.Contains(role))
                 {

@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Public_Bot
         [GraphQLObj, GraphQLSObj]
         public GuildLevelSettings Settings { get; set; } = new GuildLevelSettings();
         [GraphQLObj]
-        [GraphQLName("LevelMembers")]
+        [GraphQLName("LevelMembers"), JsonProperty("LevelMembers")]
         public List<LevelUser> CurrentUsers { get; set; } = new List<LevelUser>();
 
 

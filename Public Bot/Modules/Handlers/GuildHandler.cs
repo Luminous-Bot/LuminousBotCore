@@ -32,6 +32,13 @@ namespace Public_Bot
                 isInitCompt = true;
             }
         }
+        public static bool GuildMemberExists(ulong MemberId, ulong GuildID)
+        {
+            if (!CurrentGuilds.Any(x => x.Id == GuildID))
+                return false;
+            var gld = CurrentGuilds.Find(x => x.Id == GuildID);
+            return gld.GuildMembers.Any(x => x.UserID == MemberId);
+        }
         public static GuildMember CreateGuildMember(ulong Idm, ulong GuildId)
         {
             var gld = client.GetGuild(GuildId);

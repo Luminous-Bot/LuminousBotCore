@@ -14,6 +14,8 @@ namespace Public_Bot
         public List<NameRecord> Nicknames { get; set; } = new List<NameRecord>();
         [GraphQLProp, GraphQLSVar]
         public ulong UserID { get; set; }
+        public string Username
+            => User.Username;
         [GraphQLSVar]
         public string CurrentNickname { get; set; }
         [GraphQLObj]
