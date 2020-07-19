@@ -30,11 +30,19 @@ namespace Public_Bot
             client.MessageReceived += CheckCommandAsync;
 
             client.ShardReady += Ready;
+            client.ShardConnected += Client_ShardConnected;
             client.ShardDisconnected += Client_ShardDisconnected;
             LoadGuildSettings();
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
+
+        private async Task Client_ShardConnected(DiscordSocketClient arg)
+        {
+            CurrentGuildSettings.Where(x => x.WelcomeCard == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
+            StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CurrentGuildSettings);
+        }
+
         private static string FormatJson(string json)
         {
             dynamic parsedJson = JsonConvert.DeserializeObject(json);
@@ -81,7 +89,6 @@ namespace Public_Bot
             foreach (var guild in arg.Guilds)
                 if (!CurrentGuildSettings.Any(x => x.GuildID == guild.Id))
                     new GuildSettings(guild);
-
             isReady = true;
         }
         public static bool IsBotRole(IRole role)

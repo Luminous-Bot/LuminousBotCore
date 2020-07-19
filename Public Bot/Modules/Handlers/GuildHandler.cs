@@ -3,6 +3,7 @@ using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +32,18 @@ namespace Public_Bot
                 await CheckGuilds();
                 isInitCompt = true;
             }
+        }
+        public static GuildMember GetOrCreateGuildMember(ulong MemberID, ulong GuildID)
+        {
+            if (!GuildMemberExists(MemberID, GuildID))
+            {
+                if (!GuildMember.Exists(MemberID, GuildID))
+                    return CreateGuildMember(MemberID, GuildID);
+                else
+                    return GuildMember.Fetch(MemberID, GuildID);
+            }
+            else
+                return CurrentGuilds.Find(x => x.Id == GuildID).GuildMembers.Find(x => x.UserID == MemberID);
         }
         public static bool GuildMemberExists(ulong MemberId, ulong GuildID)
         {

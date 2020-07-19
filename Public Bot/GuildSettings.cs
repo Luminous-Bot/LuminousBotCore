@@ -20,6 +20,7 @@ namespace Public_Bot
         public ulong LogChannel { get; set; } = 0;
         public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
+        public WelcomeCard WelcomeCard { get; set; }
         public GuildSettings() { }
 
         public static void SaveGuildSettings()
@@ -63,14 +64,17 @@ namespace Public_Bot
             foreach (var itm in CustomCommandService.Modules)
                     if (!ModulesSettings.ContainsKey(itm.Key))
                         ModulesSettings.Add(itm.Key, true);
+
             PermissionRoles.AddRange(guild.Roles.Where(x => x.Permissions.Administrator && !CommandHandler.IsBotRole(x)).Select(x => x.Id));
 
             if (Leveling)
                 new GuildLeaderboards(guild);
 
+            WelcomeCard = new WelcomeCard(this);
+            WelcomeCard.WelcomeChannel = guild.GetSystemChannelAsync(CacheMode.AllowDownload).Result.Id;
+            WelcomeCard.BackgroundUrl = guild.BannerUrl;
             CommandHandler.CurrentGuildSettings.Add(this);
             StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CommandHandler.CurrentGuildSettings);
         }
-        
     }
 }

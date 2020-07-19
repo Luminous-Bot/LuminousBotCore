@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,14 @@ namespace Public_Bot.Modules.Commands
     [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
     class SettingsCommands : CommandModuleBase
     {
+        [DiscordCommand("testwelcome")]
+        public async Task tw()
+        {
+            var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
+            img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
+            await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", "");
+        }
+
         [DiscordCommand("modules",
             commandHelp = "`(PREFIX)modules <enable/disable/list> <modulename>`",
             description = "Enables or disables a module",

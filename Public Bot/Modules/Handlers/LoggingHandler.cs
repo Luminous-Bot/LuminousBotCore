@@ -228,16 +228,20 @@ namespace Public_Bot.Modules.Handlers
                                 {
                                     Name = "Author:",
                                     Value = arg1.Value.Author.Mention,
-                                    IsInline = true,
+                                    //IsInline = true,
                                 },
                                 new EmbedFieldBuilder()
                                 {
                                     Name = "Message:",
-                                    Value = arg1.Value.Content,
-                                    IsInline = true,
+                                    Value = arg1.Value.Content == null ? "__\n__" : arg1.Value.Content,
+                                    //IsInline = true,
                                 }
                             } : new List<EmbedFieldBuilder>(),
-                            Color = Color.Red
+                            Color = Color.Red,
+                            Footer = new EmbedFooterBuilder()
+                            {
+                                Text = $"Message ID: {arg1.Id}"
+                            }
                         }.WithCurrentTimestamp().Build());
                     }
                 }

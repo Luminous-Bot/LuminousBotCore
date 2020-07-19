@@ -8,7 +8,6 @@ namespace Public_Bot
 {
     public class GuildLevelSettings
     {
-        //FIX THIS: Look at parser recurse
         [GraphQLObj, GraphQLSObj]
         public List<RankRole> RankRoles { get; set; } = new List<RankRole>();
         [GraphQLProp, GraphQLSVar]
@@ -23,7 +22,6 @@ namespace Public_Bot
         public double XpPerVCMinute { get; set; } = 5;
         [GraphQLProp, GraphQLSVar]
         public ulong LevelUpChan { get; set; }
-        //fix type to gen json arr
         [GraphQLProp, GraphQLSVar]
         public List<ulong> BlacklistedChannels { get; set; } = new List<ulong>();
         public static GuildLevelSettings Get(ulong id)

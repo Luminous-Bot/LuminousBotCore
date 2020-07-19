@@ -93,6 +93,7 @@ namespace Public_Bot.Modules.Commands
                 string reason = string.Join(' ', args.Skip(1));
                 Infraction m = new Infraction(user.Id, context.User.Id, context.Guild.Id, action, reason, DateTime.UtcNow);
                 bool Dmed = true;
+                var md = GuildHandler.GetGuildMember(m.ModeratorID, m.GuildID);
                 try
                 {
                     await user.SendMessageAsync("", false, new EmbedBuilder()
@@ -103,7 +104,7 @@ namespace Public_Bot.Modules.Commands
                             new EmbedFieldBuilder()
                             {
                                 Name = "Moderator",
-                                Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.User.Usernames.Last()}",
+                                Value = $"<@{m.ModeratorID}>\n{(md == null ? "" : md.Username)}",
                                 IsInline = true,
                             },
                             new EmbedFieldBuilder()
@@ -125,7 +126,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     try
                     {
-                        await user.KickAsync($"{m.Reason} - {m.Moderator.User.Usernames.Last()}");
+                        await user.KickAsync($"{m.Reason}{(md == null ? "" : " - " +md.Username)}");
                     }
                     catch (Exception ex)
                     {
@@ -143,7 +144,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     try
                     {
-                        await user.BanAsync(7, $"{m.Reason} - {m.Moderator.User.Usernames.Last()}");
+                        await user.BanAsync(7, $"{m.Reason}{(md == null ? "" : " - " + md.Username)}");
                     }
                     catch (Exception ex)
                     {
@@ -165,7 +166,7 @@ namespace Public_Bot.Modules.Commands
                         new EmbedFieldBuilder()
                         {
                             Name ="Moderator",
-                            Value = $"<@{m.Moderator.UserID}>\n{m.Moderator.User.Usernames.Last()}",
+                            Value = $"<@{m.ModeratorID}>\n{(md == null ? "" : md.Username)}",
                             IsInline = true
                         },
                         new EmbedFieldBuilder()
@@ -521,107 +522,95 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
             }
-            [DiscordCommand("clearlogs", description = "Clears a users logs", commandHelp = "Usage - `(PREFIX)clearlogs <@user>`, `(PREFIX)clearlogs <@user> <log_number>`", RequiredPermission = true)]
-            public async Task ClearLogs(params string[] args)
-            {
-                if (args.Length == 0)
-                {
-                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                    {
-                        Title = "Who's log do you want to clear?",
-                        Description = $"You didnt provide any arguments, if your stuck do `{GuildSettings.Prefix}help clearlogs`",
-                        Color = Color.Red
-                    }.WithCurrentTimestamp().Build());
-                    return;
-                }
-                var usr = GetUser(args[0]);
-                if (usr == null)
-                {
-                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                    {
-                        Title = $"Who?",
-                        Description = $"I couldn't find a user with the name or id of \"{args[0]}\"!",
-                        Color = Color.Red
-                    }.WithCurrentTimestamp().Build());
-                    return;
-                }
-                //if (CurrentGuildModLogs.Any(x => x.GuildID == Context.Guild.Id))
-                //{
-                //    var Gmodlogs = CurrentGuildModLogs.Find(x => x.GuildID == Context.Guild.Id);
-                //    if (Gmodlogs.Members.Any(x => x.UserID == usr.Id && x.ModLogs.Count > 0))
-                //    {
-                //        var usrlogs = Gmodlogs.Members.Find(x => x.UserID == usr.Id);
-                //        if (args.Length == 1)
-                //        {
-                //            await modlogs(args);
-                //        }
-                //        if (args.Length == 2)
-                //        {
-                //            if (args[1] == "all" || args[1] == "clear")
-                //            {
-                //                usrlogs.ModLogs.Clear();
-                //                SaveModlogs();
-                //                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                //                {
-                //                    Title = $"Cleared {usrlogs.UserName}'s Logs!",
-                //                    Description = "This user has no logs! :D",
-                //                    Color = Color.Green,
-                //                    Timestamp = DateTime.Now
-                //                }.Build());
-                //                return;
-                //            }
-                //            else
-                //            {
-                //                if (uint.TryParse(args[1], out var res))
-                //                {
-                //                    usrlogs.ModLogs.RemoveAt((int)res - 1);
-                //                    SaveModlogs();
-                //                    var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.ModLogs, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
-                //                    var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
-                //                    var msg = await Context.Channel.SendMessageAsync($"Removed log number {args[1]}", false, emb.Build());
-                //                    pg.MessageID = msg.Id;
-                //                    ModlogsPageHandler.CurrentPages.Add(pg);
-                //                    ModlogsPageHandler.SaveMLPages();
-                //                    await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1") });
-                //                }
-                //                else
-                //                {
-                //                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                //                    {
-                //                        Title = $"Invalid number",
-                //                        Description = $"\"{args[1]}\" is an invalid number!",
-                //                        Color = Color.Red
-                //                    }.WithCurrentTimestamp().Build());
-                //                    return;
-                //                }
-                //            }
+            //[DiscordCommand("clearlogs", description = "Clears a users logs", commandHelp = "Usage - `(PREFIX)clearlogs <@user>`, `(PREFIX)clearlogs <@user> <log_number>`", RequiredPermission = true)]
+            //public async Task ClearLogs(params string[] args)
+            //{
+            //    if (args.Length == 0)
+            //    {
+            //        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+            //        {
+            //            Title = "Who's log do you want to clear?",
+            //            Description = $"You didnt provide any arguments, if your stuck do `{GuildSettings.Prefix}help clearlogs`",
+            //            Color = Color.Red
+            //        }.WithCurrentTimestamp().Build());
+            //        return;
+            //    }
+            //    var usr = GetUser(args[0]);
+            //    if (usr == null)
+            //    {
+            //        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+            //        {
+            //            Title = $"Who?",
+            //            Description = $"I couldn't find a user with the name or id of \"{args[0]}\"!",
+            //            Color = Color.Red
+            //        }.WithCurrentTimestamp().Build());
+            //        return;
+            //    }
 
-                //        }
-                //    }
-                //    else
-                //    {
-                //        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                //        {
-                //            Title = $"Modlogs for **{usr}**",
-                //            Description = "This user has no logs! :D",
-                //            Color = Color.Green,
-                //            Timestamp = DateTime.Now
-                //        }.Build());
-                //        return;
-                //    }
-                //}
-                //else
-                //{
-                //    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
-                //    {
-                //        Title = $"Modlogs for **{usr}**",
-                //        Description = "This user has no logs! :D",
-                //        Color = Color.Green,
-                //        Timestamp = DateTime.Now
-                //    }.Build());
-                //    return;
-                //}
-            }
+            //    var guild = GuildHandler.GetGuild(Context.Guild.Id);
+
+            //    if (guild.GuildMembers.Any(x => x.UserID == usr.Id))
+            //    {
+            //        var usrlogs = guild.GuildMembers.Find(x => x.UserID == usr.Id);
+            //        if (args.Length == 1)
+            //        {
+            //            await modlogs(args);
+            //        }
+            //        if (args.Length == 2)
+            //        {
+            //            if (args[1] == "all" || args[1] == "clear")
+            //            {
+            //                usrlogs.Infractions.Clear();
+            //                //deleteLogs
+            //                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+            //                {
+            //                    Title = $"Cleared {usrlogs.UserName}'s Logs!",
+            //                    Description = "This user has no logs! :D",
+            //                    Color = Color.Green,
+            //                    Timestamp = DateTime.Now
+            //                }.Build());
+            //                return;
+            //            }
+            //            else
+            //            {
+            //                if (uint.TryParse(args[1], out var res))
+            //                {
+            //                    usrlogs.ModLogs.RemoveAt((int)res - 1);
+            //                    SaveModlogs();
+            //                    var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.ModLogs, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
+            //                    var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
+            //                    var msg = await Context.Channel.SendMessageAsync($"Removed log number {args[1]}", false, emb.Build());
+            //                    pg.MessageID = msg.Id;
+            //                    ModlogsPageHandler.CurrentPages.Add(pg);
+            //                    ModlogsPageHandler.SaveMLPages();
+            //                    await msg.AddReactionsAsync(new IEmote[] { new Emoji("\U00002B05"), new Emoji("\U000027A1") });
+            //                }
+            //                else
+            //                {
+            //                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+            //                    {
+            //                        Title = $"Invalid number",
+            //                        Description = $"\"{args[1]}\" is an invalid number!",
+            //                        Color = Color.Red
+            //                    }.WithCurrentTimestamp().Build());
+            //                    return;
+            //                }
+            //            }
+
+            //        }
+            //    }
+            //    else
+            //    {
+            //        await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+            //        {
+            //            Title = $"Modlogs for **{usr}**",
+            //            Description = "This user has no logs! :D",
+            //            Color = Color.Green,
+            //            Timestamp = DateTime.Now
+            //        }.Build());
+            //        return;
+            //    }
+            //}
             [DiscordCommand("purge", RequiredPermission = true, commandHelp = "Usage - `(PREFIX)purge <ammount>`, `(PREFIX)purge <@user> <ammount>`", description = "Deletes `x` ammount of messages")]
             public async Task purge(uint amount)
             {

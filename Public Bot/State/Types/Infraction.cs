@@ -7,7 +7,7 @@ namespace Public_Bot
 {
     public class Infraction
     {
-        [GraphQLSVar]
+        [GraphQLSVar, GraphQLName("Id")]
         public string InfracId { get; set; }
         [GraphQLProp, GraphQLSVar]
         public ulong GuildID { get; set; }
@@ -15,9 +15,6 @@ namespace Public_Bot
         public ulong MemberID { get; set; }
         [GraphQLProp, GraphQLSVar]
         public ulong ModeratorID { get; set; }
-        public GuildMember Member { get; set; }
-        public GuildMember Moderator { get; set; }
-
         [GraphQLProp, GraphQLSVar]
         public Action Action { get; set; }
         [GraphQLProp, GraphQLSVar]
@@ -30,13 +27,11 @@ namespace Public_Bot
         {
             this.InfracId = genId();
             this.MemberID = MemberId;
-            this.ModeratorID = ModeratorID;
+            this.ModeratorID = ModeratorId;
             this.GuildID = GuildID;
             this.Action = action;
             this.Reason = Reason;
             this.Time = time;
-            this.Moderator = GuildHandler.GetGuildMember(this.ModeratorID, this.GuildID);
-            this.Member = GuildHandler.GetGuildMember(this.MemberID, this.GuildID);
             var guild = GuildHandler.GetGuild(GuildID);
             if (guild != null)
             {

@@ -25,12 +25,16 @@ namespace Public_Bot
     
     public class GraphQLParser
     {
+        //public static string JoinQueries(params string[] Queries)
+        //    => string.Join(',', Queries);
+
         private static Dictionary<Type, Func<object, string>> Parser = new Dictionary<Type, Func<object, string>>()
         {
             {typeof(ulong), (object val) => $"\"{val}\"" },
             {typeof(DateTime), (object val) => { var dt = (DateTime)val; return $"\"{dt.ToString("o")}\""; } },
             {typeof(string), (object val) => $"\"{val}\"" },
-            {typeof(bool), (object val) => { bool vl = (bool)val; return vl ? "true" : "false"; } }
+            {typeof(bool), (object val) => { bool vl = (bool)val; return vl ? "true" : "false"; } },
+            {typeof(Action), (object val) => $"\"{val.ToString()}\"" }
         };
         public class gqlBase
         {

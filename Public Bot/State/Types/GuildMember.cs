@@ -2,6 +2,7 @@
 using Public_Bot.State.Types;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Public_Bot
@@ -32,9 +33,11 @@ namespace Public_Bot
             this.GuildID = user.Guild.Id;
             this.UserID = user.Id;
             this.CurrentNickname = user.Nickname;
-            if (!User.UserExists(user.Id))
-                this.User = new User(user);
-            StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
+            if (!UserHandler.Users.Any(x => x.Id == this.UserID))
+                if (!User.UserExists(UserID))
+                    UserHandler.CreateUser(UserID);
+            var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
+            this.User = mt.User;
         }
     }
 }

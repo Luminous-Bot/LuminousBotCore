@@ -76,13 +76,14 @@ namespace Public_Bot.Modules.Handlers
             for (int i = 0; i != rs.Count(); i++)
             {
                 var log = rs[i];
+                var md = GuildHandler.GetGuildMember(log.ModeratorID, log.GuildID);
                 b.Fields.Add(new EmbedFieldBuilder()
                 {
                     IsInline = false,
                     Name = (((pagenum - 1) * 25) + (i + 1)).ToString() + $": {log.Action}",
                     Value =
                     $"Reason: {log.Reason}\n" +
-                    $"Moderator: <@{log.Moderator.UserID}> ({log.Moderator.User.Usernames.First()})\n" +
+                    $"Moderator: <@{log.ModeratorID}> ({(md == null ? "No username on record" : md.Username)})\n" +
                     $"Date: {log.Time}"
                 });
             }
@@ -104,7 +105,7 @@ namespace Public_Bot.Modules.Handlers
             if (CurrentPages.Any(x => x.MessageID == arg3.MessageId))
             {
                 var page = CurrentPages.Find(x => x.MessageID == arg1.Id);
-                var msg = (RestUserMessage)client.GetGuild(page.GuildID).GetTextChannel(arg2.Id).GetMessageAsync(arg3.MessageId).Result;
+                var msg = client.GetGuild(page.GuildID).GetTextChannel(arg2.Id).GetMessageAsync(arg3.MessageId).Result;
                 if (arg3.UserId != page.pageOwner)
                 {
                     await msg.RemoveReactionAsync(arg3.Emote, arg3.User.Value);
@@ -119,7 +120,12 @@ namespace Public_Bot.Modules.Handlers
                         return;
                     }
                     page.page--;
-                    await msg.ModifyAsync(x => x.Embed = BuildHelpPageEmbed(page, page.page).Build());
+                    if (msg.GetType() == typeof(SocketUserMessage))
+                        await (msg as SocketUserMessage).ModifyAsync(x => x.Embed = BuildHelpPageEmbed(page, page.page).Build());
+                    else if(msg.GetType() == typeof(RestUserMessage))
+                        await (msg as RestUserMessage).ModifyAsync(x => x.Embed = BuildHelpPageEmbed(page, page.page).Build());
+                    else
+                        Logger.Write($"Message was not socket nor rest, its type was {msg.GetType()}", Logger.Severity.Warn);
                     await msg.RemoveReactionAsync(arg3.Emote, arg3.User.Value);
                     SaveMLPages();
 
@@ -127,7 +133,12 @@ namespace Public_Bot.Modules.Handlers
                 else if (arg3.Emote.Name == "➡")
                 {
                     page.page++;
-                    await msg.ModifyAsync(x => x.Embed = BuildHelpPageEmbed(page, page.page).Build());
+                    if (msg.GetType() == typeof(SocketUserMessage))
+                        await (msg as SocketUserMessage).ModifyAsync(x => x.Embed = BuildHelpPageEmbed(page, page.page).Build());
+                    else if (msg.GetType() == typeof(RestUserMessage))
+                        await (msg as RestUserMessage).ModifyAsync(x => x.Embed = BuildHelpPageEmbed(page, page.page).Build());
+                    else
+                        Logger.Write($"Message was not socket nor rest, its type was {msg.GetType()}", Logger.Severity.Warn);
                     await msg.RemoveReactionAsync(arg3.Emote, arg3.User.Value);
                     SaveMLPages();
                 }
