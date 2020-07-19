@@ -15,12 +15,52 @@ namespace Public_Bot.Modules.Commands
     [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
     class SettingsCommands : CommandModuleBase
     {
-        [DiscordCommand("testwelcome")]
+        [DiscordCommand("testwelcome", commandHelp = "`(PREFIX)testwelcome`", description = "Test your welcome message!")]
         public async Task tw()
         {
             var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
             img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
             await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", "");
+        }
+        protected static string GetBase64StringForImage(string imgPath)
+        {
+            byte[] imageBytes = System.IO.File.ReadAllBytes(imgPath);
+            string base64String = Convert.ToBase64String(imageBytes);
+            return base64String;
+        }
+        [DiscordCommand("welcomer")]
+        public async Task welcomer(params string[] args)
+        {
+            var ws = GuildSettings.WelcomeCard;
+            var welcomechan = Context.Guild.GetTextChannel(ws.WelcomeChannel);
+            if (args.Length == 0)
+            {
+                var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
+                img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
+                string b64 = GetBase64StringForImage($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png");
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Author = new EmbedAuthorBuilder()
+                    {
+                        IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                        Name = "Welcomer Settings"
+                    },
+                    Description = "Here's your current settings for welcoming new users:\n" +
+                    $"**Enabled?**: {ws.isEnabled}\n" +
+                    $"**Welcome Channel**: <#{ws.WelcomeChannel}>\n" +
+                    $"**Welcome Message**:\n> {ws.WelcomeMessage}\n" +
+                    $"**Background Image**: [Click me!]({ws.BackgroundUrl} \"ooo you found a easter egg! maybe theres more...?\")\n\n" +
+                    $"**Example Welcome Message**: Not yet implemented",
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            //finish welcome settings
+
+            //switch(args[0])
+            //{
+            //    case "":
+            //}
         }
 
         [DiscordCommand("modules",
