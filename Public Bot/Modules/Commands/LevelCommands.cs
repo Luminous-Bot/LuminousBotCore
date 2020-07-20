@@ -546,7 +546,7 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "Who? and how much?",
-                    Description = "You didn't provied any arguments!",
+                    Description = "You didn't provide any arguments!",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
                 return;
