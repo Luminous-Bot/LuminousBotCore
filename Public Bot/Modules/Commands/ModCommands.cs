@@ -656,7 +656,7 @@ namespace Public_Bot.Modules.Commands
 
             }
 
-            [DiscordCommand("slowmode", RequiredPermission = true)]
+            [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {
                 if (args.Length == 0)
@@ -679,7 +679,7 @@ namespace Public_Bot.Modules.Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Success!",
-                            Description = $"{Context.User.Mention} set the slowmode of <%{Context.Channel.Id}> to {t} Seconds!",
+                            Description = $"{Context.User.Mention} set the slowmode of <#{Context.Channel.Id}> to {t} Seconds!",
                             Color = Color.Green,
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -730,7 +730,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"{Context.User.Mention} set the slowmode of <%{Context.Channel.Id}> to {timespan.TotalSeconds} Seconds!",
+                                Description = $"{Context.User.Mention} set the slowmode of <#{Context.Channel.Id}> to {timespan.TotalSeconds} Seconds!",
                                 Color = Color.Green,
                             }.WithCurrentTimestamp().Build());
                             return;
@@ -754,7 +754,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"{Context.User.Mention} turned off slowmode for <%{Context.Channel.Id}>",
+                                Description = $"{Context.User.Mention} turned off slowmode for <#{Context.Channel.Id}>",
                                 Color = Color.Green,
                             }.WithCurrentTimestamp().Build());
                             return;

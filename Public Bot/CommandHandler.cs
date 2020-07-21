@@ -113,7 +113,7 @@ namespace Public_Bot
                 return;
 
             var s = CurrentGuildSettings.Find(x => x.GuildID == context.Guild.Id);
-            if (arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
+            if (arg.Content == ($"<@{client.CurrentUser.Id}>") || arg.Content == ($"<@!{client.CurrentUser.Id}>"))
             {
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
