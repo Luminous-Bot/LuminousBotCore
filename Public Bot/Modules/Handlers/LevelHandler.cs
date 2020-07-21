@@ -305,7 +305,7 @@ namespace Public_Bot.Modules.Handlers
             {
                 _ = chan.SendMessageAsync($"{runner.Mention}", false, new EmbedBuilder()
                 {
-                    Title = "Finnished adding Roles!",
+                    Title = "Finished adding Roles!",
                     Description = $"We added the {role.Mention} to {count} different users who had a level equal or greater than {level}",
                     Color = Color.Green
                 }.WithCurrentTimestamp().Build()).Result;
