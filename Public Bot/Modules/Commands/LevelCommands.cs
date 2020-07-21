@@ -546,7 +546,7 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "Who? and how much?",
-                    Description = "You didn't provied any arguments!",
+                    Description = "You didn't provide any arguments!",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
                 return;
@@ -838,7 +838,7 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "Who? and how much?",
-                    Description = "You didn't provied any arguments!",
+                    Description = "You didn't provide any arguments!",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
                 return;
@@ -874,12 +874,16 @@ namespace Public_Bot.Modules.Commands
                     {
                         lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                         lusr.CurrentXP += res;
+                        //The below line will ensure he reaches maxlevel possible if given enough xp
+                        LevelUpUser(lusr);
                     }
                     else
                     {
                         lusr = new LevelUser(user);
                         lusr.CurrentXP += res;
                         gl.CurrentUsers.Add(lusr);
+                        //As he's already been added he can now be levelled up.
+                        LevelUpUser(lusr);
                     }
                     lusr.Save();
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
