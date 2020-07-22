@@ -83,7 +83,7 @@ namespace Public_Bot
         static Font TitleFont = new Font("Bahnschrift", 18);
         public static async Task<Image> Generate(PingData.DiscordApiPing data)
         {
-            ChartGraphics.Clear(Color.FromArgb(44, 47, 51));
+            ChartGraphics.Clear(Color.FromArgb(47, 49, 54));
             TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var curTime = DateTime.UtcNow;
