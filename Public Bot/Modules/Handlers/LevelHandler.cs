@@ -177,12 +177,16 @@ namespace Public_Bot.Modules.Handlers
             {
                 if (user.CurrentLevel < gu.Settings.MaxLevel)
                 {
+                    bool leveledUp = false;
                     while (user.CurrentXP >= user.NextLevelXP)
                     {
                         user.CurrentXP = Math.Round(user.CurrentXP - user.NextLevelXP);
                         user.NextLevelXP = user.NextLevelXP * gu.Settings.LevelMultiplier;
                         user.CurrentLevel++;
+                        leveledUp = true;
                     }
+                    if (!leveledUp)
+                        return;
                     bool GotRole = false;
                     List<string> roles = new List<string>();
                     if (gu.Settings.RankRoles.Count != 0)
