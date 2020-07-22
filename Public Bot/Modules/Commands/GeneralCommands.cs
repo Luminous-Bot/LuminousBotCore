@@ -290,9 +290,9 @@ namespace Public_Bot.Modules.Commands
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
                 Description = $"You can view Discord's status page [here](https://status.discord.com/)" +
-                              $"```Gateway:     {this.Context.Client.Latency}\n" +
-                              $"Api Latest:  {data.Summary.Last}\n" +
-                              $"Api Average: {data.Summary.Mean}```",
+                              $"```Gateway:     {this.Context.Client.Latency}ms\n" +
+                              $"Api Latest:  {data.Summary.Last}ms\n" +
+                              $"Api Average: {data.Summary.Mean}ms```",
                 Timestamp = tm,
                 Footer = new EmbedFooterBuilder()
                 {
