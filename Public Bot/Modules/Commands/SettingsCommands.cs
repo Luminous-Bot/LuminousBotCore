@@ -15,20 +15,22 @@ namespace Public_Bot.Modules.Commands
     [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
     class SettingsCommands : CommandModuleBase
     {
-        [DiscordCommand("testwelcome", commandHelp = "`(PREFIX)testwelcome`", description = "Test your welcome message!")]
-        public async Task tw()
-        {
-            var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
-            img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
-            await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", "");
-        }
+        
         protected static string GetBase64StringForImage(string imgPath)
         {
             byte[] imageBytes = System.IO.File.ReadAllBytes(imgPath);
             string base64String = Convert.ToBase64String(imageBytes);
             return base64String;
         }
-        [DiscordCommand("welcomer")]
+        [DiscordCommand("welcomer",
+            commandHelp = "`(PREFIX)welcomer`\n" +
+                          "`(PREFIX)welcomer channel <#channel>`\n" +
+                          "`(PREFIX)welcomer message <your welcome message for new users>`\n" +
+                          "`(PREFIX)welcomer <enable/on>`\n" +
+                          "`(PREFIX)welcomer <disable/off>`\n" +
+                          "`(PREFIX)welcomer dm <true/false>`\n" +
+                          "`(PREFIX)welcomer mentions <true/false>`",
+            description = "Welcomes new users into your guild!")]
         public async Task welcomer(params string[] args)
         {
             var ws = GuildSettings.WelcomeCard;
@@ -49,18 +51,300 @@ namespace Public_Bot.Modules.Commands
                     $"**Enabled?**: {ws.isEnabled}\n" +
                     $"**Welcome Channel**: <#{ws.WelcomeChannel}>\n" +
                     $"**Welcome Message**:\n> {ws.WelcomeMessage}\n" +
-                    $"**Background Image**: [Click me!]({ws.BackgroundUrl} \"ooo you found a easter egg! maybe theres more...?\")\n\n" +
-                    $"**Example Welcome Message**: Not yet implemented",
-                    Color = Color.Green
+                    $"**Background Image**: [Click me!]({ws.BackgroundUrl} \"ooo you found a easter egg! maybe theres more...?\")\n" +
+                    $"**Mentions Users**: {ws.MentionsUsers}\n" +
+                    $"**Sent in Dm's**: {ws.DMs}\n",
+                    Color = Blurple,
+                    Fields = new List<EmbedFieldBuilder>()
+                    {
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Compiled Welcome Message",
+                            Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
+                        }
+                    }
                 }.WithCurrentTimestamp().Build());
                 return;
             }
-            //finish welcome settings
 
-            //switch(args[0])
-            //{
-            //    case "":
-            //}
+            switch (args[0].ToLower())
+            {
+                case "channel":
+                    if(args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Welcomer Settings"
+                            },
+                            Description = $"The current welcome channel is <#{ws.WelcomeChannel}> [Click here to jump to channel](https://discord.com/channels/{Context.Guild.Id}/{ws.WelcomeChannel})",
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    var chan = GetChannel(args[1]);
+                    if(chan == null)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Error"
+                            },
+                            Description = $"The channel you provided is invalid!",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    ws.WelcomeChannel = chan.Id;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Description = $"The channel is now set to <#{ws.WelcomeChannel}>",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    break;
+                case "message":
+                    if (args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Welcomer Settings"
+                            },
+                            Description = $"You can specify variables, heres a list of them:\n" +
+                            $"**{{user}}** - The user's full name. Example: quin#3017\n" +
+                            $"**{{user.name}}** - The user's username. Example: quin\n" +
+                            $"**{{guild.name}}** - The guilds name. Example: Swiss001 Official Discord Server" +
+                            $"**{{guild.count}}** - The guilds User count. Example: 8241",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Raw:",
+                                    Value = $"{ws.WelcomeMessage}"
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Compiled:",
+                                    Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
+                                }
+                            },
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    string newMessage = string.Join(" ", args.Skip(1));
+                    ws.WelcomeMessage = newMessage;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Description = $"Welcome Message has been changed!",
+                        Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Raw:",
+                                    Value = $"{ws.WelcomeMessage}"
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Compiled:",
+                                    Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
+                                }
+                            },
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                case "dm":
+                    if(args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Welcomer Settings"
+                            },
+                            Description = $"Welcome messages are sent in {(ws.DMs ? "Dm's!" : $"<#{ws.WelcomeChannel}>!")} (Dm's: {ws.DMs})",
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if(args[1].ToLower() == "true")
+                    {
+                        ws.DMs = true;
+                        GuildSettings.SaveGuildSettings();
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Success!"
+                            },
+                            Description = $"User's will now recieve there welcome message in DM's!",
+                            Color = Color.Green
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (args[1].ToLower() == "false")
+                    { 
+                        ws.DMs = false;
+                        GuildSettings.SaveGuildSettings();
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Success!"
+                            },
+                            Description = $"User's will no longer recieve there welcome message in DM's. Welcome messages will be sent in <#{ws.WelcomeChannel}>!",
+                            Color = Color.Green
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Description = $"Please either use \"true\" or \"false\"!",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                case "mentions":
+                    if(args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Welcome Settings!"
+                            },
+                            Description = $"New users will {(ws.MentionsUsers ? "" : "not")} be pinged with there welcome card",
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (args[1].ToLower() == "true")
+                    {
+                        ws.MentionsUsers = true;
+                        GuildSettings.SaveGuildSettings();
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Success!"
+                            },
+                            Description = $"New user's will be pinged on there welcome card!",
+                            Color = Color.Green
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    if (args[1].ToLower() == "false")
+                    {
+                        ws.MentionsUsers = false;
+                        GuildSettings.SaveGuildSettings();
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder()
+                            {
+                                IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                                Name = "Success!"
+                            },
+                            Description = $"New user's will no longer be pinged on there welcome card!",
+                            Color = Color.Green
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Description = $"Please either use \"true\" or \"false\"!",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                    break;
+                case "enable":
+                    ws.isEnabled = true;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Description = $"The welcomer is now enabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                case "disable":
+                    ws.isEnabled = false;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Description = $"The welcomer is now disabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                case "on":
+                    ws.isEnabled = false;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Description = $"The welcomer is now on!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                case "off":
+                    ws.isEnabled = false;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Author = new EmbedAuthorBuilder()
+                        {
+                            IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Description = $"The welcomer is now off!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                    return;
+            }
         }
 
         [DiscordCommand("modules",

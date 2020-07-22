@@ -33,7 +33,7 @@ namespace Public_Bot.Modules.Handlers
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", ImageFormat.Png);
                 var chan = arg.Guild.GetTextChannel(GuildSettings.WelcomeCard.WelcomeChannel);
                 if (chan != null)
-                    await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", "");
+                    await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}");
             }
         }
         static Bitmap WelcomeImage = new Bitmap(960, 540);
