@@ -39,7 +39,13 @@ namespace Public_Bot.Modules.Handlers
                 $"Sneezing in braille",
                 $"Understanding stupidity",
                 $"Plotting the destruction of humanity",
-                $"Tiktok is a social malware"
+                $"Tiktok is a social malware",
+                $"GraphQL for da boi's",
+                $"Star be lookin kinda thicc",
+                $"Powered by caffine",
+                $"Postman is your friend",
+                $"There are easter eggs, find them!",
+                $"Rickrolling someone"
             };
         public StatusHandler(DiscordShardedClient c)
         {
