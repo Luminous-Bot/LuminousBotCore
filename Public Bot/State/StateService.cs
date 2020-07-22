@@ -17,7 +17,11 @@ namespace Public_Bot
             => QueryAsync<T>(q).GetAwaiter().GetResult();
         public static async Task<T> QueryAsync<T>(string q)
         {
-            Logger.Write($"Sending Gql Query for {typeof(T).Name}", Logger.Severity.State);
+            string tName = typeof(T).Name;
+            if (typeof(T).Name.Contains("List"))
+                tName = typeof(T).GenericTypeArguments[0].Name + "[]";
+
+            Logger.Write($"Sending Gql Query for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             if (res.IsSuccessStatusCode)
             {
@@ -39,7 +43,11 @@ namespace Public_Bot
             => MutateAsync<T>(q).GetAwaiter().GetResult();
         public static async Task<T> MutateAsync<T>(string q)
         {
-            Logger.Write($"Sending Gql Mutation for {typeof(T).Name}", Logger.Severity.State);
+            string tName = typeof(T).Name;
+            if (typeof(T).Name.Contains("List"))
+                tName = typeof(T).GenericTypeArguments[0].Name + "[]";
+
+            Logger.Write($"Sending Gql Mutation for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(await res.Content.ReadAsStringAsync());
             if (res.IsSuccessStatusCode && rtn.errors == null)

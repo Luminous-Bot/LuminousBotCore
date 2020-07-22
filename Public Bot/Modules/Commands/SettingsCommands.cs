@@ -62,8 +62,9 @@ namespace Public_Bot.Modules.Commands
                             Name = "Compiled Welcome Message",
                             Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
                         }
-                    }
-                }.WithCurrentTimestamp().Build());
+                    },
+                    ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png").GetAwaiter().GetResult()
+                }.WithCurrentTimestamp().Build()) ;
                 return;
             }
 

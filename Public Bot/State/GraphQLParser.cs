@@ -25,9 +25,7 @@ namespace Public_Bot
     
     public class GraphQLParser
     {
-        //public static string JoinQueries(params string[] Queries)
-        //    => string.Join(',', Queries);
-
+       
         private static Dictionary<Type, Func<object, string>> Parser = new Dictionary<Type, Func<object, string>>()
         {
             {typeof(ulong), (object val) => $"\"{val}\"" },

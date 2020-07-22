@@ -160,63 +160,7 @@ namespace Public_Bot.Modules.Commands
                 Color = Color.Green
             }.WithCurrentTimestamp().Build());
         }
-        class PingData
-        {
-            public partial class DiscordApiPing
-            {
-                public Period Period { get; set; }
-                public List<MetricElement> Metrics { get; set; }
-                public DiscordApiPingSummary Summary { get; set; }
-            }
-
-            public partial class MetricElement
-            {
-                public MetricMetric Metric { get; set; }
-                public MetricSummary Summary { get; set; }
-                public List<Datum> Data { get; set; }
-            }
-
-            public partial class Datum
-            {
-                public long Timestamp { get; set; }
-                public long Value { get; set; }
-            }
-
-            public partial class MetricMetric
-            {
-                public string Name { get; set; }
-                public string MetricIdentifier { get; set; }
-                public DateTimeOffset CreatedAt { get; set; }
-                public DateTimeOffset UpdatedAt { get; set; }
-                public string Id { get; set; }
-                public string MetricsProviderId { get; set; }
-                public string MetricsDisplayId { get; set; }
-                public DateTimeOffset MostRecentDataAt { get; set; }
-                public bool Backfilled { get; set; }
-                public DateTimeOffset LastFetchedAt { get; set; }
-                public long BackfillPercentage { get; set; }
-            }
-
-            public partial class MetricSummary
-            {
-                public double Sum { get; set; }
-                public double Mean { get; set; }
-            }
-
-            public partial class Period
-            {
-                public long Count { get; set; }
-                public long Interval { get; set; }
-                public string Identifier { get; set; }
-            }
-
-            public partial class DiscordApiPingSummary
-            {
-                public double Sum { get; set; }
-                public double Mean { get; set; }
-                public long Last { get; set; }
-            }
-        }
+        
 
 
         //liege and quin coded this shit ;)
@@ -281,10 +225,12 @@ namespace Public_Bot.Modules.Commands
             HttpClient c = new HttpClient();
             var resp = await c.GetAsync("https://discord.statuspage.io/metrics-display/ztt4777v23lf/day.json");
             var cont = await resp.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<PingData.DiscordApiPing>(cont);
+            var data = JsonConvert.DeserializeObject<PingGenerator.PingData.DiscordApiPing>(cont);
             TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var tm = epoch.AddSeconds(data.Metrics.First().Data.Last().Timestamp);
+            var gfp = await PingGenerator.Generate(data);
+            gfp.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Ping.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
             await msg.ModifyAsync(x => x.Embed = new EmbedBuilder()
             {
                 Title = "Discord Ping and Status",
@@ -297,7 +243,8 @@ namespace Public_Bot.Modules.Commands
                 Footer = new EmbedFooterBuilder()
                 {
                     Text = "Last Updated: "
-                }
+                },
+                ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Ping.jpg").GetAwaiter().GetResult()
             }.Build());
         }
         public class GuildStatBuilder
