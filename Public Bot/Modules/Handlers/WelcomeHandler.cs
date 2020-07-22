@@ -31,9 +31,24 @@ namespace Public_Bot.Modules.Handlers
             {
                 var img = GenerateWelcomeImage(arg, arg.Guild, GuildSettings.WelcomeCard);
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", ImageFormat.Png);
-                var chan = arg.Guild.GetTextChannel(GuildSettings.WelcomeCard.WelcomeChannel);
-                if (chan != null)
-                    await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}");
+                if (GuildSettings.WelcomeCard.DMs)
+                {
+                    var chan =await client.GetUser(arg.Id).GetOrCreateDMChannelAsync();
+                    if(chan != null)
+                    {
+                        try
+                        {
+                            await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}");
+                        }
+                        catch { }
+                    }
+                }
+                else
+                {
+                    var chan = arg.Guild.GetTextChannel(GuildSettings.WelcomeCard.WelcomeChannel);
+                    if (chan != null)
+                        await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}");
+                }
             }
         }
         static Bitmap WelcomeImage = new Bitmap(960, 540);

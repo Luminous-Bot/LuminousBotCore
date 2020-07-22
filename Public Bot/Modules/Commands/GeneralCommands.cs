@@ -244,6 +244,11 @@ namespace Public_Bot.Modules.Commands
                 {
                     Text = "Last Updated: "
                 },
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = "Powered by Hapsy",
+                    IconUrl = "https://cdn.discordapp.com/avatars/223707551013797888/a_9f25c6c6374f4b57c5c9fb45baa5a8e8.png?size=256"
+                },
                 ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Ping.jpg").GetAwaiter().GetResult()
             }.Build());
         }
