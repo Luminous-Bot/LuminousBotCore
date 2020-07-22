@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
+using Public_Bot.State.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Public_Bot
         public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
         public WelcomeCard WelcomeCard { get; set; }
-        public string LeaveMessage { get; set; } = "";  
+        public LeaveMessage leaveMessage { get; set; }  
         public GuildSettings() { }
 
         public static void SaveGuildSettings()
@@ -74,6 +75,7 @@ namespace Public_Bot
             WelcomeCard = new WelcomeCard(this);
             WelcomeCard.WelcomeChannel = guild.GetSystemChannelAsync(CacheMode.AllowDownload).Result.Id;
             WelcomeCard.BackgroundUrl = guild.BannerUrl;
+            leaveMessage = new LeaveMessage(this,guild);
             CommandHandler.CurrentGuildSettings.Add(this);
             StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CommandHandler.CurrentGuildSettings);
         }

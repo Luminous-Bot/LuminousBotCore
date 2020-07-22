@@ -288,7 +288,8 @@ namespace Public_Bot.Modules.Commands
                         Color = Color.Red
                     }.WithCurrentTimestamp().Build());
                     return;
-                    break;
+                    //Commented below line for obvious reasons
+                    //break;
                 case "enable":
                     ws.isEnabled = true;
                     GuildSettings.SaveGuildSettings();
@@ -347,7 +348,96 @@ namespace Public_Bot.Modules.Commands
                     return;
             }
         }
-
+        [DiscordCommand("leave-message",
+            commandHelp ="`(PREFIX)leave-message <setting> <value>\n`" +
+            "`(PREFIX)leave-message on/off`\n" +
+            "`(PREFIX)leave-message title [new leave embed title]`\n" +
+            "`(PREFIX)leave-message message [new leave message]`\n"+
+            "`(PREFIX)leave-message channel #newleavemsgchnl`\n" + 
+            "\n\n" +
+            "*Use the below variables for the leave message:* \n"+
+            "*{user} - Username of the user who left*\n"+
+            "*{guild} - Name of your server*\n" + 
+            "*{guild.count} - The number of members in your server*"
+            ,
+            description ="gives the leave message settings")]
+        [Alt("leave")]
+        public async Task leaveChanger(params string[] args)
+        {
+            if (args.Length == 0)
+            {
+                if (GuildSettings.leaveMessage == null)
+                {
+                    GuildSettings.leaveMessage = new Public_Bot.State.Types.LeaveMessage(GuildSettings, Context.Guild as IGuild);
+                }
+                var mBED = new EmbedBuilder
+                {
+                    Title = "Current Leave Message Settings"
+                }.AddField("Leave Embed Title", GuildSettings.leaveMessage.leaveTitle)
+                .AddField("Embed Message", GuildSettings.leaveMessage.leaveMessage)
+                .AddField("Leave Channel", $"<#{GuildSettings.leaveMessage.leaveChannel}>").WithCurrentTimestamp().Build();
+                await Context.Channel.SendMessageAsync("", false, mBED);
+                return;
+            }
+            var x = args[0].ToLower();
+            //Alright, so the attributes for the leaveMessage are~
+            //isEnabled, GuildID, leaveChannel, leaveMessage, leaveTitle
+            //INEFFICIENT CODE BELOW, WILL IMPROVE LATER
+            switch (x)
+            {
+                case "enable":
+                    GuildSettings.leaveMessage.isEnabled = true;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now enabled!" }.WithCurrentTimestamp().Build());
+                    break;
+                case "on":
+                    GuildSettings.leaveMessage.isEnabled = true;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now enabled!" }.WithCurrentTimestamp().Build());
+                    break;
+                case "true":
+                    GuildSettings.leaveMessage.isEnabled = true;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now enabled!" }.WithCurrentTimestamp().Build());
+                    break;
+                case "disable":
+                    GuildSettings.leaveMessage.isEnabled = false;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now disabled!" }.WithCurrentTimestamp().Build());
+                    break;
+                case "off":
+                    GuildSettings.leaveMessage.isEnabled = false;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now disabled!" }.WithCurrentTimestamp().Build());
+                    break;
+                case "false":
+                    GuildSettings.leaveMessage.isEnabled = false;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now disabled!" }.WithCurrentTimestamp().Build());
+                    break;
+                case "message":
+                    if (args.Length < 2) { 
+                        await Context.Channel.SendMessageAsync("You got to give the updated leave message!\n");
+                        return; 
+                    }
+                    GuildSettings.leaveMessage.leaveMessage = string.Join(' ', args.Skip(1));
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message is now {GuildSettings.leaveMessage.leaveMessage}" }.WithCurrentTimestamp().Build());
+                    break;
+                case "title":
+                    if (args.Length < 2)
+                    {
+                        await Context.Channel.SendMessageAsync("You got to give the updated leave message title!\n");
+                        return;
+                    }
+                    GuildSettings.leaveMessage.leaveTitle = string.Join(' ', args.Skip(1));
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message Title is now {GuildSettings.leaveMessage.leaveTitle}" }.WithCurrentTimestamp().Build());
+                    break;
+                case "channel":
+                    if (!Context.Message.MentionedChannels.Any())
+                    {
+                        await Context.Channel.SendMessageAsync("You need to mention the channel you want to set as the Leave Message Channel!");
+                        return;
+                    }
+                    GuildSettings.leaveMessage.leaveChannel = Context.Message.MentionedChannels.First().Id;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message Channel is now <#{GuildSettings.leaveMessage.leaveChannel}>" }.WithCurrentTimestamp().Build());
+                    break;
+            };
+            return;
+        }
         [DiscordCommand("modules",
             commandHelp = "`(PREFIX)modules <enable/disable/list> <modulename>`",
             description = "Enables or disables a module",
