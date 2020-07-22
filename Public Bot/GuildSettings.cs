@@ -21,6 +21,7 @@ namespace Public_Bot
         public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
         public WelcomeCard WelcomeCard { get; set; }
+        public string LeaveMessage { get; set; } = "";  
         public GuildSettings() { }
 
         public static void SaveGuildSettings()
