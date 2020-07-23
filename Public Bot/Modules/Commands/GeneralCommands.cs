@@ -290,7 +290,6 @@ namespace Public_Bot.Modules.Commands
                     Text = "Last Updated: Fetching..."
                 }
             }.Build());
-            
             HttpClient c = new HttpClient();
             var resp = await c.GetAsync("https://discord.statuspage.io/metrics-display/ztt4777v23lf/day.json");
             var cont = await resp.Content.ReadAsStringAsync();
