@@ -37,7 +37,7 @@ namespace Public_Bot.Modules.Handlers
             List<string> final = new List<string>();
             foreach (var itm in prm)
                 final.Add(itm.Key.PadRight(leng) + " " + itm.Value);
-
+            
             await arg.DefaultChannel.SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = $"Thanks for adding {client.CurrentUser.Username}!",

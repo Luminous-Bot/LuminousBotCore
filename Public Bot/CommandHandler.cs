@@ -30,8 +30,11 @@ namespace Public_Bot
             client.MessageReceived += CheckCommandAsync;
 
             client.ShardReady += Ready;
+
             client.ShardConnected += Client_ShardConnected;
+
             client.ShardDisconnected += Client_ShardDisconnected;
+
             LoadGuildSettings();
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
@@ -60,9 +63,7 @@ namespace Public_Bot
         }
 
         private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
-        {
-            isReady = false;
-        }
+            => isReady = false;
 
         public static GuildSettings GetGuildSettings(ulong guildID)
         {
