@@ -75,29 +75,25 @@ namespace Public_Bot
         }
         static Image ChartImage = new Bitmap(950, 600);
         static Graphics ChartGraphics = Graphics.FromImage(ChartImage);
+        static Pen BlurplePen = new Pen(new SolidBrush(Color.FromArgb(114, 137, 218)), 3);
+        static Pen WhitePen = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 4);
+        static Pen WhitePenS = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 2);
+        static Pen WhitePenSS = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 1);
+        static Font Font = new Font("Bahnschrift", 9);
+        static Font TitleFont = new Font("Bahnschrift", 18);
         public static async Task<Image> Generate(PingData.DiscordApiPing data)
         {
-            ChartGraphics.Clear(Color.FromArgb(44, 47, 51));
+            ChartGraphics.Clear(Color.FromArgb(47, 49, 54));
             TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var curTime = DateTime.UtcNow;
             var mets = data.Metrics.First().Data;
-            //mets.ForEach(x => x.Value = 30);
             int yMin = 0;
             int yMax = (int)mets.Max(x => x.Value) + 10;
             float yOffset = ((float)ChartImage.Height - 120) / (yMax - yMin);
             float xOffset = ((float)ChartImage.Width - 120) / mets.Count;
 
-            //chart area
-            var BlurplePen = new Pen(new SolidBrush(Color.FromArgb(114, 137, 218)), 3);
-            var WhitePen = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 4);
-            var WhitePenS = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 2);
-            var WhitePenSS = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 1);
-
-            var Font = new Font("Bahnschrift", 9);
-            var TitleFont = new Font("Bahnschrift", 18);
             ChartGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-
 
             ChartGraphics.DrawLine(WhitePen, new PointF(ChartImage.Width - 60f, ChartImage.Height - 60f), new PointF(ChartImage.Width - 60f, 60f));
             ChartGraphics.DrawLine(WhitePen, new PointF(30f, ChartImage.Height - 60f), new PointF(ChartImage.Width - 60f, ChartImage.Height - 60f));
