@@ -42,10 +42,9 @@ namespace Public_Bot.Modules.Handlers
                 $"Tiktok is a social malware",
                 $"GraphQL for da boi's",
                 $"Star be lookin kinda thicc",
-                $"Powered by caffine",
-                $"Postman is your friend",
-                $"There are easter eggs, find them!",
-                $"Rickrolling someone"
+                $"⚡Powered by caffeine",
+                $"Da postman is yer friend",
+                $"Rickrollin' someone"
             };
         public StatusHandler(DiscordShardedClient c)
         {
@@ -62,7 +61,7 @@ namespace Public_Bot.Modules.Handlers
                 alusr += g.MemberCount;
             Logger.Write($"Count of {alusr}");
             
-            await client.SetGameAsync($"[0.2.8] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.2.9] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
         }
     }
 }
