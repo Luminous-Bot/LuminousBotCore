@@ -21,7 +21,7 @@ namespace Public_Bot.Modules.Commands
     class GeneralCommands : CommandModuleBase
     {
         [DiscordCommand("testwelcome", commandHelp = "`(PREFIX)testwelcome`", description = "Test your welcome message!")]
-        public async Task tw()
+        public async Task Tw()
         {
             if (GuildSettings.WelcomeCard.isEnabled)
             {
@@ -29,6 +29,70 @@ namespace Public_Bot.Modules.Commands
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
                 await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{Context.User.Id}>" : "")}");
             }
+        }
+        [DiscordCommand("testleave",description ="test your leave message!",commandHelp ="`(PREFIX)testleave`")]
+        public async Task HHE(params string[] _args)
+        {
+            var reqmBeD = await GuildSettings.leaveMessage.GenerateLeaveMessage(Context.User, Context.Guild);
+            await Context.Channel.SendMessageAsync("", false, reqmBeD);
+        }
+        [DiscordCommand("youngest",commandHelp ="`(PREFIX)youngest`\n`(PREFIX)youngest <number_of_users>`",description ="Finds the x users newest to Discord")]
+        public async Task Yu(params string[] argz)
+        {
+            var test = 10;
+            if (int.TryParse(argz.FirstOrDefault(), out int retest)){
+                test = retest;
+            }
+            if (test >= Context.Guild.MemberCount)
+            {
+                await Context.Channel.SendMessageAsync("You dont even have so many users :rofl:");
+                return;
+            }
+            var yus = Context.Guild.Users;
+            string cty = "```";
+            var tenYoungestUsers = yus.ToList();
+            tenYoungestUsers.RemoveAll(x => x.IsBot);
+            tenYoungestUsers.Sort((prev, next) => 1/DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            tenYoungestUsers.Reverse();
+            var current = tenYoungestUsers.GetRange(0,test);
+            current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Date}/{x.CreatedAt.Year}" + '\n'));
+            cty += "```";
+            var mmbed = new EmbedBuilder
+            {
+                Title = "Youngest Users!",
+                Description = cty
+            }.WithCurrentTimestamp().Build();
+            await Context.Channel.SendMessageAsync("",false,mmbed);
+        }
+        [DiscordCommand("oldest", commandHelp = "`(PREFIX)oldest`\n`(PREFIX)oldest <number_of_users>`", description = "Finds the x users eldest on Discord")]
+        [Alt("eldest")]
+        public async Task El(params string[] argz)
+        {
+            var test = 10;
+            if (int.TryParse(argz.FirstOrDefault(), out int retest))
+            {
+                test = retest;
+            }
+            if (test >= Context.Guild.MemberCount)
+            {
+                await Context.Channel.SendMessageAsync("You dont even have so many users :rofl:");
+                return;
+            }
+            var yus = Context.Guild.Users;
+            string cty = "```";
+            var tenYoungestUsers = yus.ToList();
+            tenYoungestUsers.RemoveAll(x => x.IsBot);
+            tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            //tenYoungestUsers.Reverse();
+            var current = tenYoungestUsers.GetRange(0, test);
+            current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Date}/{x.CreatedAt.Year}" + '\n'));
+            cty += "```";
+            var mmbed = new EmbedBuilder
+            {
+                Title = "Eldest Users!",
+                Description = cty
+            }.WithCurrentTimestamp().Build();
+            await Context.Channel.SendMessageAsync("", false, mmbed);
         }
         [DiscordCommand("help", description = "shows all help messages for all enabled modules", commandHelp = "Usage: `(PREFIX)help`, `(PREFIX)help <command_name>`" )]
         public async Task help(params string[] args)

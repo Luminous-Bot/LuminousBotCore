@@ -373,9 +373,13 @@ namespace Public_Bot.Modules.Commands
                 var mBED = new EmbedBuilder
                 {
                     Title = "Current Leave Message Settings"
-                }.AddField("Leave Embed Title", GuildSettings.leaveMessage.leaveTitle)
+                }
+                .AddField("Enabled?",GuildSettings.leaveMessage.isEnabled)
+                .AddField("Leave Embed Title", GuildSettings.leaveMessage.leaveTitle)
                 .AddField("Embed Message", GuildSettings.leaveMessage.leaveMessage)
-                .AddField("Leave Channel", $"<#{GuildSettings.leaveMessage.leaveChannel}>").WithCurrentTimestamp().Build();
+                .AddField("Leave Channel", $"<#{GuildSettings.leaveMessage.leaveChannel}>")
+                .WithFooter($"Do {GuildSettings.Prefix}help leave-message to get the variables!!")
+                .WithCurrentTimestamp().Build();
                 await Context.Channel.SendMessageAsync("", false, mBED);
                 return;
             }
@@ -435,7 +439,16 @@ namespace Public_Bot.Modules.Commands
                     GuildSettings.leaveMessage.leaveChannel = Context.Message.MentionedChannels.First().Id;
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message Channel is now <#{GuildSettings.leaveMessage.leaveChannel}>" }.WithCurrentTimestamp().Build());
                     break;
+                case "colour":
+                    if (args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("You need to specify the colour you want to set as the Leave Embed Colour!");
+                        return;
+                    }
+                    await Context.Channel.SendMessageAsync("We havent implemented this yet ;)");
+                    break;
             };
+            GuildSettings.SaveGuildSettings();
             return;
         }
         [DiscordCommand("modules",

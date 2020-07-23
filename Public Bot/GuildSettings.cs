@@ -77,7 +77,7 @@ namespace Public_Bot
             WelcomeCard.BackgroundUrl = guild.BannerUrl;
             leaveMessage = new LeaveMessage(this,guild);
             CommandHandler.CurrentGuildSettings.Add(this);
-            StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CommandHandler.CurrentGuildSettings);
+            StateHandler.SaveObject("guildsettings", CommandHandler.CurrentGuildSettings);
         }
     }
 }

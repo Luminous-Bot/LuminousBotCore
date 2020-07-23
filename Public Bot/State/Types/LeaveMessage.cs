@@ -13,13 +13,15 @@ namespace Public_Bot.State.Types
         public string leaveTitle { get; set; } = "We lost a comrade";
         public ulong leaveChannel { get; set; }
         public ulong GuildID { get; set; }
+        public Color Clr { get; set; }
 
         public async Task<Embed> GenerateLeaveMessage(SocketUser x, SocketGuild gld)
         {
             var xyz = new EmbedBuilder
             {
-                Title = leaveTitle
-            }.AddField(x.Username + x.Discriminator, leaveMessage.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}".Replace("\\n","\n"), gld.MemberCount.ToString())).WithCurrentTimestamp().Build();
+                Title = leaveTitle,
+                Color = Clr
+            }.WithDescription(leaveMessage.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}".Replace("\\n","\n"), gld.MemberCount.ToString())).WithCurrentTimestamp().Build();
             return xyz;
         }
         public LeaveMessage() { }
