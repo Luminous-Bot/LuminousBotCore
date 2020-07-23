@@ -42,6 +42,15 @@ namespace Public_Bot
             this.ModuleDescription = ModuleDescription;
         }
     }
+    public enum Permission
+    {
+
+    }
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RequiredPermission : Attribute
+    {
+
+    }
     /// <summary>
     /// Discord command class
     /// </summary>
