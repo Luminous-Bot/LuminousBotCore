@@ -219,14 +219,15 @@ namespace Public_Bot.Modules.Commands
             string link = "https://discord.com/api/oauth2/authorize?client_id=722435272532426783&permissions=427683062&scope=bot";
             if (x.Next(0,500) == 28)
             {
-                link = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                link = "https://www.youtube.com/watch?v=dQw4w9WgXcQ \"You're a lucky man\"";
             }
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
-                Title = "Here's my invite!",
-                Description = $"You can invite me [here]({link})",
+                //Title = "Here's my invite!",
+                //Description = $"You can invite me [here]({link})",
                 Color = Color.Green
-            }.WithCurrentTimestamp().Build());
+            }.AddField("Here's my invite!", $"You can invite me [here]({link})")
+            .WithCurrentTimestamp().Build());
         }
         
 
