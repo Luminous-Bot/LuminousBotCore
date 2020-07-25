@@ -178,7 +178,7 @@ namespace Public_Bot.Modules.Handlers
                 if (user.CurrentLevel < gu.Settings.MaxLevel)
                 {
                     bool leveledUp = false;
-                    while (user.CurrentXP >= user.NextLevelXP)
+                    while (user.CurrentXP >= user.NextLevelXP && user.CurrentLevel < gu.Settings.MaxLevel)
                     {
                         user.CurrentXP = Math.Round(user.CurrentXP - user.NextLevelXP);
                         user.NextLevelXP = user.NextLevelXP * gu.Settings.LevelMultiplier;
