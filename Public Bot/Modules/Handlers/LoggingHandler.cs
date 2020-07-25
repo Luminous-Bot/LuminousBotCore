@@ -242,7 +242,7 @@ namespace Public_Bot.Modules.Handlers
                                 new EmbedFieldBuilder()
                                 {
                                     Name = "Message:",
-                                    Value = arg1.Value.Content == null ? "__\n__" : arg1.Value.Content,
+                                    Value = arg1.Value.Content == null || arg1.Value.Content == "" ? "__\n__" : arg1.Value.Content,
                                     //IsInline = true,
                                 }
                             } : new List<EmbedFieldBuilder>(),

@@ -22,9 +22,36 @@ namespace Public_Bot
     public class GraphQLObj : Attribute { }
     public class GraphQLSVar : Attribute { }
     public class GraphQLSObj : Attribute { }
+
+    public class MutationBucket<T>
+    {
+        private List<string> Mutations { get; set; } = new List<string>();
+        private string opname { get; set; }
+        public void Add(T obj, params KeyValuePair<string, object>[] Params)
+        {
+            string parms = "";
+            foreach (var p in Params)
+                parms += $"{p.Key}: \\\"{p.Value.ToString()}\\\" ";
+
+            Mutations.Add($"_{Mutations.Count}: {opname}({parms}) {GraphQLParser.genProps(typeof(T))} ");
+        }
+        public MutationBucket(string opname)
+        {
+            this.opname = opname;
+        }
+        public string Build()
+        {
+            string query = $"{{\"operationName\": \"{opname}\"," +
+                           $"\"variables\": {{}}, " +
+                           $"\"query\": \"mutation {opname} {{ {string.Join(" ", Mutations)} }}\" }}";
+
+            return query;
+        }
+    }
     
     public class GraphQLParser
     {
+        
        
         private static Dictionary<Type, Func<object, string>> Parser = new Dictionary<Type, Func<object, string>>()
         {
@@ -124,7 +151,7 @@ namespace Public_Bot
             };
             return JsonConvert.SerializeObject(f);
         }
-        private static string genProps(Type inf)
+        internal static string genProps(Type inf)
         {
             //schm = { props } 
             string query = "{ ";

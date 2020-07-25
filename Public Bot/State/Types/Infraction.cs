@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,8 +8,8 @@ namespace Public_Bot
 {
     public class Infraction
     {
-        [GraphQLSVar, GraphQLName("Id")]
-        public string InfracId { get; set; }
+        [GraphQLSVar, GraphQLProp]
+        public string Id { get; set; }
         [GraphQLProp, GraphQLSVar]
         public ulong GuildID { get; set; }
         [GraphQLProp, GraphQLSVar]
@@ -25,7 +26,7 @@ namespace Public_Bot
         public Infraction() { }
         public Infraction(ulong MemberId, ulong ModeratorId, ulong GuildID, Action action, string Reason, DateTime time)
         {
-            this.InfracId = genId();
+            this.Id = genId();
             this.MemberID = MemberId;
             this.ModeratorID = ModeratorId;
             this.GuildID = GuildID;
