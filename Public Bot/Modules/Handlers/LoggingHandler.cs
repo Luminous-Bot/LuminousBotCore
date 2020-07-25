@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace Public_Bot.Modules.Handlers
 {
     [DiscordHandler]
-    class LoggingHandler
+    class LoggingHandler : ModuleBase
     {
         public static DiscordShardedClient client;
         public LoggingHandler(DiscordShardedClient c)
@@ -24,10 +25,35 @@ namespace Public_Bot.Modules.Handlers
             client.RoleCreated += Client_RoleCreated;
             client.RoleDeleted += Client_RoleDeleted;
             client.RoleUpdated += Client_RoleUpdated;
-            client.UserBanned += Client_UserBanned;
             client.UserUnbanned += Client_UserUnbanned;
+            // client.UserUpdated += Client_UserUpdated;
             client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
         }
+
+        /**private async Task Client_UserUpdated(SocketUser before, SocketUser after)
+        {
+            SocketGuild arg2 = (SocketGuild)Context.Guild;
+            var gs = GuildSettings.Get(arg2.Id);
+            if (gs.LogChannel != 0 && gs.Logging)
+            {
+                var logchan = arg2.GetTextChannel(gs.LogChannel);
+                if (logchan != null)
+                {
+
+                    if (before.Username != after.Username)
+                    {
+                        EmbedBuilder builder = new EmbedBuilder();
+
+                        builder.WithTitle("⚡ User Updated ⚡");
+                        builder.WithDescription($"**Before**: `{before}`   **After**: `{after}`");
+                        builder.WithColor(Color.Green);
+
+                        await logchan.SendMessageAsync("", false, builder.Build());
+                    }
+                }
+            }
+        }
+        **/
 
         private async Task Client_MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> arg1, ISocketMessageChannel arg2)
         {
@@ -68,36 +94,19 @@ namespace Public_Bot.Modules.Handlers
             }
         }
 
-        private async Task Client_UserBanned(SocketUser arg1, SocketGuild arg2)
-        {
-            var gs = GuildSettings.Get(arg2.Id);
-            if (gs.LogChannel != 0 && gs.Logging)
-            {
-                var logchan = arg2.GetTextChannel(gs.LogChannel);
-                if (logchan != null)
-                {
-                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "⚡ User Banned ⚡",
-                        Description = $"The user {arg1.ToString()} was Banned",
-                        Color = Color.Red
-                    }.WithCurrentTimestamp().Build());
-                }
-            }
-        }
-
         private async Task Client_RoleUpdated(SocketRole arg1, SocketRole arg2)
         {
             var gs = GuildSettings.Get(arg2.Guild.Id);
             if (gs.LogChannel != 0 && gs.Logging)
             {
                 var logchan = arg2.Guild.GetTextChannel(gs.LogChannel);
+
                 if (logchan != null)
                 {
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "⚡ Role Updated ⚡",
-                        Description = $"The role {arg2.Mention} was Updated. (More in depth descriptions coming soon)",
+                        Description = $"The role {arg2.Mention} was Updated.",
                         Color = Color.Orange
                     }.WithCurrentTimestamp().Build());
                 }

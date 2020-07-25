@@ -186,6 +186,21 @@ namespace Public_Bot.Modules.Commands
                     Timestamp = DateTime.Now
                 }.Build());
 
+                var gs = GuildSettings.Get(Context.Guild.Id);
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = Context.Guild.GetTextChannel(gs.LogChannel);
+                    if (logchan != null)
+                    {
+                        await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = $"⚡ User {action} ⚡",
+                            Description = $"The user {user.Username} was {action} by <@{m.ModeratorID}> for {reason}",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                    }
+                }
+
             }
             [DiscordCommand("warn", RequiredPermission = true, description = "Warns a user", commandHelp = "Usage - `(PREFIX)warn <@user> <reason>`")]
             public async Task Warn(params string[] args)
