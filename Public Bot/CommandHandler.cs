@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Public_Bot
@@ -126,36 +127,38 @@ namespace Public_Bot
             }
             if (arg.Content.StartsWith(s.Prefix) || arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
             {
-                var resp = await service.ExecuteAsync(context, s);
-                Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");
-
-                if (resp.Result == CommandStatus.InvalidPermissions)
-                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "**You do not have permission**",
-                        Description = @"Looks like you don't have permission for this command.",
-                        Color = Color.Red,
-                        Timestamp = DateTimeOffset.Now,
-                    }.Build());
-
-                else if (resp.Result == CommandStatus.Disabled)
+                new Thread( async () =>
                 {
-                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "**Sorry!**",
-                        Description = @"That module is disabled!",
-                        Color = Color.Red,
-                        Timestamp = DateTimeOffset.Now,
-                    }.Build());
-                }
+                   var resp = await service.ExecuteAsync(context, s);
+                   Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");
 
-                else if (resp.Result == CommandStatus.NotEnoughParams)
-                {
-                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "**You didn't provide enough parameters!**",
-                        Description = @$"Here's how to use the command",
-                        Fields = new List<EmbedFieldBuilder>()
+                   if (resp.Result == CommandStatus.InvalidPermissions)
+                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                       {
+                           Title = "**You do not have permission**",
+                           Description = @"Looks like you don't have permission for this command.",
+                           Color = Color.Red,
+                           Timestamp = DateTimeOffset.Now,
+                       }.Build());
+
+                   else if (resp.Result == CommandStatus.Disabled)
+                   {
+                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                       {
+                           Title = "**Sorry!**",
+                           Description = @"That module is disabled!",
+                           Color = Color.Red,
+                           Timestamp = DateTimeOffset.Now,
+                       }.Build());
+                   }
+
+                   else if (resp.Result == CommandStatus.NotEnoughParams)
+                   {
+                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                       {
+                           Title = "**You didn't provide enough parameters!**",
+                           Description = @$"Here's how to use the command",
+                           Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
                             {
@@ -169,18 +172,18 @@ namespace Public_Bot
                                 Value = $"{CommandModuleBase.ReadCurrentCommands(s.Prefix).Find(x => x.CommandName == msg.Content.Split(' ')[0].Remove(0,1)).CommandHelpMessage}"
                             }
                         },
-                        Color = Color.Red,
-                        Timestamp = DateTimeOffset.Now,
-                    }.Build());
-                }
+                           Color = Color.Red,
+                           Timestamp = DateTimeOffset.Now,
+                       }.Build());
+                   }
 
-                else if (resp.Result == CommandStatus.InvalidParams)
-                {
-                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "**The parameters you provided were invalid!**",
-                        Description = @$"Here's how to use the command",
-                        Fields = new List<EmbedFieldBuilder>()
+                   else if (resp.Result == CommandStatus.InvalidParams)
+                   {
+                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                       {
+                           Title = "**The parameters you provided were invalid!**",
+                           Description = @$"Here's how to use the command",
+                           Fields = new List<EmbedFieldBuilder>()
                         {
                             new EmbedFieldBuilder()
                             {
@@ -194,10 +197,11 @@ namespace Public_Bot
                                 Value = $"{CommandModuleBase.ReadCurrentCommands(s.Prefix).Find(x => x.CommandName == msg.Content.Split(' ')[0].Remove(0,1)).CommandHelpMessage}"
                             }
                         },
-                        Color = Color.Red,
-                        Timestamp = DateTimeOffset.Now,
-                    }.Build());
-                }
+                           Color = Color.Red,
+                           Timestamp = DateTimeOffset.Now,
+                       }.Build());
+                   }
+                }).Start();
             }
         }
     }
