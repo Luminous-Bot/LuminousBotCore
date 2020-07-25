@@ -52,7 +52,7 @@ namespace Public_Bot
 
     }
     /// <summary>
-    /// Discord command class
+    /// Discord command
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class DiscordCommand : Attribute
