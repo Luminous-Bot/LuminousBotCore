@@ -13,7 +13,7 @@ namespace Public_Bot.State.Types
         public string leaveTitle { get; set; } = "We lost a comrade";
         public ulong leaveChannel { get; set; }
         public ulong GuildID { get; set; }
-        public Color Clr { get; set; }
+        public Color Clr { get; set; } = new Color(114, 137, 218);
 
         public async Task<Embed> GenerateLeaveMessage(SocketUser x, SocketGuild gld)
         {
@@ -25,16 +25,11 @@ namespace Public_Bot.State.Types
             return xyz;
         }
         public LeaveMessage() { }
-        public LeaveMessage(GuildSettings gs)
-        {
-            this.isEnabled = false;
-            this.GuildID = gs.GuildID;
-        }
         public LeaveMessage(GuildSettings gs, IGuild gld)
         {
             this.isEnabled = false;
             this.GuildID = gs.GuildID;
-            this.leaveChannel = gld.GetSystemChannelAsync(CacheMode.AllowDownload).Result.Id;
+            this.leaveChannel = gld.SystemChannelId.HasValue ? gld.SystemChannelId.Value : gld.DefaultChannelId;
         }
     }
 }

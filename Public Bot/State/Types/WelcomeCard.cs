@@ -28,7 +28,7 @@ namespace Public_Bot
         {
             this.isEnabled = false;
             this.GuildId = gs.GuildID;
-            WelcomeChannel = guild.GetSystemChannelAsync(CacheMode.AllowDownload).Result.Id;
+            WelcomeChannel = guild.SystemChannelId.HasValue ? guild.SystemChannelId.Value : guild.DefaultChannelId;
             BackgroundUrl = guild.BannerUrl;
         }
     }

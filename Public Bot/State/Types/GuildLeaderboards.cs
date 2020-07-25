@@ -35,7 +35,7 @@ namespace Public_Bot
             this.GuildID = g.Id;
             if (g.AFKChannelId.HasValue)
                 this.Settings.BlacklistedChannels.Add(g.AFKChannelId.Value);
-            this.Settings.LevelUpChan = g.DefaultChannelId;
+            this.Settings.LevelUpChan = g.SystemChannelId.HasValue ? g.SystemChannelId.Value : g.DefaultChannelId;
             Save();
         }
     }
