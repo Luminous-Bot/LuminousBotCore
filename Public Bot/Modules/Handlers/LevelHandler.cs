@@ -132,6 +132,7 @@ namespace Public_Bot.Modules.Handlers
 
         private void GiveVCPoints(object sender, ElapsedEventArgs e)
         {
+            var _bucket = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
             foreach (var guild in client.Guilds)
             {
                 if (GuildLevels.Any(x => x.GuildID == guild.Id))
@@ -151,7 +152,11 @@ namespace Public_Bot.Modules.Handlers
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                                    usr.Save();
+                                    _bucket.Add(usr,
+                                        new KeyValuePair<string, object>("guildId", $"\\\"{usr.GuildID}\\\""),
+                                        new KeyValuePair<string, object>("userId", $"\\\"{usr.MemberID}\\\""),
+                                        new KeyValuePair<string, object>("level", usr.CurrentLevel),
+                                        new KeyValuePair<string, object>("xp", usr.CurrentXP));
                                 }
                                 else
                                 {
@@ -161,13 +166,18 @@ namespace Public_Bot.Modules.Handlers
                                         LevelUpUser(usr);
                                     gl.CurrentUsers.Add(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                                    usr.Save();
+                                    _bucket.Add(usr,
+                                        new KeyValuePair<string, object>("guildId", $"\\\"{usr.GuildID}\\\""),
+                                        new KeyValuePair<string, object>("userId", $"\\\"{usr.MemberID}\\\""),
+                                        new KeyValuePair<string, object>("level", usr.CurrentLevel),
+                                        new KeyValuePair<string, object>("xp", usr.CurrentXP));
                                 }
                             }
                         }
                     }
                 }
             }
+            StateService.ExecuteNoReturnAsync<List<LevelUser>>(_bucket.Build()).GetAwaiter().GetResult();
         }
         public static async void LevelUpUser(LevelUser user)
         {

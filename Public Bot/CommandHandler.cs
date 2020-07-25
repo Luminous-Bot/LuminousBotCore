@@ -46,7 +46,6 @@ namespace Public_Bot
             CurrentGuildSettings.Where(x => x.WelcomeCard == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
             StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CurrentGuildSettings);
         }
-
         private static string FormatJson(string json)
         {
             dynamic parsedJson = JsonConvert.DeserializeObject(json);
@@ -57,7 +56,7 @@ namespace Public_Bot
             await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Failed GraphQl!",
-                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{FormatJson(q)}```" +
+                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{string.Join("", FormatJson(q).Take(1800))}...```" +
                 $"{(error == null ? "" : $"\n**Error**\n```json\n{string.Join("\n\n", error)}```")}",
                 Color = Color.Red
             }.WithCurrentTimestamp().Build());

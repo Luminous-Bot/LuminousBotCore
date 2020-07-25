@@ -31,9 +31,9 @@ namespace Public_Bot
         {
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Key}: \\\"{p.Value.ToString()}\\\" ";
+                parms += $"{p.Key}: {p.Value.ToString()} ";
 
-            Mutations.Add($"_{Mutations.Count}: {opname}({parms}) {GraphQLParser.genProps(typeof(T))} ");
+            Mutations.Add($"_{Mutations.Count}: {opname}({parms}) {GraphQLParser.genProps(typeof(T))}");
         }
         public MutationBucket(string opname)
         {
@@ -53,7 +53,7 @@ namespace Public_Bot
     {
         
        
-        private static Dictionary<Type, Func<object, string>> Parser = new Dictionary<Type, Func<object, string>>()
+        internal static Dictionary<Type, Func<object, string>> Parser = new Dictionary<Type, Func<object, string>>()
         {
             {typeof(ulong), (object val) => $"\"{val}\"" },
             {typeof(DateTime), (object val) => { var dt = (DateTime)val; return $"\"{dt.ToString("o")}\""; } },

@@ -27,10 +27,8 @@ namespace Public_Bot.Modules.Handlers
                     try
                     {
                         await channel.SendMessageAsync("", false, embed);
-                    } catch
-                    {
-                        Console.WriteLine("GODDAMN IT");
                     }
+                    catch { }
                 }
             }
         }
