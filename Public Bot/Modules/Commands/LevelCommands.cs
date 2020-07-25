@@ -386,6 +386,7 @@ namespace Public_Bot.Modules.Commands
                                 Description = $"Set the Rank Card Color's to this Embed's Color ({usr.BarColor})",
                                 Color = usr.DiscordColorFromHex(hex)
                             }.WithCurrentTimestamp().Build());
+                            return;
                         }
                         else
                         {

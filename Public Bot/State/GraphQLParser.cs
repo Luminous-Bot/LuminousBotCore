@@ -26,6 +26,8 @@ namespace Public_Bot
     public class MutationBucket<T>
     {
         private List<string> Mutations { get; set; } = new List<string>();
+        public int Count
+            => Mutations.Count;
         private string opname { get; set; }
         public void Add(T obj, params KeyValuePair<string, object>[] Params)
         {

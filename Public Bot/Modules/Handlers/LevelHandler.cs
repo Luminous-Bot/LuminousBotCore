@@ -177,7 +177,8 @@ namespace Public_Bot.Modules.Handlers
                     }
                 }
             }
-            StateService.ExecuteNoReturnAsync<List<LevelUser>>(_bucket.Build()).GetAwaiter().GetResult();
+            if(_bucket.Count > 0)
+                StateService.ExecuteNoReturnAsync<List<LevelUser>>(_bucket.Build()).GetAwaiter().GetResult();
         }
         public static async void LevelUpUser(LevelUser user)
         {
