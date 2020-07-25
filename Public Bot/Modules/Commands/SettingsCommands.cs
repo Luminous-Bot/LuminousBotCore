@@ -15,13 +15,6 @@ namespace Public_Bot.Modules.Commands
     [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
     class SettingsCommands : CommandModuleBase
     {
-        
-        protected static string GetBase64StringForImage(string imgPath)
-        {
-            byte[] imageBytes = System.IO.File.ReadAllBytes(imgPath);
-            string base64String = Convert.ToBase64String(imageBytes);
-            return base64String;
-        }
         [DiscordCommand("welcomer",
             commandHelp = "`(PREFIX)welcomer`\n" +
                           "`(PREFIX)welcomer channel <#channel>`\n" +
@@ -39,7 +32,6 @@ namespace Public_Bot.Modules.Commands
             {
                 var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
                 img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
-                string b64 = GetBase64StringForImage($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png");
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Author = new EmbedAuthorBuilder()
@@ -350,15 +342,15 @@ namespace Public_Bot.Modules.Commands
         }
         [DiscordCommand("leave-message",
             commandHelp ="`(PREFIX)leave-message <setting> <value>\n`" +
-            "`(PREFIX)leave-message on/off`\n" +
-            "`(PREFIX)leave-message title [new leave embed title]`\n" +
-            "`(PREFIX)leave-message message [new leave message]`\n"+
-            "`(PREFIX)leave-message channel #newleavemsgchnl`\n" + 
-            "\n\n" +
-            "*Use the below variables for the leave message:* \n"+
-            "*{user} - Username of the user who left*\n"+
-            "*{guild} - Name of your server*\n" + 
-            "*{guild.count} - The number of members in your server*"
+                         "`(PREFIX)leave-message on/off`\n" +
+                         "`(PREFIX)leave-message title [new leave embed title]`\n" +
+                         "`(PREFIX)leave-message message [new leave message]`\n"+
+                         "`(PREFIX)leave-message channel #newleavemsgchnl`\n" + 
+                         "\n\n" +
+                         "*Use the below variables for the leave message:* \n"+
+                         "*{user} - Username of the user who left*\n"+
+                         "*{guild} - Name of your server*\n" + 
+                         "*{guild.count} - The number of members in your server*"
             ,
             description ="gives the leave message settings")]
         [Alt("leave")]
@@ -439,7 +431,7 @@ namespace Public_Bot.Modules.Commands
                     GuildSettings.leaveMessage.leaveChannel = Context.Message.MentionedChannels.First().Id;
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message Channel is now <#{GuildSettings.leaveMessage.leaveChannel}>" }.WithCurrentTimestamp().Build());
                     break;
-                case "colour":
+                case "color":
                     if (args.Length == 1)
                     {
                         await Context.Channel.SendMessageAsync("You need to specify the colour you want to set as the Leave Embed Colour!");

@@ -19,9 +19,9 @@ namespace Public_Bot.State.Types
         {
             var xyz = new EmbedBuilder
             {
-                Title = leaveTitle,
+                Title = leaveTitle.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString()),
                 Color = Clr
-            }.WithDescription(leaveMessage.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}".Replace("\\n","\n"), gld.MemberCount.ToString())).WithCurrentTimestamp().Build();
+            }.WithDescription(leaveMessage.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString())).WithCurrentTimestamp().Build();
             return xyz;
         }
         public LeaveMessage() { }
