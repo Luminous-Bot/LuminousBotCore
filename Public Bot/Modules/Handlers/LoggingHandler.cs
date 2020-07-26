@@ -101,30 +101,31 @@ namespace Public_Bot.Modules.Handlers
             if (gs.LogChannel != 0 && gs.Logging)
             {
                 var logchan = arg2.Guild.GetTextChannel(gs.LogChannel);
-                string body = "Can't find changes :(";
+                string body = "";
                 if (arg1.Name != arg2.Name)
-                    body = $"Name Changed:\n> Old Name: {arg1.Name}\n> New Name: {arg2.Name}\n\n";
+                    body += $"__Name Changed:__\n> Old Name:  {arg1.Name}\n> New Name: {arg2.Name}\n__\n__\n";
                 if(!arg1.Permissions.Equals(arg2.Permissions))
                 {
-                    body = "Permission Changed:\n";
-                    var type = typeof(SocketRole);
+                    body += "__Permission Changed:__\n";
+                    var type = typeof(GuildPermissions);
                     var props = type.GetProperties();
                     foreach(var prop in props.Where(x => x.PropertyType == typeof(bool)))
                     {
-                        bool oldVal = (bool)prop.GetValue(arg1);
-                        bool newVal = (bool)prop.GetValue(arg2);
+                        bool oldVal = (bool)prop.GetValue(arg1.Permissions);
+                        bool newVal = (bool)prop.GetValue(arg2.Permissions);
                         if (oldVal != newVal)
-                            body += $"> **{prop.Name}**\n> Old Value: {(oldVal ? "✅" : "❌")}\n> New Value: {(newVal ? "✅" : "❌")}\n";
+                            body += $"> **{prop.Name}**\n> Old Value:  {(oldVal ? "✅" : "❌")}\n> New Value: {(newVal ? "✅" : "❌")}\n> \n";
                     }
                     body += "\n";
                 }
                 if (arg1.Color != arg2.Color)
-                    body += $"Color Changed:\n> Old Color: {arg1.Color.ToString()}\n> New Color: {arg2.Color.ToString()}\n\n";
+                    body += $"__Color Changed:__\n> Old Color:  {arg1.Color.ToString()}\n> New Color: {arg2.Color.ToString()}\n__\n__\n";
                 if (arg1.IsMentionable != arg2.IsMentionable)
-                    body += $"Mention Changed:\n> Old Value: {(arg1.IsMentionable ? "✅" : "❌")}\n> New Value: {(arg2.IsMentionable ? "✅" : "❌")}\n\n";
+                    body += $"__Mention Changed:__\n> Old Value:  {(arg1.IsMentionable ? "✅" : "❌")}\n> New Value: {(arg2.IsMentionable ? "✅" : "❌")}\n__\n__\n";
                 if (arg1.IsHoisted != arg2.IsHoisted)
-                    body += $"Hoisted Changed:\n> Old Value: {(arg1.IsHoisted)}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}";
-                
+                    body += $"__Hoisted Changed:__\n> Old Value:  {(arg1.IsHoisted)}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}\n__\n__\n";
+                if (body == "")
+                    body = "Can't find changes :(";
                 if (logchan != null)
                 {
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
