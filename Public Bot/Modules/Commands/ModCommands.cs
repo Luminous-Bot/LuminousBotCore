@@ -20,7 +20,7 @@ namespace Public_Bot.Modules.Commands
         {
             client = _client;
         }
-        [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficent with this module, you can keep track of user infractions and keep your server in order!")]
+        [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficient with this module, you can keep track of user infractions and keep your server in order!")]
         public class ModCommandsModule : CommandModuleBase
         {
             public async Task CreateAction(string[] args, Action action, ICommandContext context)
@@ -284,7 +284,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
                         Title = "**That user is not Muted**",
-                        Description = "There not muted lol. dont know what else you want me to say",
+                        Description = "They are not muted lol. dont know what else you want me to say",
                         Color = Color.Red,
                         Timestamp = DateTime.Now
                     }.Build());
@@ -745,7 +745,151 @@ namespace Public_Bot.Modules.Commands
                 await m.DeleteAsync();
 
             }
-
+            [DiscordCommand("lock", RequiredPermission = true, commandHelp = "`(PREFIX)lock #channel`", description = "locks the mentioned channel")]
+            public async Task Lock(params string[] args)
+            {
+                if (!Context.Message.MentionedChannels.Any())
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Channel not mentioned",
+                        Description = "You need to mention a channel to lock it!!"
+                    }.WithCurrentTimestamp().Build()
+                    );
+                    return;
+                }
+                var lockchnl = Context.Message.MentionedChannels.First();
+                var lockMSGchnl = lockchnl as SocketTextChannel;
+                EmbedBuilder alfa = new EmbedBuilder();
+                try
+                {
+                    if (lockMSGchnl == null)
+                    {
+                        var lockVOICE = lockchnl as SocketVoiceChannel;
+                        var xyz = new OverwritePermissions(connect: PermValue.Deny);
+                        await lockVOICE.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, xyz);
+                        alfa.Title = $"Locked Voice Channel {lockVOICE.Name}";
+                        alfa.Description = "The aforementioned voice channel has been locked.";
+                        alfa.WithCurrentTimestamp();
+                    }
+                    else
+                    {
+                        var sry = new OverwritePermissions(sendMessages: PermValue.Deny);
+                        await lockchnl.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, sry);
+                        alfa.Title = $"Locked Text Channel {lockMSGchnl.Name}";
+                        alfa.Description = $"{lockMSGchnl.Mention} has been locked";
+                        alfa.WithCurrentTimestamp();
+                    }
+                    await Context.Channel.SendMessageAsync("", false, alfa.Build());
+                }
+                catch {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Title ="Missing Permissions",
+                        Description = "I do not have perms :sob:"
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            [DiscordCommand("unlock",commandHelp ="`(PREFIX)unlock #channel`",description ="Unlocks the mentioned channel")]
+            public async Task Unlock(params string[] args)
+            {
+                if (!Context.Message.MentionedChannels.Any())
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Channel not mentioned",
+                        Description = "You need to mention a channel to unlock it!!"
+                    }.WithCurrentTimestamp().Build()
+                    );
+                    return;
+                }
+                var lockchnl = Context.Message.MentionedChannels.First();
+                var lockMSGchnl = lockchnl as SocketTextChannel;
+                EmbedBuilder alfa = new EmbedBuilder();
+                try
+                {
+                    if (lockMSGchnl == null)
+                    {
+                        var lockVOICE = lockchnl as SocketVoiceChannel;
+                        var xyz = new OverwritePermissions(connect: PermValue.Inherit);
+                        await lockVOICE.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, xyz);
+                        alfa.Title = $"Unlocked Voice Channel {lockVOICE.Name}";
+                        alfa.Description = "The aforementioned voice channel has been unlocked.";
+                        alfa.WithCurrentTimestamp();
+                    }
+                    else
+                    {
+                        var sry = new OverwritePermissions(sendMessages: PermValue.Inherit);
+                        await lockchnl.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, sry);
+                        alfa.Title = $"Unlocked Text Channel {lockMSGchnl.Name}";
+                        alfa.Description = $"{lockMSGchnl.Mention} has been unlocked";
+                        alfa.WithCurrentTimestamp();
+                    }
+                    await Context.Channel.SendMessageAsync("", false, alfa.Build());
+                }
+                catch
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Title = "Missing Permissions",
+                        Description = "I do not have perms :sob:"
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            [DiscordCommand("nickname",RequiredPermission =true,commandHelp ="`(PREFIX)nickname @USER newnick`",description ="Changes the nickname of mentioned user")]
+            [Alt("nick")]
+            public async Task NicknameUpdate(params string[] args)
+            {
+                if (!Context.Message.MentionedUsers.Any())
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "User not mentioned",
+                        Description = "You need to mention a user to change their nickname!"
+                    }.WithCurrentTimestamp().Build()
+                    );
+                    return;
+                }
+                if (args.Length == 1)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "What nickname do we set to??",
+                        Description = "You need to give a nickname dummy."
+                    }.WithCurrentTimestamp().Build()
+                    );
+                    return;
+                }
+                var user = Context.Message.MentionedUsers.First();
+                if (args[0][0] == '<')
+                {
+                    try
+                    {
+                        await (user as SocketGuildUser).ModifyAsync(x => x.Nickname = string.Join(' ', args.Skip(1)));
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Nickname changed",
+                            Description = $"{user.Username}s nickname was changed to {string.Join(' ', args.Skip(1))}"
+                        }.WithCurrentTimestamp().Build());
+                    }
+                    catch
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Missing Permissions",
+                            Description = "I do not have perms :sob:"
+                        }.WithCurrentTimestamp().Build());
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Title = "Invalid Params",
+                        Description = $"The command usage is {GuildSettings.Prefix}nickname @mention new name that may exceed 1 word"
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
             [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {
@@ -754,7 +898,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "How much slowmode?",
-                        Description = "Prove some arguments!",
+                        Description = "Provide some arguments!",
                         Color = Color.Orange,
                     }.WithCurrentTimestamp().Build());
                     return;
