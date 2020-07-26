@@ -61,7 +61,7 @@ namespace Public_Bot.Modules.Handlers
                 alusr += g.MemberCount;
             Logger.Write($"Count of {alusr}");
             
-            await client.SetGameAsync($"[0.2.9] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.4.0] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
         }
     }
 }

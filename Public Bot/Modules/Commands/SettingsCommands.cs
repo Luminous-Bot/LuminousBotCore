@@ -30,8 +30,8 @@ namespace Public_Bot.Modules.Commands
             var welcomechan = Context.Guild.GetTextChannel(ws.WelcomeChannel);
             if (args.Length == 0)
             {
-                var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
-                img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
+                //var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
+                //img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Author = new EmbedAuthorBuilder()
@@ -55,7 +55,7 @@ namespace Public_Bot.Modules.Commands
                             Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
                         }
                     },
-                    ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png").GetAwaiter().GetResult()
+                    //ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png").GetAwaiter().GetResult()
                 }.WithCurrentTimestamp().Build()) ;
                 return;
             }
@@ -311,7 +311,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                     return;
                 case "on":
-                    ws.isEnabled = false;
+                    ws.isEnabled = true;
                     GuildSettings.SaveGuildSettings();
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {

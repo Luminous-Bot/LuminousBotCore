@@ -17,19 +17,21 @@ namespace Public_Bot
         public GuildHandler(DiscordShardedClient c)
         {
             client = c;
+            string q = GraphQLParser.GenerateGQLQuery<Guild>("guilds");
+            CurrentGuilds = StateService.Query<List<Guild>>(q);
             client.JoinedGuild += AddGuild;
             client.UserJoined += NewUser;
             client.ShardConnected += Init;
             //load guilds
-            string q = GraphQLParser.GenerateGQLQuery<Guild>("guilds");
-            CurrentGuilds = StateService.Query<List<Guild>>(q);
+            CheckGuilds().GetAwaiter().GetResult();
+
         }
         bool isInitCompt = false;
         private async Task Init(DiscordSocketClient arg)
         {
             if (!isInitCompt)
             {
-                await CheckGuilds();
+                //await CheckGuilds();
                 isInitCompt = true;
             }
         }

@@ -29,8 +29,8 @@ namespace Public_Bot.Modules.Handlers
             var GuildSettings = CommandHandler.GetGuildSettings(arg.Guild.Id);
             if (GuildSettings.WelcomeCard.isEnabled)
             {
-                var img = GenerateWelcomeImage(arg, arg.Guild, GuildSettings.WelcomeCard);
-                img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", ImageFormat.Png);
+                //var img = GenerateWelcomeImage(arg, arg.Guild, GuildSettings.WelcomeCard);
+                //img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", ImageFormat.Png);
                 if (GuildSettings.WelcomeCard.DMs)
                 {
                     var chan =await client.GetUser(arg.Id).GetOrCreateDMChannelAsync();
@@ -38,7 +38,7 @@ namespace Public_Bot.Modules.Handlers
                     {
                         try
                         {
-                            await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}");
+                            await chan.SendMessageAsync($"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}", false, GuildSettings.WelcomeCard.BuildEmbed(arg, arg.Guild));
                         }
                         catch { }
                     }
@@ -47,7 +47,7 @@ namespace Public_Bot.Modules.Handlers
                 {
                     var chan = arg.Guild.GetTextChannel(GuildSettings.WelcomeCard.WelcomeChannel);
                     if (chan != null)
-                        await chan.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}");
+                        await chan.SendMessageAsync($"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{arg.Id}>" : "")}", false, GuildSettings.WelcomeCard.BuildEmbed(arg, arg.Guild));
                 }
             }
         }
@@ -84,11 +84,13 @@ namespace Public_Bot.Modules.Handlers
             //text
             StringFormat stringFormat = new StringFormat();
             stringFormat.Alignment = StringAlignment.Center;
-            // stringFormat.LineAlignment = StringAlignment.Center;
+            stringFormat.FormatFlags = StringFormatFlags.LineLimit;
+            stringFormat.Trimming = StringTrimming.None;
+            stringFormat.LineAlignment = StringAlignment.Center;
 
             var font = new Font("Bahnschrift", 30, FontStyle.Regular);
             var brush = new SolidBrush(System.Drawing.Color.White);
-            WelcomeGraphics.DrawString(guild.Name, new Font("Bahnschrift", 40), new SolidBrush(System.Drawing.Color.White), new RectangleF(60, 50, WelcomeImage.Width - 120, 60), stringFormat);
+            WelcomeGraphics.DrawString(guild.Name, new Font("Bahnschrift", 40, FontStyle.Regular), new SolidBrush(System.Drawing.Color.White), new RectangleF(60, 50, WelcomeImage.Width - 120, 60), stringFormat);
             var textArea = new Rectangle(50, 310, 860, 200);
             //WelcomeGraphics.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(200, 255, 40, 40)), LevelCommands.RankBuilder.RoundedRect(textArea, 30));
             WelcomeGraphics.DrawString($"{welc.GenerateWelcomeMessage(user, guild)}", font, brush, textArea, stringFormat);

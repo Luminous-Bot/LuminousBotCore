@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using Public_Bot.Modules.Handlers;
+using Public_Bot.State.Types;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +29,8 @@ namespace Public_Bot
 
             handlerService = handler;
 
+            LoadGuildSettings();
+
             client.MessageReceived += CheckCommandAsync;
 
             client.ShardReady += Ready;
@@ -36,7 +39,6 @@ namespace Public_Bot
 
             client.ShardDisconnected += Client_ShardDisconnected;
 
-            LoadGuildSettings();
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
@@ -44,6 +46,9 @@ namespace Public_Bot
         private async Task Client_ShardConnected(DiscordSocketClient arg)
         {
             CurrentGuildSettings.Where(x => x.WelcomeCard == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
+            CurrentGuildSettings.Where(x => arg.GetGuild(x.GuildID) != null && x.WelcomeCard.BackgroundUrl == null ).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
+            CurrentGuildSettings.Where(x => x.leaveMessage == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.leaveMessage = new LeaveMessage(x, client.GetGuild(x.GuildID)));
+
             StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CurrentGuildSettings);
         }
         private static string FormatJson(string json)

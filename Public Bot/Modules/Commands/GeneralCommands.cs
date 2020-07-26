@@ -23,9 +23,9 @@ namespace Public_Bot.Modules.Commands
         {
             if (GuildSettings.WelcomeCard.isEnabled)
             {
-                var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
-                img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
-                await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", $"{(GuildSettings.WelcomeCard.MentionsUsers ? $"<@{Context.User.Id}>" : "")}");
+                //var img = WelcomeHandler.GenerateWelcomeImage(Context.User as SocketGuildUser, Context.Guild, GuildSettings.WelcomeCard);
+                //img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", System.Drawing.Imaging.ImageFormat.Png);
+                await Context.Channel.SendMessageAsync("", false, GuildSettings.WelcomeCard.BuildEmbed(Context.User as SocketGuildUser, Context.Guild));
             }
         }
         [DiscordCommand("testleave",description ="test your leave message!",commandHelp ="`(PREFIX)testleave`")]

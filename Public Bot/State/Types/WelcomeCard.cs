@@ -17,6 +17,21 @@ namespace Public_Bot
         public string WelcomeMessage { get; set; } = "Welcome {user.name} to {guild.name}! you are the {guild.count} member!";
         public string GenerateWelcomeMessage(SocketGuildUser user, SocketGuild g)
             => WelcomeMessage.Replace("{user}", user.ToString()).Replace("{user.name}", user.Username).Replace("{guild.name}", g.Name).Replace("{guild.count}", g.MemberCount.ToString());
+        public Embed BuildEmbed(SocketGuildUser usr, SocketGuild g)
+        {
+            EmbedBuilder b = new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = usr.ToString(),
+                    IconUrl = usr.GetAvatarUrl()
+                },
+                Description = GenerateWelcomeMessage(usr, g),
+                Color = CommandModuleBase.Blurple,
+                Footer = new EmbedFooterBuilder() { Text = g.Name },
+            }.WithCurrentTimestamp();
+            return b.Build();
+        }
 
         public WelcomeCard() { }
         public WelcomeCard(GuildSettings gs)
@@ -29,7 +44,8 @@ namespace Public_Bot
             this.isEnabled = false;
             this.GuildId = gs.GuildID;
             WelcomeChannel = guild.SystemChannelId.HasValue ? guild.SystemChannelId.Value : guild.DefaultChannelId;
-            BackgroundUrl = guild.BannerUrl;
+            if (guild.BannerUrl != null)
+                BackgroundUrl = guild.BannerUrl;
         }
     }
 }

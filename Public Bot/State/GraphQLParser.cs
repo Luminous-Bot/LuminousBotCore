@@ -71,14 +71,14 @@ namespace Public_Bot
         }
         public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params KeyValuePair<string, object>[] Params)
         {
-            Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);
+            Console.WriteLine($"Making Mutation for method {opname}");
             var classtype = typeof(T);
-            var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSVar) || x.AttributeType == typeof(GraphQLSObj)));
+            var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(GraphQLSVar) || y.AttributeType == typeof(GraphQLSObj)));
             List<string> vars = new List<string>();
-            foreach(var tv in typeVars)
+            foreach (var tv in typeVars)
             {
                 string name = tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName)) ? ((GraphQLName)tv.GetCustomAttribute(typeof(GraphQLName))).Name : tv.Name;
-                if(tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
+                if (tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
                 {
                     var tvT = tv.PropertyType;
                     var l = RecurseMutateVars(tvT, tv.GetValue(obj));
@@ -99,13 +99,13 @@ namespace Public_Bot
                 parms += $"{p.Key}: \\\"{p.Value.ToString()}\\\" ";
             string query = $"{{\"operationName\": \"{opname}\"," +
                            $"\"variables\": {(hasVars ? $"{{ \"{varName}\": {{ {string.Join(", ", vars)} }} }}" : "{ }")}," +
-                           $"\"query\": \"mutation {opname}{(hasVars ? $"(${varName}: {varType})" : "")} {{ {opname}({( hasVars ? $"{varName}: ${varName}, {parms}" : parms)}) {genProps(typeof(T))} }}\" }}";
+                           $"\"query\": \"mutation {opname}{(hasVars ? $"(${varName}: {varType})" : "")} {{ {opname}({(hasVars ? $"{varName}: ${varName}, {parms}" : parms)}) {genProps(typeof(T))} }}\" }}";
 
             return query;
         }
         public static List<string> RecurseMutateVars(Type type, object obj)
         {
-            var typeVars = type.GetProperties().Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSVar) || x.AttributeType == typeof(GraphQLSObj)));
+            var typeVars = type.GetProperties().Where(x => x.CustomAttributes.Any(z => z.AttributeType == typeof(GraphQLSVar) || z.AttributeType == typeof(GraphQLSObj)));
             List<string> vars = new List<string>();
             foreach (var tv in typeVars)
             {
@@ -119,14 +119,46 @@ namespace Public_Bot
                 else
                 {
                     string val = "";
-                    if (tv.PropertyType.Name.Contains("List"))
-                        val = JsonConvert.SerializeObject(tv.GetValue(obj));
+                    if (tv.PropertyType.Name.Contains("List") && tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
+                        val = GenerateList(tv.PropertyType.GenericTypeArguments.First(), tv.GetValue(obj) as IList);
+                    else if (tv.PropertyType.Name.Contains("List"))
+                        val = genPropList(tv.GetValue(obj) as IList);
                     else
                         val = Parser.ContainsKey(tv.PropertyType) ? Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
                     vars.Add($"\"{name}\": {val}");
                 }
             }
             return vars;
+        }
+        public static string genPropList(IList obj)
+        {
+            if (obj.Count == 0)
+                return "[]";
+            List<string> final = new List<string>();
+            var intyp = obj.GetType().GenericTypeArguments.First();
+            foreach (var o in obj)
+                final.Add(Parser.ContainsKey(intyp) ? Parser[intyp](o) : o.ToString());
+            return $"[ {string.Join(", ", final)} ]";
+        }
+        public static string GenerateList(Type listof, IList obj)
+        {
+            if (obj.Count == 0)
+                return "[]";
+            var typeVars = listof.GetProperties().Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(GraphQLSVar) || y.AttributeType == typeof(GraphQLSObj)));
+            List<string> fn = new List<string>();
+            foreach (var item in obj)
+            {
+                List<string> fnl = new List<string>();
+                foreach (var t in typeVars)
+                {
+                    fnl.Add($"\"{t.Name}\": {(Parser.ContainsKey(t.PropertyType) ? Parser[t.PropertyType](t.GetValue(item)) : t.GetValue(item))}");
+
+                }
+                fn.Add(string.Join(", ", fnl));
+            }
+
+            return $"[ {{ {string.Join(" }, { ", fn)} }} ]";
+
         }
         public static string GenerateGQLQuery<T>(string method, params KeyValuePair<string, object>[] Params)
         {

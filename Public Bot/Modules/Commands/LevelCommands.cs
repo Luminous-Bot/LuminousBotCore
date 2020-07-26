@@ -943,10 +943,10 @@ namespace Public_Bot.Modules.Commands
                             bc.Add($"🔊 - {rch.Name}");
                     }
                     List<string> rl = new List<string>();
-                    //foreach (var chan in ls.RankRoles.OrderBy(x => x.Key * -1))
-                    //{
-                    //    rl.Add($"{chan.Key} - <@&{chan.Value}>");
-                    //}
+                    foreach (var chan in ls.RankRoles.OrderBy(x => x.Level * -1))
+                    {
+                        rl.Add($"{chan.Level} - <@&{chan.Role}>");
+                    }
                     Dictionary<string, string> gnrl = new Dictionary<string, string>();
                     gnrl.Add("XP Multiplier:", ls.LevelMultiplier.ToString());
                     gnrl.Add("XP Per Message:", ls.XpPerMessage.ToString());
@@ -1291,10 +1291,10 @@ namespace Public_Bot.Modules.Commands
                     if (args.Length == 1)
                     {
                         List<string> ranks = new List<string>();
-                        //foreach (var chan in ls.RankRoles.OrderBy(x => x.Key * -1))
-                        //{
-                        //    ranks.Add($"Level {chan.Key} - <@&{chan.Value}>");
-                        //}
+                        foreach (var chan in ls.RankRoles.OrderBy(x => x.Level * -1))
+                        {
+                            ranks.Add($"Level {chan.Level} - <@&{chan.Role}>");
+                        }
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Ranks",
@@ -1461,45 +1461,45 @@ namespace Public_Bot.Modules.Commands
                             Color = Color.Orange
                         }.WithCurrentTimestamp().Build());
                     }
-                    //if (args.Length == 3)
-                    //{
-                    //    if (args[2].ToLower() == "confirm")
-                    //    {
-                    //        if (CurrentRF.Contains(Context.Guild.Id))
-                    //        {
-                    //            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    //            {
-                    //                Title = "Theres a refresh already happening!",
-                    //                Description = "Please wait untill the previous refresh completes",
-                    //                Color = Color.Red,
+                    if (args.Length == 3)
+                    {
+                        if (args[2].ToLower() == "confirm")
+                        {
+                            if (CurrentRF.Contains(Context.Guild.Id))
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Theres a refresh already happening!",
+                                    Description = "Please wait untill the previous refresh completes",
+                                    Color = Color.Red,
 
-                    //            }.WithCurrentTimestamp().Build());
-                    //            return;
-                    //        }
-                    //        var role = GetRole(args[1]);
-                    //        if (role == null)
-                    //        {
-                    //            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    //            {
-                    //                Title = "That role is invalid!",
-                    //                Description = "Please make sure you spell the role name right, or provided a valid id or mention.",
-                    //                Color = Color.Red,
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            var role = GetRole(args[1]);
+                            if (role == null)
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "That role is invalid!",
+                                    Description = "Please make sure you spell the role name right, or provided a valid id or mention.",
+                                    Color = Color.Red,
 
-                    //            }.WithCurrentTimestamp().Build());
-                    //        }
-                    //        if (ls.RankRoles.ContainsValue(role.Id))
-                    //        {
-                    //            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    //            {
-                    //                Title = "We're on it!",
-                    //                Description = "We are working on giving the users there roles! I'l send a message here when the process is finnished",
-                    //                Color = Color.Green
-                    //            }.WithCurrentTimestamp().Build());
-                    //            CurrentRF.Add(Context.Guild.Id);
-                    //            new Thread(() => LevelHandler.GiveForNewRole(gl, role, ls.RankRoles.First(x => x.Value == role.Id).Key, Context.User as SocketGuildUser, Context.Channel as SocketTextChannel)).Start();
-                    //        }
-                    //    }
-                    //}
+                                }.WithCurrentTimestamp().Build());
+                            }
+                            if (ls.RankRoles.Any(x => x.Role == role.Id))
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "We're on it!",
+                                    Description = "We are working on giving the users there roles! I'l send a message here when the process is finnished",
+                                    Color = Color.Green
+                                }.WithCurrentTimestamp().Build());
+                                CurrentRF.Add(Context.Guild.Id);
+                                new Thread(() => LevelHandler.GiveForNewRole(gl, role, ls.RankRoles.First(x => x.Role == role.Id).Level, Context.User as SocketGuildUser, Context.Channel as SocketTextChannel)).Start();
+                            }
+                        }
+                    }
                     break;
             }
         }
