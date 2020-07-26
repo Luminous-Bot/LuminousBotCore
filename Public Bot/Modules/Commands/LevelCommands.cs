@@ -1258,7 +1258,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Blacklisted Channels",
-                                Description = $"Added the channel {chan.Name} to the Blacklisted Channels!",
+                                Description = $"Added the channel `{chan.Name}` to the Blacklisted Channels!",
                                 Color = Color.Green
                             }.WithCurrentTimestamp().Build());
                             return;
@@ -1280,7 +1280,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Blacklisted Channels",
-                                Description = $"Removed the channel {chan.Name} from the Blacklisted Channels!",
+                                Description = $"Removed the channel `{chan.Name}` from the Blacklisted Channels!",
                                 Color = Color.Green
                             }.WithCurrentTimestamp().Build());
                             return;

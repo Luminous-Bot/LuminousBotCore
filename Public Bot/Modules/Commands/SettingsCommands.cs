@@ -352,7 +352,8 @@ namespace Public_Bot.Modules.Commands
                          "*{guild} - Name of your server*\n" + 
                          "*{guild.count} - The number of members in your server*"
             ,
-            description ="gives the leave message settings")]
+            description ="gives the leave message settings", 
+            RequiredPermission = true)]
         [Alt("leave")]
         public async Task leaveChanger(params string[] args)
         {

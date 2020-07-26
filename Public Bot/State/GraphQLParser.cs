@@ -71,7 +71,7 @@ namespace Public_Bot
         }
         public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params KeyValuePair<string, object>[] Params)
         {
-            Console.WriteLine($"Making Mutation for method {opname}");
+            Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);
             var classtype = typeof(T);
             var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(GraphQLSVar) || y.AttributeType == typeof(GraphQLSObj)));
             List<string> vars = new List<string>();
