@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -100,15 +101,46 @@ namespace Public_Bot.Modules.Handlers
             if (gs.LogChannel != 0 && gs.Logging)
             {
                 var logchan = arg2.Guild.GetTextChannel(gs.LogChannel);
-
+                string body = "Can't find changes :(";
+                if (arg1.Name != arg2.Name)
+                    body = $"Name Changed:\n> Old Name: {arg1.Name}\n> New Name: {arg2.Name}\n\n";
+                if(!arg1.Permissions.Equals(arg2.Permissions))
+                {
+                    body = "Permission Changed:\n";
+                    var type = typeof(SocketRole);
+                    var props = type.GetProperties();
+                    foreach(var prop in props.Where(x => x.PropertyType == typeof(bool)))
+                    {
+                        bool oldVal = (bool)prop.GetValue(arg1);
+                        bool newVal = (bool)prop.GetValue(arg2);
+                        if (oldVal != newVal)
+                            body += $"> **{prop.Name}**\n> Old Value: {(oldVal ? "✅" : "❌")}\n> New Value: {(newVal ? "✅" : "❌")}\n";
+                    }
+                    body += "\n";
+                }
+                if (arg1.Color != arg2.Color)
+                    body += $"Color Changed:\n> Old Color: {arg1.Color.ToString()}\n> New Color: {arg2.Color.ToString()}\n\n";
+                if (arg1.IsMentionable != arg2.IsMentionable)
+                    body += $"Mention Changed:\n> Old Value: {(arg1.IsMentionable ? "✅" : "❌")}\n> New Value: {(arg2.IsMentionable ? "✅" : "❌")}\n\n";
+                if (arg1.IsHoisted != arg2.IsHoisted)
+                    body += $"Hoisted Changed:\n> Old Value: {(arg1.IsHoisted)}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}";
+                
                 if (logchan != null)
                 {
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "⚡ Role Updated ⚡",
                         Description = $"The role {arg2.Mention} was Updated.",
+                        Fields = new List<EmbedFieldBuilder>()
+                        {
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Changes:",
+                                Value = body
+                            }
+                        },
                         Color = Color.Orange
-                    }.WithCurrentTimestamp().Build());
+                    }.WithCurrentTimestamp().Build());;
                 }
             }
         }
@@ -157,6 +189,8 @@ namespace Public_Bot.Modules.Handlers
                 var gs = GuildSettings.Get(sgc.Guild.Id);
                 if (gs.LogChannel != 0 && gs.Logging)
                 {
+                    if (arg2.Id == gs.LogChannel)
+                        return;
                     var logchan = sgc.Guild.GetTextChannel(gs.LogChannel);
                     if (arg3.Id == logchan.Id)
                         return;
@@ -222,8 +256,11 @@ namespace Public_Bot.Modules.Handlers
             {
                 var sgc = arg2 as SocketTextChannel;
                 var gs = GuildSettings.Get(sgc.Guild.Id);
+
                 if (gs.LogChannel != 0 && gs.Logging)
                 {
+                    if (arg2.Id == gs.LogChannel)
+                        return;
                     var logchan = sgc.Guild.GetTextChannel(gs.LogChannel);
                     if (logchan != null)
                     {
