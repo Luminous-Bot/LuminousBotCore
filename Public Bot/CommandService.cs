@@ -574,7 +574,7 @@ namespace Public_Bot
                     try
                     {
                         var u = context.Guild.GetUser(context.Message.Author.Id);
-                        if (context.User.Id == 259053800755691520)
+                        if (context.User.Id == 259053800755691520 || context.User.Id == 393448221944315915 || context.User.Id == 223707551013797888 || context.User.Id == 701029647760097361 || context.User.Id == 310586056351154176)
                             CommandModuleBase.HasExecutePermission = true;
                         else
                             CommandModuleBase.HasExecutePermission =
