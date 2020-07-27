@@ -24,17 +24,13 @@ namespace Public_Bot.Modules.Commands
         {
 
             HttpClient client = new HttpClient();
-            var request = await client.GetAsync("https://www.reddit.com/r/dankmemes.json/new");
+            var request = await client.GetAsync("https://www.reddit.com/r/dankmemes.json");
             string response = await request.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
             Regex r = new Regex(@"https:\/\/i.redd.it\/(.*?)\.");
-            var childs = data.Data.Children.Where(x => r.IsMatch(x.Data.Url.ToString()));
+            var childs = data.Data.Children.Where(x => r.IsMatch(x.Data.Url.ToString())).ToList();
             Random rnd = new Random();
-            int count = childs.Count();
-            if (rot >= count - 1)
-                rot = 0;
-            var post = childs.ToArray()[0];
-            rot++;
+            var post = childs[rnd.Next(0, childs.Count())];
 
             EmbedBuilder b = new EmbedBuilder()
             {

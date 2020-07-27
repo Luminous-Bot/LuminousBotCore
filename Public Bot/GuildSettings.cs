@@ -72,9 +72,9 @@ namespace Public_Bot
             if (Leveling)
                 new GuildLeaderboards(guild);
 
-            WelcomeCard = new WelcomeCard(this);
-            WelcomeCard.WelcomeChannel = guild.GetSystemChannelAsync(CacheMode.AllowDownload).Result.Id;
-            WelcomeCard.BackgroundUrl = guild.BannerUrl;
+            if (this == null)
+                Console.WriteLine("UH OH: THIS IS NULL ");
+            WelcomeCard = new WelcomeCard(this, guild);
             leaveMessage = new LeaveMessage(this,guild);
             CommandHandler.CurrentGuildSettings.Add(this);
             StateHandler.SaveObject("guildsettings", CommandHandler.CurrentGuildSettings);

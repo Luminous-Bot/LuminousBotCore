@@ -212,6 +212,181 @@ namespace Public_Bot.Modules.Commands
             }
 
         }
+        [DiscordCommand("nickname", commandHelp = "`(PREFIX)nickname <@user> <nickname>`", description = "Changes a user's nickname")]
+        [Alt("nick")]
+        public async Task NicknameUpdate(params string[] args)
+        {
+
+            if (args.Length == 0)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                {
+                    Author = new EmbedAuthorBuilder()
+                    {
+                        Name = "Provide some Arguments!"
+                    },
+                    Color = Color.Orange,
+                    Description = "You didnt provide any arguments!"
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            var cgu = Context.Guild.GetUser(Context.User.Id);
+
+            var user = GetUser(args[0]);
+            if (user != null && user.Id != cgu.Id)
+            {
+                if (user.Id == Context.Guild.OwnerId)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        ThumbnailUrl = "https://cdn.hapsy.net/947e21c9-0551-4043-a942-338cec178ad2",
+                        Color = Color.Red,
+                        Title = "Missing Permissions",
+                        Description = "The bot can't nick the owner... only he can."
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                if (user.Hierarchy >= Context.Guild.CurrentUser.Hierarchy)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Color = Color.Red,
+                        Title = "Missing Permissions",
+                        Description = "The bot can't change a users nickname that has the same role or a role above the bots!"
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+
+                if (cgu.GuildPermissions.ManageNicknames || cgu.GuildPermissions.Administrator)
+                {
+                    try
+                    {
+                        await (user as SocketGuildUser).ModifyAsync(x => x.Nickname = string.Join(' ', args.Skip(1)));
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Author = new EmbedAuthorBuilder
+                            {
+                                IconUrl = cgu.GetAvatarUrl(),
+                                Name = "Success!"
+                            },
+                            Color = Color.Green,
+                            Description = $"Changed {user.Username}s nickname to {string.Join(' ', args.Skip(1))}"
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    catch
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Author = new EmbedAuthorBuilder
+                            {
+                                IconUrl = cgu.GetAvatarUrl(),
+                                Name = "Error!"
+                            },
+                            Color = Color.Red,
+                            Title = "Missing Permissions",
+                            Description = "The bot doesn't have the `Manage Nicknames` permission!"
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Title = "Missing Permissions",
+                        Description = "You need the `Manage Nicknames` permission to nick other users",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+
+            }
+            else
+            {
+                if (cgu.Id == Context.Guild.OwnerId)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        ThumbnailUrl = "https://cdn.hapsy.net/947e21c9-0551-4043-a942-338cec178ad2",
+                        Color = Color.Red,
+                        Title = "Missing Permissions",
+                        Description = "The bot can't nick the owner... only he can."
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                if (cgu.Hierarchy >= Context.Guild.CurrentUser.Hierarchy)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Color = Color.Red,
+                        Title = "Missing Permissions",
+                        Description = "The bot can't change a users nickname that has the same role or a role above the bots!"
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                string newNick = "";
+                if (user == null)
+                    newNick = string.Join(' ', args);
+                else
+                    newNick = string.Join(' ', args.Skip(1));
+                if (cgu.GuildPermissions.ChangeNickname || cgu.GuildPermissions.Administrator)
+                {
+                    await cgu.ModifyAsync(x => x.Nickname = newNick);
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Success!"
+                        },
+                        Color = Color.Green,
+                        Description = $"Your nickname is now `{newNick}`"
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Title = "Missing Permissions",
+                        Description = "You need the `Change Nickname` permission to nick other users",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+            }
+        }
         [DiscordCommand("invite", description = "Provides an invite for this bot")]
         public async Task invite()
         {
@@ -230,53 +405,74 @@ namespace Public_Bot.Modules.Commands
             .WithCurrentTimestamp().Build());
         }
         
-
-
-        //liege and quin coded this shit ;)
         [DiscordCommand("whois", description = "Shows information about the mentioned user", commandHelp = "Usage: `(PREFIX)whois <mention>`")]
         public async Task WhoIs(params string[] user)
         {
 
             SocketGuildUser userAccount;
-
-            userAccount = GetUser(user.First());
+            if (user.Length == 0)
+                userAccount = Context.User as SocketGuildUser;
+            else userAccount = GetUser(user[0]);
 
             if (userAccount == null)
             {
                 EmbedBuilder error = new EmbedBuilder()
                 {
                     Title = "That user is invalid ¯-(ツ)-¯",
-                    Description = "If you put their nickname, try mentioning the user instead",
+                    Description = "Please provide a valid user",
                     Color = Blurple
                 };
                 await Context.Channel.SendMessageAsync("", false, error.Build());
                 return;
             }
-
-            IReadOnlyCollection<SocketRole> roles = userAccount.Roles;
-            List<SocketRole> sortedRoles = roles.OrderByDescending(o => o.Position).ToList();
-            SocketRole MainRole = sortedRoles.First();
-
+            string perms = "```\n";
+            var props = typeof(GuildPermissions).GetProperties();
+            var boolProps = props.Where(x => x.PropertyType == typeof(bool));
+            var pTypes = boolProps.Where(x => (bool)x.GetValue(userAccount.GuildPermissions) == true).ToList();
+            var nTypes = boolProps.Where(x => (bool)x.GetValue(userAccount.GuildPermissions) == false).ToList();
+            var pd = boolProps.Max(x => x.Name.Length) + 1;
+            if(nTypes.Count == 0)
+                perms += "Administrator: ✅```";
+            else
+            {
+                foreach (var perm in pTypes)
+                    perms += $"{perm.Name}:".PadRight(pd) + " ✅\n";
+                foreach (var nperm in nTypes)
+                    perms += $"{nperm.Name}:".PadRight(pd) + " ❌\n";
+                perms += "```";
+            }
+            
             EmbedBuilder whois = new EmbedBuilder()
             {
-                Title = $"`{userAccount}'s info`",
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = userAccount.ToString(),
+                    IconUrl = userAccount.GetAvatarUrl()
+                },
                 Color = Blurple,
-                Description = $"`Creation Date:` {userAccount.CreatedAt.UtcDateTime.ToLocalTime().ToString()}\n" +
-                              $"`Joined At:` {userAccount.JoinedAt.Value.UtcDateTime.ToLocalTime().ToString()}\n",
+                Description = $"Nickname?: {(userAccount.Nickname == null ? "None" : userAccount.Nickname)}\n" +
+                              $"Id: {userAccount.Id}\n" +
+                              $"Creation Date: {userAccount.CreatedAt.UtcDateTime.ToString("r")}\n" +
+                              $"Joined At: {userAccount.JoinedAt.Value.UtcDateTime.ToString("r")}\n",
                 Fields = new List<EmbedFieldBuilder>()
                 {
-                    { new EmbedFieldBuilder()
-                    { 
+                    new EmbedFieldBuilder()
+                    {
                         Name = "Roles",
                         Value =
                         string.Join("\n", userAccount.Roles.OrderBy(x => x.Position).Select(x => x.Mention)).Length > 1024
                         ? $"Unable to display all roles, listing top ten:\n{string.Join("\n", userAccount.Roles.OrderBy(x => x.Position).Select(x => x.Mention).Take(10))}"
                         : string.Join("\n", userAccount.Roles.Select(x => x.Mention))
-                    } }
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Permissions",
+                        Value = perms
+                    }
                 }
             };
 
-            Context.Channel.SendMessageAsync("", false, whois.Build());
+            await Context.Channel.SendMessageAsync("", false, whois.Build());
         }
 
 

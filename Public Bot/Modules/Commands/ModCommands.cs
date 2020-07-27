@@ -782,15 +782,16 @@ namespace Public_Bot.Modules.Commands
                     }
                     await Context.Channel.SendMessageAsync("", false, alfa.Build());
                 }
-                catch {
+                catch
+                {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
                     {
-                        Title ="Missing Permissions",
+                        Title = "Missing Permissions",
                         Description = "I do not have perms :sob:"
                     }.WithCurrentTimestamp().Build());
                 }
             }
-            [DiscordCommand("unlock",commandHelp ="`(PREFIX)unlock #channel`",description ="Unlocks the mentioned channel")]
+            [DiscordCommand("unlock", commandHelp = "`(PREFIX)unlock #channel`", description = "Unlocks the mentioned channel")]
             public async Task Unlock(params string[] args)
             {
                 if (!Context.Message.MentionedChannels.Any())
@@ -836,60 +837,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                 }
             }
-            [DiscordCommand("nickname",RequiredPermission =true,commandHelp ="`(PREFIX)nickname @USER newnick`",description ="Changes the nickname of mentioned user")]
-            [Alt("nick")]
-            public async Task NicknameUpdate(params string[] args)
-            {
-                if (!Context.Message.MentionedUsers.Any())
-                {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "User not mentioned",
-                        Description = "You need to mention a user to change their nickname!"
-                    }.WithCurrentTimestamp().Build()
-                    );
-                    return;
-                }
-                if (args.Length == 1)
-                {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "What nickname do we set to??",
-                        Description = "You need to give a nickname dummy."
-                    }.WithCurrentTimestamp().Build()
-                    );
-                    return;
-                }
-                var user = Context.Message.MentionedUsers.First();
-                if (args[0][0] == '<')
-                {
-                    try
-                    {
-                        await (user as SocketGuildUser).ModifyAsync(x => x.Nickname = string.Join(' ', args.Skip(1)));
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                        {
-                            Title = "Nickname changed",
-                            Description = $"{user.Username}s nickname was changed to {string.Join(' ', args.Skip(1))}"
-                        }.WithCurrentTimestamp().Build());
-                    }
-                    catch
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                        {
-                            Title = "Missing Permissions",
-                            Description = "I do not have perms :sob:"
-                        }.WithCurrentTimestamp().Build());
-                    }
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                    {
-                        Title = "Invalid Params",
-                        Description = $"The command usage is {GuildSettings.Prefix}nickname @mention new name that may exceed 1 word"
-                    }.WithCurrentTimestamp().Build());
-                }
-            }
+    
             [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {

@@ -49,6 +49,12 @@ namespace Public_Bot
             CurrentGuildSettings.Where(x => arg.GetGuild(x.GuildID) != null && x.WelcomeCard.BackgroundUrl == null ).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
             CurrentGuildSettings.Where(x => x.leaveMessage == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.leaveMessage = new LeaveMessage(x, client.GetGuild(x.GuildID)));
 
+
+            foreach(var gs in CurrentGuildSettings)
+                foreach (var itm in CustomCommandService.Modules)
+                    if (!gs.ModulesSettings.ContainsKey(itm.Key))
+                        gs.ModulesSettings.Add(itm.Key, true);
+
             StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CurrentGuildSettings);
         }
         private static string FormatJson(string json)
