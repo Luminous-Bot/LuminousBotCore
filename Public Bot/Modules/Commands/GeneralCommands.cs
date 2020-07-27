@@ -241,6 +241,18 @@ namespace Public_Bot.Modules.Commands
 
             userAccount = GetUser(user.First());
 
+            if (userAccount == null)
+            {
+                EmbedBuilder error = new EmbedBuilder()
+                {
+                    Title = "That user is invalid ¯-(ツ)-¯",
+                    Description = "If you put their nickname, try mentioning the user instead",
+                    Color = Blurple
+                };
+                await Context.Channel.SendMessageAsync("", false, error.Build());
+                return;
+            }
+
             IReadOnlyCollection<SocketRole> roles = userAccount.Roles;
             List<SocketRole> sortedRoles = roles.OrderByDescending(o => o.Position).ToList();
             SocketRole MainRole = sortedRoles.First();
