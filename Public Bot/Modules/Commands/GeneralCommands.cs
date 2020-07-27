@@ -233,43 +233,38 @@ namespace Public_Bot.Modules.Commands
 
 
         //liege and quin coded this shit ;)
-        [DiscordCommand("whois")]
-        public async Task ServerInfo(params string[] user)
+        [DiscordCommand("whois", description = "Shows information about the mentioned user", commandHelp = "Usage: `(PREFIX)whois <mention>`")]
+        public async Task WhoIs(params string[] user)
         {
-            SocketGuildUser userAccount; 
 
-            if (user.Length == 0)
-            {
-                userAccount = Context.User as SocketGuildUser;
-            }
-            else
-            {
-                userAccount = GetUser(user.First());
+            SocketGuildUser userAccount;
 
-                if(userAccount == null)
+            userAccount = GetUser(user.First());
+
+            IReadOnlyCollection<SocketRole> roles = userAccount.Roles;
+            List<SocketRole> sortedRoles = roles.OrderByDescending(o => o.Position).ToList();
+            SocketRole MainRole = sortedRoles.First();
+
+            EmbedBuilder whois = new EmbedBuilder()
+            {
+                Title = $"`{userAccount}'s info`",
+                Color = Blurple,
+                Description = $"`Creation Date:` {userAccount.CreatedAt.UtcDateTime.ToLocalTime().ToString()}\n" +
+                              $"`Joined At:` {userAccount.JoinedAt.Value.UtcDateTime.ToLocalTime().ToString()}\n",
+                Fields = new List<EmbedFieldBuilder>()
                 {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "Invalid User",
-                        Description = "The user you provided is invalid",
-                        Color = Color.Red
-                    }.Build());
-                    return;
+                    { new EmbedFieldBuilder()
+                    { 
+                        Name = "Roles",
+                        Value =
+                        string.Join("\n", userAccount.Roles.OrderBy(x => x.Position).Select(x => x.Mention)).Length > 1024
+                        ? $"Unable to display all roles, listing top ten:\n{string.Join("\n", userAccount.Roles.OrderBy(x => x.Position).Select(x => x.Mention).Take(10))}"
+                        : string.Join("\n", userAccount.Roles.Select(x => x.Mention))
+                    } }
                 }
-            }       
-                var info = new EmbedBuilder();
-                //info.WithTitle($"{userAccount} Info");
-                info.WithAuthor(userAccount);
-                info.WithDescription(userAccount.Mention);
-                info.AddField("Roles", $"{userAccount.Roles.Count}", true);
-                info.AddField("User ID", $"{userAccount.Id}", true);
-                info.AddField("Status", $"{userAccount.Status}", true);
-                //info.AddField("Playing", $"{userAccount.Activity}", true);
-                info.AddField("Joined", $"{userAccount.JoinedAt}", true);
-                info.AddField("Created", $"{userAccount.CreatedAt}", true);
-                info.WithColor(Color.Orange);
+            };
 
-                await Context.Channel.SendMessageAsync("", false, info.Build());           
+            Context.Channel.SendMessageAsync("", false, whois.Build());
         }
 
 
