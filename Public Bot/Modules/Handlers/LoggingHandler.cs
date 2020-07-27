@@ -114,7 +114,7 @@ namespace Public_Bot.Modules.Handlers
                         bool oldVal = (bool)prop.GetValue(arg1.Permissions);
                         bool newVal = (bool)prop.GetValue(arg2.Permissions);
                         if (oldVal != newVal)
-                            body += $"> **{prop.Name}**\n> Old Value:  {(oldVal ? "✅" : "❌")}\n> New Value: {(newVal ? "✅" : "❌")}\n> \n";
+                            body += $"> **{prop.Name}**\n> Old Value:  {(oldVal ? "✅" : "❌")}\n> New Value: {(newVal ? "✅" : "❌")}\n\n";
                     }
                     body += "\n";
                 }

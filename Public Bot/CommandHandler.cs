@@ -37,8 +37,7 @@ namespace Public_Bot
 
             client.ShardConnected += Client_ShardConnected;
 
-            client.ShardDisconnected += Client_ShardDisconnected;
-
+            //client.ShardDisconnected += Client_ShardDisconnected;
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
@@ -73,8 +72,8 @@ namespace Public_Bot
             }.WithCurrentTimestamp().Build());
         }
 
-        private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
-            => isReady = false;
+        //private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
+        //    => isReady = false;
 
         public static GuildSettings GetGuildSettings(ulong guildID)
         {
@@ -116,7 +115,10 @@ namespace Public_Bot
         private async Task CheckCommandAsync(SocketMessage arg)
         {
             if (!isReady)
+            {
+                Logger.Write("Fired command before bot was ready!", Logger.Severity.Error);
                 return;
+            }
 
             var msg = arg as SocketUserMessage;
             if (msg == null) return;
