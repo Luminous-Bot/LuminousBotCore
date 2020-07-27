@@ -20,6 +20,7 @@ namespace Public_Bot.Modules.Handlers
         public static DiscordShardedClient client;
         public static List<string> facts { get; set; }
         public static List<GuildLeaderboards> GuildLevels { get; set; }
+        public static XPBucket _xpBucket = new XPBucket();
         public LevelHandler(DiscordShardedClient c)
         {
             client = c;
@@ -127,9 +128,60 @@ namespace Public_Bot.Modules.Handlers
             };
             GuildLevels = StateService.Query<List<GuildLeaderboards>>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboards"));
             new System.Timers.Timer() { AutoReset = true, Interval = 60000, Enabled = true }.Elapsed += GiveVCPoints;
+            new System.Timers.Timer() { AutoReset = true, Interval = 3000, Enabled = true }.Elapsed += ClearBucket;
             client.MessageReceived += HandleLevelAdd;
         }
 
+        private async void ClearBucket(object sender, ElapsedEventArgs e)
+        {
+            var bRex = _xpBucket.BuildAndClear();
+            if (bRex == null)
+                return;
+            await StateService.ExecuteNoReturnAsync<List<LevelUser>>(bRex);
+        }
+
+        public class XPBucket
+        {
+            private List<XPBucketItem> _bucket = new List<XPBucketItem>();
+            public class XPBucketItem
+            {
+                public ulong GuildId { get; set; }
+                public ulong UserId { get; set; }
+                public LevelUser LevelUser { get; set; }
+            }
+            public void Add(LevelUser u)
+            {
+                var gid = u.GuildID;
+                var uid = u.MemberID;
+                if (_bucket.Any(x => x.GuildId == gid && x.UserId == uid))
+                    _bucket[_bucket.IndexOf(_bucket.Find(x => x.GuildId == gid && x.UserId == uid))] = new XPBucketItem()
+                    {
+                        GuildId = gid,
+                        UserId = uid,
+                        LevelUser = u
+                    };
+                else
+                    _bucket.Add(new XPBucketItem()
+                    {
+                        GuildId = gid,
+                        UserId = uid,
+                        LevelUser = u
+                    });
+            }
+            public string BuildAndClear()
+            {
+                if (_bucket.Count == 0)
+                    return null;
+                var b = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
+                _bucket.ForEach(x => b.Add(x.LevelUser,
+                                        new KeyValuePair<string, object>("guildId", $"\\\"{x.GuildId}\\\""),
+                                        new KeyValuePair<string, object>("userId", $"\\\"{x.UserId}\\\""),
+                                        new KeyValuePair<string, object>("level", x.LevelUser.CurrentLevel),
+                                        new KeyValuePair<string, object>("xp", x.LevelUser.CurrentXP)));
+                _bucket.Clear();
+                return b.Build();
+            }
+        }
         private void GiveVCPoints(object sender, ElapsedEventArgs e)
         {
             var _bucket = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
@@ -166,11 +218,7 @@ namespace Public_Bot.Modules.Handlers
                                         LevelUpUser(usr);
                                     gl.CurrentUsers.Add(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                                    _bucket.Add(usr,
-                                        new KeyValuePair<string, object>("guildId", $"\\\"{usr.GuildID}\\\""),
-                                        new KeyValuePair<string, object>("userId", $"\\\"{usr.MemberID}\\\""),
-                                        new KeyValuePair<string, object>("level", usr.CurrentLevel),
-                                        new KeyValuePair<string, object>("xp", usr.CurrentXP));
+                                    usr.Save();
                                 }
                             }
                         }
@@ -285,7 +333,7 @@ namespace Public_Bot.Modules.Handlers
                             if (usr.CurrentXP >= usr.NextLevelXP)
                                 LevelUpUser(usr);
                             Logger.Write($"{sm.Author} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                            usr.Save();
+                            _xpBucket.Add(usr);
                         }
                         else
                         {
