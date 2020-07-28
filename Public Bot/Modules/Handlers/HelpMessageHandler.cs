@@ -68,7 +68,6 @@ namespace Public_Bot.Modules.Handlers
 
                 if (arg3.Emote.Name == "⬅")
                 {
-                    //check if the message is > 2 weeks old or exists in swiss server
                     if (curpage == 1)
                     {
                         await msg.RemoveReactionAsync(arg3.Emote, arg3.User.Value);

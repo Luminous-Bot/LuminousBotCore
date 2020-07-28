@@ -171,19 +171,19 @@ namespace Public_Bot
                            Title = "**You didn't provide enough parameters!**",
                            Description = @$"Here's how to use the command",
                            Fields = new List<EmbedFieldBuilder>()
-                        {
-                            new EmbedFieldBuilder()
-                            {
-                                Name = "Your input:",
-                                Value = msg.Content,
-                                IsInline = true
-                            },
-                            new EmbedFieldBuilder()
-                            {
-                                Name = "Expected input:",
-                                Value = $"{CommandModuleBase.ReadCurrentCommands(s.Prefix).Find(x => x.CommandName == msg.Content.Split(' ')[0].Remove(0,1)).CommandHelpMessage}"
-                            }
-                        },
+                           {
+                               new EmbedFieldBuilder()
+                               {
+                                   Name = "Your input:",
+                                   Value = msg.Content,
+                                   IsInline = true
+                               },
+                               new EmbedFieldBuilder()
+                               {
+                                   Name = "Expected input:",
+                                   Value = $"{CommandModuleBase.ReadCurrentCommands(s.Prefix).Find(x => x.CommandName == msg.Content.Split(' ')[0].Remove(0,1)).CommandHelpMessage}"
+                               }
+                           },
                            Color = Color.Red,
                            Timestamp = DateTimeOffset.Now,
                        }.Build());
