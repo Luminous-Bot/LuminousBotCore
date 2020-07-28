@@ -791,7 +791,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                 }
             }
-            [DiscordCommand("unlock", commandHelp = "`(PREFIX)unlock #channel`", description = "Unlocks the mentioned channel")]
+            [DiscordCommand("unlock", commandHelp = "`(PREFIX)unlock #channel`", description = "Unlocks the mentioned channel",RequiredPermission = true)]
             public async Task Unlock(params string[] args)
             {
                 if (!Context.Message.MentionedChannels.Any())

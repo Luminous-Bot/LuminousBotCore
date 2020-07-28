@@ -13,14 +13,19 @@ namespace Public_Bot.State.Types
         public string leaveTitle { get; set; } = "We lost a comrade";
         public ulong leaveChannel { get; set; }
         public ulong GuildID { get; set; }
-        public Color Clr { get; set; } = new Color(114, 137, 218);
 
         public async Task<Embed> GenerateLeaveMessage(SocketUser x, SocketGuild gld)
         {
             var xyz = new EmbedBuilder
             {
-                Title = leaveTitle.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString()),
-                Color = Clr
+                Author = new EmbedAuthorBuilder()
+                {
+                    IconUrl = x.GetAvatarUrl(),
+                    Name = x.ToString()
+                },
+                Description = leaveTitle.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString()),
+                Color = CommandModuleBase.Blurple,
+                
             }.WithDescription(leaveMessage.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString())).WithCurrentTimestamp().Build();
             return xyz;
         }

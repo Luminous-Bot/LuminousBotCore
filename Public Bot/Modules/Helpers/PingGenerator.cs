@@ -95,22 +95,28 @@ namespace Public_Bot
 
             ChartGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
 
-            ChartGraphics.DrawLine(WhitePen, new PointF(ChartImage.Width - 60f, ChartImage.Height - 60f), new PointF(ChartImage.Width - 60f, 60f));
-            ChartGraphics.DrawLine(WhitePen, new PointF(30f, ChartImage.Height - 60f), new PointF(ChartImage.Width - 60f, ChartImage.Height - 60f));
+            ChartGraphics.DrawLine(WhitePen, new PointF(ChartImage.Width - 80f, ChartImage.Height - 60f), new PointF(ChartImage.Width - 80f, 60f));
+            ChartGraphics.DrawLine(WhitePen, new PointF(30f, ChartImage.Height - 60f), new PointF(ChartImage.Width - 80f, ChartImage.Height - 60f));
 
             ChartGraphics.DrawString("Time (Hours)", TitleFont, new SolidBrush(Color.White), ChartImage.Width / 2, ChartImage.Height - 30, new StringFormat() { Alignment = StringAlignment.Center });
             ChartGraphics.DrawString("Discord Ping (Past 24 Hours)", TitleFont, new SolidBrush(Color.White), ChartImage.Width / 2, 20, new StringFormat() { Alignment = StringAlignment.Center });
 
+            var chtr = yMax / 5;
+            var chtr2 = yMax / 10;
             for (float i = 1; i != yMax + 1; i++)
             {
-                if (i % 5 == 0)
+                if (i % chtr == 0)
                 {
-                    ChartGraphics.DrawString($"{i}ms", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF(ChartImage.Width - 50f, (ChartImage.Height - 60) - i * yOffset - 6));
-                    ChartGraphics.DrawLine(WhitePenS, new PointF(ChartImage.Width - 60f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 50f, (ChartImage.Height - 60) - i * yOffset));
+                    string n = i.ToString();
+                    if (i > 1000)
+                        n = ((double)i / 1000).ToString("0.#k") + " ";
+
+                    ChartGraphics.DrawString($"{n}ms", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF(ChartImage.Width - 70f, (ChartImage.Height - 60) - i * yOffset - 6));
+                    ChartGraphics.DrawLine(WhitePenS, new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 90f, (ChartImage.Height - 60) - i * yOffset));
                 }
-                if (i % 10 == 0)
+                if (i % chtr2 == 0)
                 {
-                    ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 60f, (ChartImage.Height - 60) - i * yOffset));
+                    ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset));
                 }
             }
             var hSpace = (ChartImage.Width - 120) / 24;
@@ -118,8 +124,8 @@ namespace Public_Bot
             {
                 if (i % 4 == 0)
                 {
-                    ChartGraphics.DrawLine(WhitePenSS, new PointF((ChartImage.Width - 60) - i * hSpace, (ChartImage.Height - 60)), new PointF((ChartImage.Width - 60) - i * hSpace, 60f));
-                    ChartGraphics.DrawString($"-{i}", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF((ChartImage.Width - 60) - i * hSpace, (ChartImage.Height - 50)), new StringFormat() { Alignment = StringAlignment.Center });
+                    ChartGraphics.DrawLine(WhitePenSS, new PointF((ChartImage.Width - 80) - i * hSpace, (ChartImage.Height - 60)), new PointF((ChartImage.Width - 80) - i * hSpace, 60f));
+                    ChartGraphics.DrawString($"-{i}", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF((ChartImage.Width - 80) - i * hSpace, (ChartImage.Height - 50)), new StringFormat() { Alignment = StringAlignment.Center });
                 }
             }
             ChartGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -128,7 +134,7 @@ namespace Public_Bot
             {
                 var cur = mets[i];
                 var nxt = mets[i + 1];
-                ChartGraphics.DrawLine(BlurplePen, new PointF(xOffset * i + 60f, (ChartImage.Height - 60) - ((cur.Value) * yOffset)), new PointF(xOffset * (i + 1) + 60f, (ChartImage.Height - 60) - ((nxt.Value) * yOffset)));
+                ChartGraphics.DrawLine(BlurplePen, new PointF(xOffset * i + 40f, (ChartImage.Height - 60) - ((cur.Value) * yOffset)), new PointF(xOffset * (i + 1) + 40f, (ChartImage.Height - 60) - ((nxt.Value) * yOffset)));
             }
 
             return ChartImage;

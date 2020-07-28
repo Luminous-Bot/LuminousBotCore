@@ -23,7 +23,7 @@ namespace Public_Bot.Modules.Commands
                           "`(PREFIX)welcomer <disable/off>`\n" +
                           "`(PREFIX)welcomer dm <true/false>`\n" +
                           "`(PREFIX)welcomer mentions <true/false>`",
-            description = "Welcomes new users into your guild!")]
+            description = "Welcomes new users into your guild!", RequiredPermission = true)]
         public async Task welcomer(params string[] args)
         {
             var ws = GuildSettings.WelcomeCard;
