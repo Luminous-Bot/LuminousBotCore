@@ -128,5 +128,16 @@ namespace Public_Bot.Modules.Commands
             await Context.Channel.SendMessageAsync("", false, embed.Build());
 
         }
+
+        [DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
+
+        public async Task HangmanAsync(SocketMessage arg)
+        {
+            await Context.Message.Author.SendMessageAsync("Please respond with the word or phrase you want to use for hangman!");
+            await Context.Message.Channel.SendMessageAsync("Sent you a dm <3");
+
+
+
+        }
     }
 }
