@@ -5,6 +5,7 @@ using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -711,7 +712,63 @@ namespace Public_Bot.Modules.Commands
                 await Task.Delay(delay);
                 await m.DeleteAsync();
             }
-            [DiscordCommand("purge")]
+            //[DiscordCommand("hardmute",RequiredPermission =true,commandHelp ="`(PREFIX)hardmute <user> <time> <reason>`",description ="Removes all roles from the user, and then mutes them.")]
+            public async Task hm(params string[] cmdargs)
+            {
+                if (cmdargs.Length < 1)
+                {
+                    await Context.Channel.SendMessageAsync(embed: new EmbedBuilder
+                    {
+                        Title = "Invalid Arguments",
+                        Description = "You havent even given a user."
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                var myUser = GetUser(cmdargs[0]);
+                if (myUser == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                    {
+                        Title = "Who?",
+                        Description = $"That user is invalid!",
+                        Color = Color.Red,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                    return;
+                }
+                if (myUser.Hierarchy >= (Context.User as SocketGuildUser).Hierarchy)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Title = "Error!",
+                        Description = "That user is hierarchically above you.",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build()
+                    );
+                    return;
+                }
+                IReadOnlyCollection<SocketRole> hisRoleList;
+                try
+                {
+                    hisRoleList = myUser.Roles;
+                    foreach(var rl in myUser.Roles)
+                    {
+                        if (rl == Context.Guild.EveryoneRole) continue;
+                        await myUser.RemoveRoleAsync(rl);
+                    }
+                } catch (Exception e)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder {
+                        Title="Error!",
+                        Description=$"I am missing permissions to hardmute the mentioned user.\n{e}",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                await Mute(cmdargs);
+                await myUser.AddRolesAsync(hisRoleList);
+            }
+            [DiscordCommand("purge",RequiredPermission =true)]
             public async Task purge(string usr, uint ammount)
             {
 
@@ -837,7 +894,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                 }
             }
-    
+                
             [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {
