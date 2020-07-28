@@ -28,6 +28,37 @@ namespace Public_Bot.Modules.Commands
                 await Context.Channel.SendMessageAsync("", false, GuildSettings.WelcomeCard.BuildEmbed(Context.User as SocketGuildUser, Context.Guild));
             }
         }
+        [DiscordCommand("avatar",commandHelp ="`(PREFIX)avatar <user>`",description ="Shows the users avatar")]
+        public async Task AvatarShows(params string[] args)
+        {
+            SocketGuildUser use;
+            if (args.Length == 0)
+            {
+                use = Context.User as SocketGuildUser;
+            }
+            else
+            {
+                use = GetUser(args[0]);
+            }
+            if (use == null)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                {
+                    Title = "Error",
+                    Description = "That user is invalid!",
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            var png = use.GetAvatarUrl(ImageFormat.Png);
+            var jpeg = use.GetAvatarUrl(ImageFormat.Jpeg);
+            var webp = use.GetAvatarUrl(ImageFormat.WebP);
+            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder {
+                Title = "User Avatar",
+                Description = $"Here are the avatar links:\n1. **[PNG]({png})**\n2. **[JPEG]({jpeg})**\n3. **[WEBP]({webp})**",
+                ImageUrl = jpeg
+            }.WithCurrentTimestamp().Build());
+        }
         [DiscordCommand("testleave",description ="test your leave message!",commandHelp ="`(PREFIX)testleave`")]
         public async Task HHE(params string[] _args)
         {
