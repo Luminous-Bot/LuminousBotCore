@@ -89,7 +89,8 @@ namespace Public_Bot
             var curTime = DateTime.UtcNow;
             var mets = data.Metrics.First().Data;
             int yMin = 0;
-            int yMax = (int)mets.Max(x => x.Value) + 10;
+            int yMax = (int)mets.Max(x => x.Value);
+            yMax += (int)(yMax * 0.1);
             float yOffset = ((float)ChartImage.Height - 120) / (yMax - yMin);
             float xOffset = ((float)ChartImage.Width - 120) / mets.Count;
 
@@ -101,8 +102,8 @@ namespace Public_Bot
             ChartGraphics.DrawString("Time (Hours)", TitleFont, new SolidBrush(Color.White), ChartImage.Width / 2, ChartImage.Height - 30, new StringFormat() { Alignment = StringAlignment.Center });
             ChartGraphics.DrawString("Discord Ping (Past 24 Hours)", TitleFont, new SolidBrush(Color.White), ChartImage.Width / 2, 20, new StringFormat() { Alignment = StringAlignment.Center });
 
-            var chtr = yMax / 5;
-            var chtr2 = yMax / 10;
+            var chtr = yMax / 10;
+            var chtr2 = yMax / 20;
             for (float i = 1; i != yMax + 1; i++)
             {
                 if (i % chtr == 0)
