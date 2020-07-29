@@ -443,9 +443,14 @@ namespace Public_Bot
                     cmd.parent.ClassInstance.GetType().GetProperty("GuildSettings").SetValue(cmd.parent.ClassInstance, sett);
 
                     var d = (Func<Task>)Delegate.CreateDelegate(typeof(Func<Task>), cmd.parent.ClassInstance, cmd.Method);
-                    await d();
+                    var s = d.Invoke();
+                    s.Wait();
+                    if (s.Exception == null)
+                        return new CommandResult() { Result = CommandStatus.Success, IsSuccess = true };
+                    else
+                        return new CommandResult() { Exception = s.Exception.InnerException, Result = CommandStatus.Error, IsSuccess = false };
                     //cmd.Method.Invoke(cmd.parent.ClassInstance, null);
-                    return new CommandResult() { Result = CommandStatus.Success, IsSuccess = true };
+                    //return new CommandResult() { Result = CommandStatus.Success, IsSuccess = true };
                 }
                 catch (Exception ex)
                 {
