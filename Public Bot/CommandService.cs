@@ -661,6 +661,9 @@ namespace Public_Bot
         /// Contains all the help messages. Key is the command name, Value is the Command Description
         /// </summary>
         public static Dictionary<string, string> CommandDescriptions { get; internal set; }
+        /// <summary>
+        /// Blurple, use this for default embed color <3
+        /// </summary>
         public static readonly Color Blurple = new Color(114, 137, 218);
         /// <summary>
         /// The superlist with all the commands
