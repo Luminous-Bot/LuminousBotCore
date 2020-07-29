@@ -956,6 +956,7 @@ namespace Public_Bot.Modules.Commands
                     Description = "The role you provided was invalid!",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
+                return;
             }
             GuildSettings.NewMemberRole = role.Id;
             GuildSettings.SaveGuildSettings();

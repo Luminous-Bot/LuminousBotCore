@@ -724,9 +724,6 @@ namespace Public_Bot
                 if (Context.Guild.Roles.Any(x => x.Name.StartsWith(role)))
                     return Context.Guild.Roles.First(x => x.Name.StartsWith(role));
                 else
-                    if (Context.Guild.Roles.Any(x => x.Name.StartsWith(role)))
-                        return Context.Guild.Roles.First(x => x.Name.StartsWith(role));
-                else
                     return null;
         }
 
