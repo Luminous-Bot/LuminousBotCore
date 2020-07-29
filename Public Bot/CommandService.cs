@@ -616,6 +616,9 @@ namespace Public_Bot
             else
                 return new CommandResult() { Result = CommandStatus.NotEnoughParams, IsSuccess = false };
         }
+        /// <summary>
+        /// The Generic command class
+        /// </summary>
         public class Commands : ICommands
         {
             public string CommandName { get; set; }
