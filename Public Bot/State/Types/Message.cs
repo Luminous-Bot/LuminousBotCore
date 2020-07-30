@@ -13,13 +13,13 @@ namespace Public_Bot
         public ulong TextChannelID { get; set; }
         //txtchanObj
         [GraphQLProp, GraphQLSVar]
-        public ulong GuildId { get; set; }
+        public ulong GuildID { get; set; }
         [GraphQLObj]
         public Guild Guild { get; set; }
         [GraphQLObj]
         public User Author { get; set; }
         [GraphQLSVar]
-        public ulong AuthorId { get; set; }
+        public ulong AuthorID { get; set; }
         [GraphQLObj]
         public GuildMember GuildMember { get; set; }
         [GraphQLProp, GraphQLSVar]
@@ -28,7 +28,7 @@ namespace Public_Bot
         public bool Deleted { get; set; } = false;
         [GraphQLProp]
         public DateTime DeletedOn { get; set; }
-        [GraphQLProp]
+        [GraphQLObj]
         public List<MessageRevision> Revisions { get; set; }
         [GraphQLProp, GraphQLSVar]
         public string Content { get; set; }
@@ -36,11 +36,11 @@ namespace Public_Bot
         public Message(SocketMessage msg, SocketTextChannel chan)
         {
             this.Id = msg.Id;
-            this.AuthorId = msg.Author.Id;
-            this.GuildId = chan.Guild.Id;
-            this.Author = UserHandler.GetUser(msg.Author.Id);
+            this.AuthorID = msg.Author.Id;
+            this.GuildID = chan.Guild.Id;
+            //this.Author = UserHandler.GetUser(msg.Author.Id);
             this.TextChannelID = chan.Id;
-            this.GuildMember = GuildHandler.GetGuildMember(msg.Author.Id, chan.Guild.Id);
+            //this.GuildMember = GuildHandler.GetGuildMember(msg.Author.Id, chan.Guild.Id);
             this.Content = msg.Content;
 
             //createMutation

@@ -66,7 +66,7 @@ namespace Public_Bot
             await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Failed GraphQl!",
-                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{string.Join("", FormatJson(q).Take(1800))}...```" +
+                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{string.Join("", FormatJson(q).Take(1000))}...```" +
                 $"{(error == null ? "" : $"\n**Error**\n```json\n{string.Join("\n\n", error)}```")}",
                 Color = Color.Red
             }.WithCurrentTimestamp().Build());

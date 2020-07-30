@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Public_Bot.Modules.Handlers
 {
     [DiscordHandler]
-    class LoggingHandler : ModuleBase
+    class LoggingHandler
     {
         public static DiscordShardedClient client;
         public LoggingHandler(DiscordShardedClient c)
@@ -28,35 +28,60 @@ namespace Public_Bot.Modules.Handlers
             client.RoleDeleted += Client_RoleDeleted;
             client.RoleUpdated += Client_RoleUpdated;
             client.UserUnbanned += Client_UserUnbanned;
-            // client.UserUpdated += Client_UserUpdated;
+            client.UserUpdated += Client_UserUpdated;
             client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
         }
 
-        /**private async Task Client_UserUpdated(SocketUser before, SocketUser after)
+        private async Task Client_UserUpdated(SocketUser before, SocketUser after)
         {
-            SocketGuild arg2 = (SocketGuild)Context.Guild;
-            var gs = GuildSettings.Get(arg2.Id);
-            if (gs.LogChannel != 0 && gs.Logging)
+            //SocketGuild arg2 = (SocketGuild)Context.Guild;
+            foreach(var mu in after.MutualGuilds)
             {
-                var logchan = arg2.GetTextChannel(gs.LogChannel);
-                if (logchan != null)
+                var gs = GuildSettings.Get(mu.Id);
+                if (gs.LogChannel != 0 && gs.Logging)
                 {
-
-                    if (before.Username != after.Username)
+                    var logchan = mu.GetTextChannel(gs.LogChannel);
+                    if (logchan != null)
                     {
-                        EmbedBuilder builder = new EmbedBuilder();
+                        var fields = new List<EmbedFieldBuilder>();
 
-                        builder.WithTitle("⚡ User Updated ⚡");
-                        builder.WithDescription($"**Before**: `{before}`   **After**: `{after}`");
-                        builder.WithColor(Color.Green);
+                        if (before.Username != after.Username)
+                        {
+                            fields.Add(new EmbedFieldBuilder()
+                            {
+                                Name = "Username Changed",
+                                Value = $"> **Old Username:**\n> {before.Username}\n>**New Username**\n> {after.Username}"
+                            });
+                        }
+                        if (before.Discriminator != after.Discriminator)
+                        {
+                            fields.Add(new EmbedFieldBuilder()
+                            {
+                                Name = "Discriminator Changed",
+                                Value = $"> **Old Discriminator:**\n> {before.Discriminator}\n>**New Discriminator**\n> {after.Discriminator}"
+                            });
+                        }
+                        if (before.AvatarId != after.AvatarId)
+                        {
+                            fields.Add(new EmbedFieldBuilder()
+                            {
+                                Name = "Avatar Changed",
+                                Value = $"> **Old Avatar:**\n> (Link)[{before.GetAvatarUrl()}]\n>**New Avatar**\n> (Link)[{after.GetAvatarUrl()}]"
+                            });
+                        }
 
-                        await logchan.SendMessageAsync("", false, builder.Build());
+                        await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "⚡ User Updated ⚡",
+                            Color = Color.Orange,
+                            Description = $"<@{after.Id}> was Updated",
+                            Fields = fields
+                        }.Build());
                     }
                 }
             }
         }
-        **/
-
+        
         private async Task Client_MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> arg1, ISocketMessageChannel arg2)
         {
             if (arg2.GetType() == typeof(SocketTextChannel))
@@ -72,6 +97,7 @@ namespace Public_Bot.Modules.Handlers
                         {
                             Title = "⚡ Bulk Messages Deleted ⚡",
                             Description = $"{arg1.Count} Messages were deleted in {sgc.Mention}",
+                            Color = Color.Orange
                         }.WithCurrentTimestamp().Build());
                     }
                 }
@@ -90,7 +116,7 @@ namespace Public_Bot.Modules.Handlers
                     {
                         Title = "⚡ User Unbanned ⚡",
                         Description = $"The user {arg1.ToString()} was Unbanned",
-                        Color = Color.Red
+                        Color = Color.DarkMagenta
                     }.WithCurrentTimestamp().Build());
                 }
             }
@@ -269,7 +295,7 @@ namespace Public_Bot.Modules.Handlers
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Author:",
-                                Value = $"<@{msg.AuthorId}>"
+                                Value = $"<@{msg.AuthorID}>"
                             });
                             fields.Add(new EmbedFieldBuilder()
                             {

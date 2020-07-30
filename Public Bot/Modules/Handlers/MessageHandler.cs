@@ -35,7 +35,8 @@ namespace Public_Bot.Modules.Handlers
         {
             if (arg.Channel.GetType() != typeof(SocketTextChannel))
                 return;
-
+            if (arg.Author.IsBot)
+                return;
             var channel = (SocketTextChannel)arg.Channel;
             var guild = channel.Guild;
             var gs = GuildSettings.Get(guild.Id);
