@@ -144,7 +144,16 @@ namespace Public_Bot
                    var resp = await service.ExecuteAsync(context, s);
                    Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");
 
-                   if (resp.Result == CommandStatus.InvalidPermissions)
+                   if(resp.Result == CommandStatus.MissingGuildPermission)
+                   {
+                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**Missing Permissions**",
+                            Color = Color.Red,
+                            Description = $"{client.CurrentUser.Username} is missing these permissions:\n{resp.ResultMessage}This command will not work until you give {client.CurrentUser.Username} these permissions!"
+                        }.WithCurrentTimestamp().Build());
+                   }
+                   else if (resp.Result == CommandStatus.InvalidPermissions)
                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                        {
                            Title = "**You do not have permission**",

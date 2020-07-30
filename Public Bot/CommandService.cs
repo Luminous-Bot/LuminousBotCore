@@ -42,14 +42,13 @@ namespace Public_Bot
             this.ModuleDescription = ModuleDescription;
         }
     }
-    public enum Permission
-    {
-
-    }
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class RequiredPermission : Attribute
+    public class GuildPermissions : Attribute
     {
+        public GuildPermission[] Permissions { get; set; }
 
+        public GuildPermissions(params GuildPermission[] perms)
+            => this.Permissions = perms;
     }
     /// <summary>
     /// Discord command
@@ -184,7 +183,9 @@ namespace Public_Bot
         /// <summary>
         /// Somthing happend that shouldn't have, i dont know what to say here other than :/
         /// </summary>
-        Unknown
+        Unknown,
+        MissingGuildPermission
+            
     }
     /// <summary>
     /// The base class of <see cref="CustomCommandService"/>
@@ -211,6 +212,7 @@ namespace Public_Bot
             public MethodInfo Method { get; set; }
             public DiscordCommand attribute { get; set; }
             public CommandClassobj parent { get; set; }
+            public GuildPermissions perms { get; set; }
         }
         private class CommandClassobj
         {
@@ -302,7 +304,10 @@ namespace Public_Bot
                         attribute = parat,
                     },
                     Paramaters = item.Key.GetParameters(),
-                    RequirePermission = cmdat.RequiredPermission
+                    RequirePermission = cmdat.RequiredPermission,
+                    perms = item.Key.CustomAttributes.Any(x => x.AttributeType == typeof(GuildPermissions)) 
+                          ? item.Key.GetCustomAttribute<GuildPermissions>() 
+                          : null,
                 };
                 CommandList.Add(cmdobj);
 
@@ -337,6 +342,7 @@ namespace Public_Bot
             public bool MultipleResults { get; set; }
             public CommandStatus Result { get; set; }
             public ICommandResult[] Results { get; set; }
+            public string ResultMessage { get; set; }
             public Exception Exception { get; set; }
         }
         /// <summary>
@@ -356,6 +362,7 @@ namespace Public_Bot
             /// a <see cref="bool"/> determining if there was multiple results, if true look in <see cref="Results"/>
             /// </summary>
             bool MultipleResults { get; }
+            string ResultMessage { get; }
             /// <summary>
             /// The multi-Result Array
             /// </summary>
@@ -418,6 +425,18 @@ namespace Public_Bot
         {
             if (!sett.ModulesSettings[cmd.parent.attribute.ModuleName])
                 return new CommandResult() { Result = CommandStatus.Disabled };
+
+            if(cmd.perms != null)
+                foreach (var p in cmd.perms.Permissions)
+                    if (!context.Guild.CurrentUser.GuildPermissions.Has(p))
+                        return new CommandResult() 
+                        { 
+                            Result = CommandStatus.MissingGuildPermission, 
+                            ResultMessage = $"" +
+                                            $"```\n" +
+                                            $"{string.Join('\n', cmd.perms.Permissions.Where(x => !context.Guild.CurrentUser.GuildPermissions.Has(x))).Select(x => x.ToString())}" +
+                                            $"```" 
+                        };
 
             if (!cmd.attribute.BotCanExecute && context.Message.Author.IsBot)
                 return new CommandResult() { Result = CommandStatus.InvalidPermissions };

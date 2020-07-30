@@ -170,15 +170,16 @@ namespace Public_Bot.Modules.Handlers
             }
             public string BuildAndClear()
             {
-                if (_bucket.Count == 0)
+                var lbuck = _bucket.ToList();
+                if (lbuck.Count == 0)
                     return null;
                 var b = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
-                _bucket.ForEach(x => b.Add(x.LevelUser,
+                lbuck.ForEach(x => b.Add(x.LevelUser,
                                         new KeyValuePair<string, object>("guildId", $"\\\"{x.GuildId}\\\""),
                                         new KeyValuePair<string, object>("userId", $"\\\"{x.UserId}\\\""),
                                         new KeyValuePair<string, object>("level", x.LevelUser.CurrentLevel),
                                         new KeyValuePair<string, object>("xp", x.LevelUser.CurrentXP)));
-                _bucket.Clear();
+                lbuck.Clear();
                 return b.Build();
             }
         }

@@ -208,16 +208,19 @@ namespace Public_Bot.Modules.Commands
             {
                 await CreateAction(args, Action.Warned, Context);
             }
+            [GuildPermissions(GuildPermission.KickMembers)]
             [DiscordCommand("kick", RequiredPermission = true, description = "Kicks a user", commandHelp = "Usage - `(PREFIX)kick <@user> <reason>`")]
             public async Task Kick(params string[] args)
             {
                 await CreateAction(args, Action.Kicked, Context);
             }
+            [GuildPermissions(GuildPermission.BanMembers)]
             [DiscordCommand("ban", RequiredPermission = true, description = "Bans a user", commandHelp = "Usage - `(PREFIX)ban <@user> <reason>`")]
             public async Task Ban(params string[] args)
             {
                 await CreateAction(args, Action.Banned, Context);
             }
+            [GuildPermissions(GuildPermission.ManageRoles)]
             [DiscordCommand("unmute", RequiredPermission = true, description = "Unmutes a muted user", commandHelp = "Usage - `(PREFIX)unmute <@user>`")]
             public async Task unmute(params string[] args)
             {
@@ -293,6 +296,7 @@ namespace Public_Bot.Modules.Commands
                 }
 
             }
+            [GuildPermissions(GuildPermission.ManageRoles)]
             [DiscordCommand("mute", RequiredPermission = true, description = "Mutes a user", commandHelp = "Usage - `(PREFIX)mute <@user> <timespan> <reason>`\nTimespans:\n`10m` - Ten minutes\n`1h` - One hour\n`45s` - Forty five seconds\n`2d` - Two days\n`1y` - One year (dont recommend)")]
             public async Task Mute(params string[] args)
             {
@@ -702,6 +706,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
             }
+            [GuildPermissions(GuildPermission.ManageMessages)]
             [DiscordCommand("purge", RequiredPermission = true, commandHelp = "Usage - `(PREFIX)purge <ammount>`, `(PREFIX)purge <@user> <ammount>`", description = "Deletes `x` ammount of messages")]
             public async Task purge(uint amount)
             {
@@ -768,6 +773,7 @@ namespace Public_Bot.Modules.Commands
                 await Mute(cmdargs);
                 await myUser.AddRolesAsync(hisRoleList);
             }
+            [GuildPermissions(GuildPermission.ManageMessages)]
             [DiscordCommand("purge",RequiredPermission =true)]
             public async Task purge(string usr, uint ammount)
             {
@@ -802,6 +808,7 @@ namespace Public_Bot.Modules.Commands
                 await m.DeleteAsync();
 
             }
+            [GuildPermissions(GuildPermission.ManageChannels)]
             [DiscordCommand("lock", RequiredPermission = true, commandHelp = "`(PREFIX)lock #channel`", description = "locks the mentioned channel")]
             public async Task Lock(params string[] args)
             {
@@ -848,6 +855,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                 }
             }
+            [GuildPermissions(GuildPermission.ManageChannels)]
             [DiscordCommand("unlock", commandHelp = "`(PREFIX)unlock #channel`", description = "Unlocks the mentioned channel",RequiredPermission = true)]
             public async Task Unlock(params string[] args)
             {

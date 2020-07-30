@@ -104,6 +104,7 @@ namespace Public_Bot
 
             var chtr = yMax / 10;
             var chtr2 = yMax / 20;
+            bool odd = true;
             for (float i = 1; i != yMax + 1; i++)
             {
                 if (i % chtr == 0)
@@ -113,11 +114,15 @@ namespace Public_Bot
                         n = ((double)i / 1000).ToString("0.#k") + " ";
 
                     ChartGraphics.DrawString($"{n}ms", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF(ChartImage.Width - 70f, (ChartImage.Height - 60) - i * yOffset - 6));
-                    ChartGraphics.DrawLine(WhitePenS, new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 90f, (ChartImage.Height - 60) - i * yOffset));
+                    //ChartGraphics.DrawLine(WhitePenS, new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 90f, (ChartImage.Height - 60) - i * yOffset));
                 }
                 if (i % chtr2 == 0)
                 {
-                    ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset));
+                    if (!odd)
+                        ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 75f, (ChartImage.Height - 60) - i * yOffset));
+                    else
+                        ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset));
+                    odd = !odd;
                 }
             }
             var hSpace = (ChartImage.Width - 120) / 24;
@@ -148,7 +153,7 @@ namespace Public_Bot
             request.AddHeader("Authorization", "b3bb9d86-ca90-44ea-8836-ce44b08b52a0");
             request.AddFile("file", fPath);
             IRestResponse response = client.Execute(request);
-            Console.WriteLine(response.Content);
+            //Console.WriteLine(response.Content);
             var json = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
             return json["url"].ToString();
         }
