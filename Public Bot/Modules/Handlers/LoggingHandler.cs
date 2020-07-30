@@ -234,10 +234,14 @@ namespace Public_Bot.Modules.Handlers
 
                         if(arg1.HasValue)
                         {
+                            var oval = "{no content}";
+                            if (arg1.Value.Content != null)
+                                if (arg1.Value.Content != "")
+                                    oval = arg1.Value.Content;
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Old Message:",
-                                Value = arg2.Content == null ? "{no content}" : arg2.Content,
+                                Value = oval,
                                 IsInline = true,
 
                             });
@@ -254,11 +258,14 @@ namespace Public_Bot.Modules.Handlers
                                 });
                             }
                         }
-
+                        var val = "{no content}";
+                        if (arg2.Content != null)
+                            if (arg2.Content != "")
+                                val = arg2.Content;
                         fields.Add(new EmbedFieldBuilder()
                         {
                             Name = "New Message:",
-                            Value = arg2.Content == null ? "{no content}" : arg2.Content,
+                            Value = val,
                             IsInline = true,
 
                         });

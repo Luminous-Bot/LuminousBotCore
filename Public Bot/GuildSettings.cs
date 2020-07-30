@@ -21,14 +21,14 @@ namespace Public_Bot
         public ulong LogChannel { get; set; } = 0;
         public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
+        public List<string> MemeSubreddits = new List<string>() { "https://www.reddit.com/r/dankmemes.json" };
         public WelcomeCard WelcomeCard { get; set; }
         public LeaveMessage leaveMessage { get; set; }  
         public GuildSettings() { }
 
-        public static void SaveGuildSettings()
-        {
-            StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CommandHandler.CurrentGuildSettings);
-        }
+        public void SaveGuildSettings()
+            => GuildSettingsHelper.SaveGuildSettings(this);
+
         public GuildSettings AddRole(SocketRole role)
         {
             if (!this.PermissionRoles.Contains(role.Id))
@@ -44,7 +44,7 @@ namespace Public_Bot
             return this;
         }
         public static GuildSettings Get(ulong id)
-            => CommandHandler.CurrentGuildSettings.Any(x => x.GuildID == id) ? CommandHandler.CurrentGuildSettings.Find(x => x.GuildID == id) : null;
+            => GuildSettingsHelper.GetGuildSettings(id);
         public GuildSettings(IGuild guild)
         {
             if (guild == null)
@@ -76,8 +76,8 @@ namespace Public_Bot
                 Console.WriteLine("UH OH: THIS IS NULL ");
             WelcomeCard = new WelcomeCard(this, guild);
             leaveMessage = new LeaveMessage(this,guild);
-            CommandHandler.CurrentGuildSettings.Add(this);
-            StateHandler.SaveObject("guildsettings", CommandHandler.CurrentGuildSettings);
+            GuildSettingsHelper.LoadedGuildSettings.Add(this);
+            GuildSettingsHelper.SaveGuildSettings(this);
         }
     }
 }

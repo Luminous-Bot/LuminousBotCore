@@ -171,6 +171,7 @@ namespace Public_Bot.Modules.Handlers
             public string BuildAndClear()
             {
                 var lbuck = _bucket.ToList();
+                _bucket.Clear();
                 if (lbuck.Count == 0)
                     return null;
                 var b = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
@@ -179,8 +180,7 @@ namespace Public_Bot.Modules.Handlers
                                         new KeyValuePair<string, object>("userId", $"\\\"{x.UserId}\\\""),
                                         new KeyValuePair<string, object>("level", x.LevelUser.CurrentLevel),
                                         new KeyValuePair<string, object>("xp", x.LevelUser.CurrentXP)));
-                lbuck.Clear();
-                return b.Build();
+               return b.Build();
             }
         }
         private void GiveVCPoints(object sender, ElapsedEventArgs e)
@@ -232,7 +232,7 @@ namespace Public_Bot.Modules.Handlers
         public static async void LevelUpUser(LevelUser user)
         {
             var gu = GuildLeaderboards.Get(user.GuildID);
-            var gs = CommandHandler.GetGuildSettings(user.GuildID);
+            var gs = GuildSettingsHelper.GetGuildSettings(user.GuildID);
             if (gs.ModulesSettings["🧪 Levels 🧪"])
             {
                 if (user.CurrentLevel < gu.Settings.MaxLevel)
@@ -316,6 +316,8 @@ namespace Public_Bot.Modules.Handlers
                 return;
             var g = (sm.Channel as SocketGuildChannel).Guild;
             if (g == null)
+                return;
+            if (arg.Author.IsWebhook)
                 return;
             var gs = GuildSettings.Get(g.Id);
             if (gs.ModulesSettings["🧪 Levels 🧪"])

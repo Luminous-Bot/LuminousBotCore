@@ -20,7 +20,7 @@ namespace Public_Bot
         static CustomCommandService service;
         static HandlerService handlerService;
         bool isReady = false;
-        public static List<GuildSettings> CurrentGuildSettings { get; set; } = new List<GuildSettings>();
+        //public static List<GuildSettings> CurrentGuildSettings { get; set; } = new List<GuildSettings>();
         public CommandHandler(CustomCommandService _service, DiscordShardedClient _client, HandlerService handler)
         {
             client = _client;
@@ -29,33 +29,18 @@ namespace Public_Bot
 
             handlerService = handler;
 
-            LoadGuildSettings();
-
             client.MessageReceived += CheckCommandAsync;
 
             client.ShardReady += Ready;
 
-            client.ShardConnected += Client_ShardConnected;
+            //client.ShardConnected += Client_ShardConnected;
 
             //client.ShardDisconnected += Client_ShardDisconnected;
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
 
-        private async Task Client_ShardConnected(DiscordSocketClient arg)
-        {
-            CurrentGuildSettings.Where(x => x.WelcomeCard == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
-            CurrentGuildSettings.Where(x => arg.GetGuild(x.GuildID) != null && x.WelcomeCard.BackgroundUrl == null ).ToList().ForEach(x => x.WelcomeCard = new WelcomeCard(x, client.GetGuild(x.GuildID)));
-            CurrentGuildSettings.Where(x => x.leaveMessage == null && arg.GetGuild(x.GuildID) != null).ToList().ForEach(x => x.leaveMessage = new LeaveMessage(x, client.GetGuild(x.GuildID)));
-
-
-            foreach(var gs in CurrentGuildSettings)
-                foreach (var itm in CustomCommandService.Modules)
-                    if (!gs.ModulesSettings.ContainsKey(itm.Key))
-                        gs.ModulesSettings.Add(itm.Key, true);
-
-            StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CurrentGuildSettings);
-        }
+        
         private static string FormatJson(string json)
         {
             dynamic parsedJson = JsonConvert.DeserializeObject(json);
@@ -75,32 +60,14 @@ namespace Public_Bot
         //private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
         //    => isReady = false;
 
-        public static GuildSettings GetGuildSettings(ulong guildID)
-        {
-            if (CurrentGuildSettings.Any(x => x.GuildID == guildID))
-                return CurrentGuildSettings.Find(x => x.GuildID == guildID);
-            else
-                return null;
-        }
-        public void LoadGuildSettings()
-        {
-            try
-            {
-                CurrentGuildSettings = StateHandler.LoadObject<List<GuildSettings>>("guildsettings");
-            }
-            catch
-            {
-                CurrentGuildSettings = new List<GuildSettings>();
-            }
-        }
+        
         private async Task Ready(DiscordSocketClient arg)
         {
             handlerService.CreateHandlers();
 
             foreach (var guild in arg.Guilds)
-                if (!CurrentGuildSettings.Any(x => x.GuildID == guild.Id))
-                    new GuildSettings(guild);
-            isReady = true;
+                GuildSettingsHelper.GetGuildSettings(guild.Id);
+             isReady = true;
         }
         public static bool IsBotRole(IRole role)
         {
@@ -126,7 +93,7 @@ namespace Public_Bot
             if (context.IsPrivate)
                 return;
 
-            var s = CurrentGuildSettings.Find(x => x.GuildID == context.Guild.Id);
+            var s = GuildSettingsHelper.GetGuildSettings(context.Guild.Id);
             if (arg.Content == ($"<@{client.CurrentUser.Id}>") || arg.Content == ($"<@!{client.CurrentUser.Id}>"))
             {
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()

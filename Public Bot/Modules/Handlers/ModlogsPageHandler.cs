@@ -64,7 +64,7 @@ namespace Public_Bot.Modules.Handlers
             var rs = page.Modlogs.Skip((pagenum - 1) * 25).Take(25).ToArray();
             var guild = client.GetGuild(page.GuildID);
             var user = guild.GetUser(page.UserID);
-            var gs = CommandHandler.GetGuildSettings(page.GuildID);
+            var gs = GuildSettingsHelper.GetGuildSettings(page.GuildID);
             EmbedBuilder b = new EmbedBuilder()
             {
                 Title = $"Modlogs for **{user}** ({user.Id})",

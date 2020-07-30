@@ -26,7 +26,7 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_UserJoined(SocketGuildUser arg)
         {
-            var GuildSettings = CommandHandler.GetGuildSettings(arg.Guild.Id);
+            var GuildSettings = GuildSettingsHelper.GetGuildSettings(arg.Guild.Id);
             if (GuildSettings.WelcomeCard.isEnabled)
             {
                 //var img = GenerateWelcomeImage(arg, arg.Guild, GuildSettings.WelcomeCard);

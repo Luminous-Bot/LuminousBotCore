@@ -732,17 +732,23 @@ namespace Public_Bot.Modules.Commands
         public async Task addmodrole(string r)
         {
             var role = GetRole(r);
-            try
+            if (role == null)
             {
-                CommandHandler.CurrentGuildSettings.Find(x => x.GuildID == Context.Guild.Id).AddRole(role);
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Invalid Role!",
+                    Description = "The role you provided was invalid!",
+                    Color = Color.Red,
+                }.WithCurrentTimestamp().Build());
+                return;
             }
-            catch
+            if(GuildSettings.PermissionRoles.Any(x => x == role.Id))
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "That role is already added!",
                     Description = "The roles is already in the permission list!",
-                    Color = Color.Green,
+                    Color = Color.Orange,
                 }.WithCurrentTimestamp().Build());
                 return;
             }
@@ -758,17 +764,23 @@ namespace Public_Bot.Modules.Commands
         public async Task removemodrole(string r)
         {
             var role = GetRole(r);
-            try
+            if (role == null)
             {
-                CommandHandler.CurrentGuildSettings.Find(x => x.GuildID == Context.Guild.Id).RemoveRole(role);
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Invalid Role!",
+                    Description = "The role you provided was invalid!",
+                    Color = Color.Red,
+                }.WithCurrentTimestamp().Build());
+                return;
             }
-            catch
+            if (!GuildSettings.PermissionRoles.Any(x => x == role.Id))
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "That role isn't added!",
-                    Description = "The roles is not in the permission list!",
-                    Color = Color.Green,
+                    Description = "That role isn't in the permission list",
+                    Color = Color.Orange,
                 }.WithCurrentTimestamp().Build());
                 return;
             }
@@ -947,6 +959,7 @@ namespace Public_Bot.Modules.Commands
                 }
             }
         }
+        
         [GuildPermissions(GuildPermission.ManageRoles)]
         [DiscordCommand("joinrole", description = "Gives new users a role", commandHelp = "Usage - `(PREFIX)joinrole <role>", RequiredPermission = true)]
         public async Task Joinrole(string r)

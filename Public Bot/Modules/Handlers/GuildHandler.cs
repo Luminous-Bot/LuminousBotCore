@@ -23,7 +23,7 @@ namespace Public_Bot
             client.UserJoined += NewUser;
             client.ShardConnected += Init;
             //load guilds
-            CheckGuilds().GetAwaiter().GetResult();
+            
 
         }
         bool isInitCompt = false;
@@ -32,6 +32,7 @@ namespace Public_Bot
             if (!isInitCompt)
             {
                 //await CheckGuilds();
+                CheckGuilds().GetAwaiter().GetResult();
                 isInitCompt = true;
             }
         }

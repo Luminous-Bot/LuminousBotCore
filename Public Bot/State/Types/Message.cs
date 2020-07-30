@@ -27,7 +27,7 @@ namespace Public_Bot
         [GraphQLProp]
         public bool Deleted { get; set; } = false;
         [GraphQLProp]
-        public DateTime DeletedOn { get; set; }
+        public Nullable<DateTime> DeletedOn { get; set; }
         [GraphQLObj]
         public List<MessageRevision> Revisions { get; set; }
         [GraphQLProp, GraphQLSVar]
