@@ -75,23 +75,26 @@ namespace Public_Bot
             var classtype = typeof(T);
             var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(GraphQLSVar) || y.AttributeType == typeof(GraphQLSObj)));
             List<string> vars = new List<string>();
-            foreach (var tv in typeVars)
+            if (hasVars)
             {
-                string name = tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName)) ? ((GraphQLName)tv.GetCustomAttribute(typeof(GraphQLName))).Name : tv.Name;
-                if (tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
+                foreach (var tv in typeVars)
                 {
-                    var tvT = tv.PropertyType;
-                    var l = RecurseMutateVars(tvT, tv.GetValue(obj));
-                    vars.AddRange(l);
-                }
-                else
-                {
-                    string val = "";
-                    if (tv.PropertyType.Name.Contains("List"))
-                        val = JsonConvert.SerializeObject(tv.GetValue(obj));
+                    string name = tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName)) ? ((GraphQLName)tv.GetCustomAttribute(typeof(GraphQLName))).Name : tv.Name;
+                    if (tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
+                    {
+                        var tvT = tv.PropertyType;
+                        var l = RecurseMutateVars(tvT, tv.GetValue(obj));
+                        vars.AddRange(l);
+                    }
                     else
-                        val = Parser.ContainsKey(tv.PropertyType) ? Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
-                    vars.Add($"\"{name}\": {val}");
+                    {
+                        string val = "";
+                        if (tv.PropertyType.Name.Contains("List"))
+                            val = JsonConvert.SerializeObject(tv.GetValue(obj));
+                        else
+                            val = Parser.ContainsKey(tv.PropertyType) ? Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
+                        vars.Add($"\"{name}\": {val}");
+                    }
                 }
             }
             string parms = "";

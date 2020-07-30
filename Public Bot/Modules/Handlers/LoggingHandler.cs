@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Public_Bot.Modules.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -197,53 +198,49 @@ namespace Public_Bot.Modules.Handlers
                         return;
                     if (logchan != null)
                     {
-                        if (arg1.HasValue)
-                            if (arg1.Value.Embeds.Count > 0)
-                                return;
-                        if (arg2.Embeds.Count > 0)
-                            return;
+                        List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+                        fields.Add(new EmbedFieldBuilder()
+                        {
+                            Name = "Author:",
+                            Value = arg2.Author.Mention,
+                            IsInline = true,
+                        });
+
+                        if(arg1.HasValue)
+                        {
+                            fields.Add(new EmbedFieldBuilder()
+                            {
+                                Name = "Old Message:",
+                                Value = arg2.Content == null ? "{no content}" : arg2.Content,
+                                IsInline = true,
+
+                            });
+                        }
+                        else
+                        {
+                            if (MessageHelper.MessageExists(arg1.Id))
+                            {
+                                var msg = await MessageHelper.GetMessageAsync(arg1.Id);
+                                fields.Add(new EmbedFieldBuilder()
+                                {
+                                    Name = "Old Message:",
+                                    Value = msg.Content
+                                });
+                            }
+                        }
+
+                        fields.Add(new EmbedFieldBuilder()
+                        {
+                            Name = "New Message:",
+                            Value = arg2.Content == null ? "{no content}" : arg2.Content,
+                            IsInline = true,
+
+                        });
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Message Edited ⚡",
                             Description = $"Message edited in {sgc.Mention}",
-                            Fields = arg1.HasValue ? new List<EmbedFieldBuilder>()
-                            {
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Author:",
-                                    Value = arg1.Value.Author.Mention,
-                                    IsInline = true,
-                                },
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Old Message:",
-                                    Value = arg1.Value.Content,                                   
-                                    IsInline = true,
-
-                                },
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "New Message:",
-                                    Value = arg2.Content,
-                                    IsInline = true,
-
-                                }
-                            } : new List<EmbedFieldBuilder>() 
-                            {
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Author:",
-                                    Value = arg2.Author.Mention,
-                                    IsInline = true,
-                                },
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "New Message:",
-                                    Value = arg2.Content == null ? "{no content}" : arg2.Content,
-                                    IsInline = true,
-
-                                }
-                            },
+                            Fields = fields,
                             Color = Color.Orange
                         }.WithCurrentTimestamp().Build());
                     }
@@ -265,25 +262,27 @@ namespace Public_Bot.Modules.Handlers
                     var logchan = sgc.Guild.GetTextChannel(gs.LogChannel);
                     if (logchan != null)
                     {
+                        var fields = new List<EmbedFieldBuilder>();
+                        if (MessageHelper.MessageExists(arg1.Id))
+                        {
+                            var msg = await MessageHelper.GetMessageAsync(arg1.Id);
+                            fields.Add(new EmbedFieldBuilder()
+                            {
+                                Name = "Author:",
+                                Value = $"<@{msg.AuthorId}>"
+                            });
+                            fields.Add(new EmbedFieldBuilder()
+                            {
+                                Name = "Message:",
+                                Value = msg.Content == null ? "{no content}" : msg.Content
+                            });
+                        }
+
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Message Deleted ⚡",
                             Description = $"Message deleted in {sgc.Mention}",
-                            Fields = arg1.HasValue ? new List<EmbedFieldBuilder>()
-                            {
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Author:",
-                                    Value = arg1.Value.Author.Mention,
-                                    //IsInline = true,
-                                },
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Message:",
-                                    Value = arg1.Value.Content == null || arg1.Value.Content == "" ? "__\n__" : arg1.Value.Content,
-                                    //IsInline = true,
-                                }
-                            } : new List<EmbedFieldBuilder>(),
+                            Fields = fields,
                             Color = Color.Red,
                             Footer = new EmbedFooterBuilder()
                             {

@@ -90,6 +90,7 @@ namespace Public_Bot
                 return false;
             return true;
         }
+
         public static bool Exists(string q)
         {
             var res = Query<ExistBase>(q);
@@ -103,7 +104,7 @@ namespace Public_Bot
         {
             public List<object> errors { get; set; }
         }
-        private class GqlBase<T>
+        internal class GqlBase<T>
         {
             public Dictionary<string, T> data { get; set; }
             public List<object> errors { get; set; }
