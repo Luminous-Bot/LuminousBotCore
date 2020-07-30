@@ -426,17 +426,18 @@ namespace Public_Bot
             if (!sett.ModulesSettings[cmd.parent.attribute.ModuleName])
                 return new CommandResult() { Result = CommandStatus.Disabled };
 
-            if(cmd.perms != null)
-                foreach (var p in cmd.perms.Permissions)
-                    if (!context.Guild.CurrentUser.GuildPermissions.Has(p))
-                        return new CommandResult() 
-                        { 
-                            Result = CommandStatus.MissingGuildPermission, 
-                            ResultMessage = $"" +
-                                            $"```\n" +
-                                            $"{string.Join('\n', cmd.perms.Permissions.Where(x => !context.Guild.CurrentUser.GuildPermissions.Has(x))).Select(x => x.ToString())}" +
-                                            $"```" 
-                        };
+            if (!context.Guild.CurrentUser.GuildPermissions.Administrator)
+                if (cmd.perms != null)
+                    foreach (var p in cmd.perms.Permissions)
+                        if (!context.Guild.CurrentUser.GuildPermissions.Has(p))
+                            return new CommandResult()
+                            {
+                                Result = CommandStatus.MissingGuildPermission,
+                                ResultMessage = $"" +
+                                                $"```\n" +
+                                                $"{string.Join('\n', cmd.perms.Permissions.Where(x => !context.Guild.CurrentUser.GuildPermissions.Has(x))).Select(x => x.ToString())}" +
+                                                $"```"
+                            };
 
             if (!cmd.attribute.BotCanExecute && context.Message.Author.IsBot)
                 return new CommandResult() { Result = CommandStatus.InvalidPermissions };
