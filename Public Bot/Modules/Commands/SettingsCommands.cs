@@ -667,6 +667,7 @@ namespace Public_Bot.Modules.Commands
                 }
             }
         }
+        [GuildPermissions(GuildPermission.ManageRoles)]
         [DiscordCommand("setmutedrole", RequiredPermission = true)]
         public async Task setmrole(string t)
         {
@@ -690,6 +691,7 @@ namespace Public_Bot.Modules.Commands
                 Description = $"The role {role.Mention} will be given when someone does {GuildSettings.Prefix}mute"
             }.WithCurrentTimestamp().Build());
         }
+        [GuildPermissions(GuildPermission.ManageRoles)]
         [DiscordCommand("createmutedrole", RequiredPermission = true)]
         public async Task cmr(params string[] args)
         {
@@ -855,6 +857,7 @@ namespace Public_Bot.Modules.Commands
                 Color = Color.Green
             }.WithCurrentTimestamp().Build());
         }
+        [GuildPermissions(GuildPermission.ViewAuditLog)]
         [DiscordCommand("logs", RequiredPermission = true, commandHelp = "Usage - `(PREFIX)logs channel <channel>`, `(PREFIX)logs on/off`", description = "Set a channel to log to and enable or disable logging to a channel.")]
         public async Task logs(params string[] args)
         {
@@ -944,6 +947,7 @@ namespace Public_Bot.Modules.Commands
                 }
             }
         }
+        [GuildPermissions(GuildPermission.ManageRoles)]
         [DiscordCommand("joinrole", description = "Gives new users a role", commandHelp = "Usage - `(PREFIX)joinrole <role>", RequiredPermission = true)]
         public async Task Joinrole(string r)
         {
