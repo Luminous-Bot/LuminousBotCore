@@ -52,7 +52,7 @@
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/Public Bot/Public Bot.csproj"
+                "appProject": "${workspaceFolder}/Public Bot/Luminous.csproj"
             }
         },
         {
@@ -68,7 +68,7 @@
                 "pull": true
             },
             "netCore": {
-                "appProject": "${workspaceFolder}/Public Bot/Public Bot.csproj"
+                "appProject": "${workspaceFolder}/Public Bot/Luminous.csproj"
             }
         },
         {
@@ -79,7 +79,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/Public Bot/Public Bot.csproj",
+                "appProject": "${workspaceFolder}/Public Bot/Luminous.csproj",
                 "enableDebugging": true
             }
         },
@@ -91,7 +91,7 @@
             ],
             "dockerRun": {},
             "netCore": {
-                "appProject": "${workspaceFolder}/Public Bot/Public Bot.csproj"
+                "appProject": "${workspaceFolder}/Public Bot/Luminous.csproj"
             }
         }
     ]

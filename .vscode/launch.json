@@ -27,7 +27,7 @@
         "request": "launch",
         "preLaunchTask": "docker-run: debug",
         "netCore": {
-            "appProject": "${workspaceFolder}/Public Bot/Public Bot.csproj"
+            "appProject": "${workspaceFolder}/Public Bot/Luminous.csproj"
         }
     }
 ]
