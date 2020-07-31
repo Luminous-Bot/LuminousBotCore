@@ -279,6 +279,14 @@ namespace Public_Bot.Modules.Commands
 
         }
 
+        [DiscordCommand("", commandHelp = "(PREFIX)", description = "")]
+
+        public async Task Pun()
+        {
+            var Puns = new List<string>{ "How do you throw a space party? You planet.", ""};
+
+        }
+
         //[DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
 
         //public async Task HangmanAsync(SocketMessage arg)
