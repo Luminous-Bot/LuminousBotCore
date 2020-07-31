@@ -21,172 +21,33 @@ namespace Public_Bot.Modules.Commands
         private readonly Random _random = new Random();
 
         [DiscordCommand("meme", commandHelp = "`(PREFIX)meme`", description = "Grabs a random meme from reddit")]
-        public async Task meme(params string[] args)
+        public async Task ImageGen()
         {
-            if(args.Length == 0)
+
+            HttpClient client = new HttpClient();
+            var request = await client.GetAsync("https://www.reddit.com/r/dankmemes.json");
+            string response = await request.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
+            Regex r = new Regex(@"https:\/\/i.redd.it\/(.*?)\.");
+            var childs = data.Data.Children.Where(x => r.IsMatch(x.Data.Url.ToString())).ToList();
+            Random rnd = new Random();
+            var post = childs[rnd.Next(0, childs.Count())];
+
+            EmbedBuilder b = new EmbedBuilder()
             {
-                HttpClient client = new HttpClient();
-                var sb = new Random().Next(0, GuildSettings.MemeSubreddits.Count);
-                var sbrt = GuildSettings.MemeSubreddits[sb];
-                var request = await client.GetAsync(sbrt);
-                string response = await request.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
-                if(data.Data.Children.Length == 0)
+                Title = "r/dankmemes",
+                ImageUrl = post.Data.Url.ToString(),
+                Footer = new EmbedFooterBuilder()
                 {
-                    GuildSettings.MemeSubreddits.RemoveAt(sb);
-                    GuildSettings.SaveGuildSettings();
-                    await meme(args).ConfigureAwait(false);
+                    Text = "u/" + post.Data.Author
                 }
-                Regex r = new Regex(@"https:\/\/i.redd.it\/(.*?)\.");
-                var childs = data.Data.Children.Where(x => r.IsMatch(x.Data.Url.ToString())).ToList();
-                Random rnd = new Random();
-                var post = childs[rnd.Next(0, childs.Count())];
+            };
 
-                EmbedBuilder b = new EmbedBuilder()
-                {
-                    Title = "r/dankmemes",
-                    ImageUrl = post.Data.Url.ToString(),
-                    Footer = new EmbedFooterBuilder()
-                    {
-                        Text = "u/" + post.Data.Author
-                    }
-                };
+            b.WithCurrentTimestamp();
+            b.WithColor(Blurple);
 
-                b.WithCurrentTimestamp();
-                b.WithColor(Blurple);
+            await Context.Channel.SendMessageAsync("", false, b.Build());
 
-                await Context.Channel.SendMessageAsync("", false, b.Build());
-            }
-            else
-            {
-                if(args[0].ToLower() == "subs" || args[0].ToLower() == "subreddits")
-                {
-                    if(args.Length == 1)
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "Current Subreddits",
-                            Color = Blurple,
-                            Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}meme {args[0]} add <r/sub>`"
-                        }.WithCurrentTimestamp().Build());
-                        return;
-                    }
-
-                    switch(args[1])
-                    {
-                        case "add":
-                            if(args.Length == 2)
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "No Parameters.",
-                                    Color = Color.Red,
-                                    Description = $"Please add some parameters.\nExample: `{GuildSettings.Prefix}meme {args[0]} add r/yoursub`"
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                            string sb = args[1];
-                            if(Regex.IsMatch(sb, "r\\/(\\w*?)$"))
-                            {
-                                var request = await new HttpClient().GetAsync($"https://www.reddit.com/{sb}");
-                                string response = await request.Content.ReadAsStringAsync();
-                                var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
-                                if (!data.Data.Children.Any())
-                                {
-                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                    {
-                                        Title = "Invalid Subreddit!",
-                                        Color = Color.Red,
-                                        Description = $"The subreddit `{sb}` doesn't exist!"
-                                    }.WithCurrentTimestamp().Build());
-                                    return;
-                                }
-                                if (GuildSettings.MemeSubreddits.Contains($"https://www.reddit.com/{sb}"))
-                                {
-                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                    {
-                                        Title = "Subreddit already added!",
-                                        Color = Color.Red,
-                                        Description = $"The subreddit `{sb}` is already added"
-                                    }.WithCurrentTimestamp().Build());
-                                    return;
-                                }
-                                GuildSettings.MemeSubreddits.Add($"https://www.reddit.com/{sb}");
-                                GuildSettings.SaveGuildSettings();
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Success!",
-                                    Color = Color.Green,
-                                    Description = $"Added ({sb})[https://www.reddit.com/{sb}] to the list of meme subreddits"
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                            else
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Invalid format!",
-                                    Color = Color.Red,
-                                    Description = $"Please use the format `r/yourSubreddit` without spaces!\nExample: `{GuildSettings.Prefix}meme {args[0]} add r/yoursub`"
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                        case "remove":
-                            if (args.Length == 2)
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "No Parameters.",
-                                    Color = Color.Red,
-                                    Description = $"Please add some parameters.\nExample: `{GuildSettings.Prefix}meme {args[0]} remove r/yoursub`"
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                            string sub = args[1];
-                            if (Regex.IsMatch(sub, "r\\/(\\w*?)$"))
-                            {
-                                if (!GuildSettings.MemeSubreddits.Contains($"https://www.reddit.com/{sub}"))
-                                {
-                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                    {
-                                        Title = "Subreddit not added!",
-                                        Color = Color.Red,
-                                        Description = $"The Subreddit `{sub}` isn't in the list!"
-                                    }.WithCurrentTimestamp().Build());
-                                    return;
-                                }
-                                GuildSettings.MemeSubreddits.Remove($"https://www.reddit.com/{sub}");
-                                GuildSettings.SaveGuildSettings();
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Success!",
-                                    Color = Color.Green,
-                                    Description = $"Removed ({sub})[https://www.reddit.com/{sub}] from the list of meme subreddits"
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                            else
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Invalid format!",
-                                    Color = Color.Red,
-                                    Description = $"Please use the format `r/yourSubreddit` without spaces!\nExample: `{GuildSettings.Prefix}meme {args[0]} remove r/yoursub`"
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                        case "list":
-                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                            {
-                                Title = "Current Subreddits",
-                                Color = Blurple,
-                                Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}meme {args[0]} add <r/sub>`"
-                            }.WithCurrentTimestamp().Build());
-                            return;
-                        
-                    }
-                }
-            }
         }
 
         [DiscordCommand("coinflip", commandHelp = "`(PREFIX)coinflip`", description = "Flips a coin")]
@@ -268,7 +129,7 @@ namespace Public_Bot.Modules.Commands
 
         }
 
-        [DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
+        /** [DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
 
         public async Task HangmanAsync(SocketMessage arg)
         {
@@ -278,5 +139,6 @@ namespace Public_Bot.Modules.Commands
 
 
         }
+        **/
     }
 }
