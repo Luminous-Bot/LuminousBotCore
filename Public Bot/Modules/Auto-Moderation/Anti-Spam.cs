@@ -10,6 +10,9 @@ namespace Public_Bot.Modules.Auto_Moderation
 {
     public class Anti_Spam
     {
+        /// <summary>
+        /// Boolean to decide whether to DM user on delete or not.
+        /// </summary>
         public bool DMUser { get; set; } = true;
         /// <summary>
         /// The maximum <b>characters</b> allowed as not spam.
