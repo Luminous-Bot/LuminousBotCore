@@ -30,6 +30,7 @@ namespace Public_Bot.Modules.Handlers
             client.UserUnbanned += Client_UserUnbanned;
             client.UserUpdated += Client_UserUpdated;
             client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
+            
         }
 
         private async Task Client_UserUpdated(SocketUser before, SocketUser after)

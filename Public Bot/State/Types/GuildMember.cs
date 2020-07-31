@@ -11,14 +11,11 @@ namespace Public_Bot
     {
         [GraphQLProp, GraphQLSVar]
         public ulong GuildID { get; set; }
-        [GraphQLObj]
-        public List<NameRecord> Nicknames { get; set; } = new List<NameRecord>();
         [GraphQLProp, GraphQLSVar]
         public ulong UserID { get; set; }
         public string Username
             => User.Username;
-        [GraphQLSVar]
-        public string CurrentNickname { get; set; }
+        
         [GraphQLObj]
         public List<Infraction> Infractions { get; set; } = new List<Infraction>();
         [GraphQLObj]
@@ -32,7 +29,6 @@ namespace Public_Bot
         {
             this.GuildID = user.Guild.Id;
             this.UserID = user.Id;
-            this.CurrentNickname = user.Nickname;
             if (!UserHandler.Users.Any(x => x.Id == this.UserID))
                 if (!User.UserExists(UserID))
                     UserHandler.CreateUser(UserID);

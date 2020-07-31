@@ -43,8 +43,11 @@ namespace Public_Bot.Modules.Handlers
                 $"GraphQL for da boi's",
                 $"Star be lookin kinda thicc",
                 $"⚡Powered by caffeine",
-                $"Da postman is yer friend",
-                $"Rickrollin' someone"
+                $"Postman is your friend",
+                $"Rickrollin' someone",
+                $"Some get him some milk!",
+                $"Databases are sick!",
+                $"Beep boop?"
             };
         public StatusHandler(DiscordShardedClient c)
         {
@@ -61,7 +64,7 @@ namespace Public_Bot.Modules.Handlers
                 alusr += g.MemberCount;
             Logger.Write($"Count of {alusr}");
             
-            await client.SetGameAsync($"[0.4.0] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.4.0 | https://luminousbot.com] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
         }
     }
 }
