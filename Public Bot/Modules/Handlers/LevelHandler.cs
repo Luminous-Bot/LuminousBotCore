@@ -240,9 +240,9 @@ namespace Public_Bot.Modules.Handlers
                     bool leveledUp = false;
                     while (user.CurrentXP >= user.NextLevelXP && user.CurrentLevel < gu.Settings.MaxLevel)
                     {
-                        user.CurrentXP = Math.Round(user.CurrentXP - user.NextLevelXP);
-                        user.NextLevelXP = user.NextLevelXP * gu.Settings.LevelMultiplier;
                         user.CurrentLevel++;
+                        user.CurrentXP = Math.Round(user.CurrentXP - user.NextLevelXP);
+                        user.NextLevelXP = CalcXP(user.CurrentLevel, gu.Settings.LevelMultiplier, gu.Settings.DefaultBaseLevelXp );
                         leveledUp = true;
                     }
                     if (!leveledUp)
@@ -390,6 +390,13 @@ namespace Public_Bot.Modules.Handlers
         public async Task RemoveFromRole(GuildLeaderboards gl, SocketRole role)
         {
 
+        }
+        public static int CalcXP(uint level, double xpMult, uint baseXp)
+        {
+            double res = baseXp;
+            for (int i = 0; i != level; i++)
+                res *= xpMult;
+            return (int)res;
         }
     }
 }
