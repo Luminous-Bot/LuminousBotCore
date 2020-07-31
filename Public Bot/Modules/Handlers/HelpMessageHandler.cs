@@ -50,7 +50,7 @@ namespace Public_Bot.Modules.Handlers
             if (!CurrentHelpMessages.Any(x => x.MessageID == arg3.MessageId))
                 return;
             var hm = CurrentHelpMessages.Find(x => x.MessageID == arg3.MessageId);
-            var gs = CommandHandler.GetGuildSettings(hm.GuildID);
+            var gs = GuildSettingsHelper.GetGuildSettings(hm.GuildID);
             var msg = (RestUserMessage)client.GetGuild(hm.GuildID).GetTextChannel(arg3.Channel.Id).GetMessageAsync(arg3.MessageId).Result;
             if (CurrentHelpMessages.Any(x => x.MessageID == arg3.MessageId) && msg != null)
             {

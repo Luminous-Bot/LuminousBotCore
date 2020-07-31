@@ -17,7 +17,7 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_UserLeft(SocketGuildUser arg)
         {
-            var guildSettings = CommandHandler.GetGuildSettings(arg.Guild.Id);
+            var guildSettings = GuildSettingsHelper.GetGuildSettings(arg.Guild.Id);
             if (guildSettings.leaveMessage.isEnabled)
             {
                 var embed = await guildSettings.leaveMessage.GenerateLeaveMessage(arg,arg.Guild);

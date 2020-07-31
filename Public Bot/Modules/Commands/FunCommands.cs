@@ -129,7 +129,7 @@ namespace Public_Bot.Modules.Commands
 
         }
 
-        [DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
+        /** [DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
 
         public async Task HangmanAsync(SocketMessage arg)
         {
@@ -139,5 +139,6 @@ namespace Public_Bot.Modules.Commands
 
 
         }
+        **/
     }
 }

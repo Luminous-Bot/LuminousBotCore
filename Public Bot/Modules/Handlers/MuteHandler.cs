@@ -90,8 +90,9 @@ namespace Public_Bot.Modules.Handlers
                 await Task.Delay(3000);
             }
 
-            CommandHandler.CurrentGuildSettings[CommandHandler.CurrentGuildSettings.IndexOf(CommandHandler.CurrentGuildSettings.Find(x => x.GuildID == g.Id))].MutedRoleID = role.Id;
-            StateHandler.SaveObject<List<GuildSettings>>("guildsettings", CommandHandler.CurrentGuildSettings);
+            var gs = GuildSettingsHelper.GetGuildSettings(g.Id);
+            gs.MutedRoleID = role.Id;
+            gs.SaveGuildSettings();
 
             var c = await g.GetTextChannelAsync(completeChan);
             await c.SendMessageAsync($"<@{User}>", false, new EmbedBuilder()

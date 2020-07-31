@@ -171,6 +171,7 @@ namespace Public_Bot.Modules.Handlers
             public string BuildAndClear()
             {
                 var lbuck = _bucket.ToList();
+                _bucket.Clear();
                 if (lbuck.Count == 0)
                     return null;
                 var b = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
@@ -179,8 +180,7 @@ namespace Public_Bot.Modules.Handlers
                                         new KeyValuePair<string, object>("userId", $"\\\"{x.UserId}\\\""),
                                         new KeyValuePair<string, object>("level", x.LevelUser.CurrentLevel),
                                         new KeyValuePair<string, object>("xp", x.LevelUser.CurrentXP)));
-                lbuck.Clear();
-                return b.Build();
+               return b.Build();
             }
         }
         private void GiveVCPoints(object sender, ElapsedEventArgs e)
@@ -232,7 +232,7 @@ namespace Public_Bot.Modules.Handlers
         public static async void LevelUpUser(LevelUser user)
         {
             var gu = GuildLeaderboards.Get(user.GuildID);
-            var gs = CommandHandler.GetGuildSettings(user.GuildID);
+            var gs = GuildSettingsHelper.GetGuildSettings(user.GuildID);
             if (gs.ModulesSettings["🧪 Levels 🧪"])
             {
                 if (user.CurrentLevel < gu.Settings.MaxLevel)
@@ -240,9 +240,9 @@ namespace Public_Bot.Modules.Handlers
                     bool leveledUp = false;
                     while (user.CurrentXP >= user.NextLevelXP && user.CurrentLevel < gu.Settings.MaxLevel)
                     {
-                        user.CurrentXP = Math.Round(user.CurrentXP - user.NextLevelXP);
-                        user.NextLevelXP = user.NextLevelXP * gu.Settings.LevelMultiplier;
                         user.CurrentLevel++;
+                        user.CurrentXP = Math.Round(user.CurrentXP - user.NextLevelXP);
+                        user.NextLevelXP = CalcXP(user.CurrentLevel, gu.Settings.LevelMultiplier, gu.Settings.DefaultBaseLevelXp );
                         leveledUp = true;
                     }
                     if (!leveledUp)
@@ -317,6 +317,8 @@ namespace Public_Bot.Modules.Handlers
             var g = (sm.Channel as SocketGuildChannel).Guild;
             if (g == null)
                 return;
+            if (arg.Author.IsWebhook)
+                return;
             var gs = GuildSettings.Get(g.Id);
             if (gs.ModulesSettings["🧪 Levels 🧪"])
             {
@@ -388,6 +390,13 @@ namespace Public_Bot.Modules.Handlers
         public async Task RemoveFromRole(GuildLeaderboards gl, SocketRole role)
         {
 
+        }
+        public static int CalcXP(uint level, double xpMult, uint baseXp)
+        {
+            double res = baseXp;
+            for (int i = 0; i != level; i++)
+                res *= xpMult;
+            return (int)res;
         }
     }
 }
