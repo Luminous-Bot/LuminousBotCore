@@ -14,6 +14,7 @@ namespace Public_Bot.Modules.Auto_Moderation
         /// Boolean to decide whether to DM user on delete or not.
         /// </summary>
         public bool DMUser { get; set; } = true;
+
         /// <summary>
         /// The maximum <b>characters</b> allowed as not spam.
         /// </summary>
@@ -42,7 +43,14 @@ namespace Public_Bot.Modules.Auto_Moderation
             MaxChars = mxchs;
             DMUser = DMuser;
         }
-
+        /// <summary>
+        /// Constructor taking only the <b>DM User Boolean</b>
+        /// </summary>
+        /// <param name="DMUse"></param>
+        public Anti_Spam(bool DMUse)
+        {
+            DMUser = DMUse;
+        }
 
         /// <summary>
         /// Checks the message for exceeding the maximum permitted character length.
@@ -51,6 +59,7 @@ namespace Public_Bot.Modules.Auto_Moderation
         /// <returns></returns>
         public async Task SimpleSpamCheck(SocketCommandContext ctxt)
         {
+            Logger.Write("Spam Check");
             if (ctxt.Message.Content.Length >= MaxChars) {
                 await ctxt.Message.DeleteAsync();
                 if (!DMUser) return;

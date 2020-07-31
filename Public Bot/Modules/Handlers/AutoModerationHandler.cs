@@ -25,7 +25,7 @@ namespace Public_Bot.Modules.Handlers
             {
                 await GuildSettings.Get(context.Guild.Id).autoMod.AutoModeration(context);
             }
-            catch { }
+            catch(Exception) { }
         }
     }
 }

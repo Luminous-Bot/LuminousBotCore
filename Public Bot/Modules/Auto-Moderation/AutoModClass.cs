@@ -25,12 +25,14 @@ namespace Public_Bot.Modules.Auto_Moderation
         /// The AntiSpam class for the Bot.
         /// </summary>
         public Anti_Spam Antispam { get; set; } = new Anti_Spam();
+        public bool DMUser { get; set; } = true;
+        public AntiMassCapsSpam AntiMCS { get; set; } = new AntiMassCapsSpam();
         public AutoModClass() { }
         /// <summary>
         /// A function for execution of AutoModeration
         /// </summary>
         /// <param name="alfa">The SocketCommandContext required.</param>
-        /// <returns></returns>
+        /// <returns>A task to await for Automod</returns>
         public async Task AutoModeration(SocketCommandContext alfa)
         {
             if (!Enabled) return;
@@ -38,6 +40,16 @@ namespace Public_Bot.Modules.Auto_Moderation
             if ((alfa.User as SocketGuildUser).GuildPermissions.Administrator && !ApplyOnAdmins) return;
             if (alfa.User.IsBot && !ApplyOnBots) return;
             await Antispam.SimpleSpamCheck(alfa);
+            if (AntiMCS.Enabled)
+            {
+                await AntiMCS.MassCaps(alfa);
+            }
+        }
+        public void SetDMUser(bool Dmuse)
+        {
+            DMUser = Dmuse;
+            Antispam.DMUser = Dmuse;
+            AntiMCS.DMUser = Dmuse;
         }
     }
 }
