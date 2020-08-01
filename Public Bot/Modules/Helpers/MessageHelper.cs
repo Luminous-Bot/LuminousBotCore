@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Public_Bot.StateService;
@@ -10,8 +11,8 @@ namespace Public_Bot.Modules.Helpers
     {
         public static bool MessageExists(ulong messageId)
         {
-            var re = StateService.Query<Message>("{\"operationName\":null,\"variables\":{},\"query\":\"{\n message(id: \\\"" + messageId + "\\\") {\n    GuildID\n  }\n}\n\"}");
-            return re == null;
+            var re = StateService.Query<bool>("{\"operationName\":null,\"variables\":{},\"query\":\"{ messageExists(MessageID: \\\"" + messageId + "\\\") }\"}");
+            return re;
         }
 
         public static Message GetMessage(ulong id)

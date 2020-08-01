@@ -21,12 +21,14 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task DeleteMessage(Discord.Cacheable<Discord.IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
-            if (MessageHelper.MessageExists(arg2.Id))
+            if (MessageHelper.MessageExists(arg1.Id))
                 await StateService.MutateAsync<Message>(GraphQLParser.GenerateGQLMutation<Message>("deleteMessage", false, null, "", "", new KeyValuePair<string, object>("id", arg1.Id)));
         }
 
         private async Task UpdateMessage(Discord.Cacheable<Discord.IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
+            if (arg2.Author.IsBot || arg2.Author.IsWebhook)
+                return;
             if (MessageHelper.MessageExists(arg2.Id))
                 new MessageRevision(arg2);
         }
@@ -35,7 +37,7 @@ namespace Public_Bot.Modules.Handlers
         {
             if (arg.Channel.GetType() != typeof(SocketTextChannel))
                 return;
-            if (arg.Author.IsBot)
+            if (arg.Author.IsBot || arg.Author.IsWebhook)
                 return;
             var channel = (SocketTextChannel)arg.Channel;
             var guild = channel.Guild;

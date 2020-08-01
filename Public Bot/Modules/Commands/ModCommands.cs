@@ -426,7 +426,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                     {
-                        Title = "**Welp, that didnt work!**",
+                        Title = "**Welp, that didn't work!**",
                         Description = $"We couldn't add the muted role to {user}, Here's the reason: {ex.Message}",
                         Color = Color.Red,
                         Timestamp = DateTime.Now

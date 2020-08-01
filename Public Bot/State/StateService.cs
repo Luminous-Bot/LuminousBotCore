@@ -100,6 +100,10 @@ namespace Public_Bot
         {
             public Dictionary<string, bool> result { get; set; }
         }
+        public class ExistNullBase
+        {
+            public Dictionary<string, dynamic> result { get; set; }
+        }
         private class GqlError
         {
             public List<object> errors { get; set; }

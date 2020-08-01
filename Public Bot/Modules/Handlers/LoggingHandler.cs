@@ -151,7 +151,7 @@ namespace Public_Bot.Modules.Handlers
                 if (arg1.IsMentionable != arg2.IsMentionable)
                     body += $"__Mention Changed:__\n> Old Value:  {(arg1.IsMentionable ? "✅" : "❌")}\n> New Value: {(arg2.IsMentionable ? "✅" : "❌")}\n__\n__\n";
                 if (arg1.IsHoisted != arg2.IsHoisted)
-                    body += $"__Hoisted Changed:__\n> Old Value:  {(arg1.IsHoisted)}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}\n__\n__\n";
+                    body += $"__Hoisted Changed:__\n> Old Value:  {(arg1.IsHoisted ? "✅" : "❌")}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}\n__\n__\n";
                 if (body == "")
                     body = "Can't find changes :(";
                 if (logchan != null)
@@ -226,13 +226,7 @@ namespace Public_Bot.Modules.Handlers
                     if (logchan != null)
                     {
                         List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
-                        fields.Add(new EmbedFieldBuilder()
-                        {
-                            Name = "Author:",
-                            Value = arg2.Author.Mention,
-                            IsInline = true,
-                        });
-
+                        
                         if(arg1.HasValue)
                         {
                             var oval = "{no content}";
@@ -255,7 +249,8 @@ namespace Public_Bot.Modules.Handlers
                                 fields.Add(new EmbedFieldBuilder()
                                 {
                                     Name = "Old Message:",
-                                    Value = msg.Content
+                                    Value = msg.Content,
+                                    IsInline = true,
                                 });
                             }
                         }
@@ -269,6 +264,12 @@ namespace Public_Bot.Modules.Handlers
                             Value = val,
                             IsInline = true,
 
+                        });
+                        fields.Add(new EmbedFieldBuilder()
+                        {
+                            Name = "Author:",
+                            Value = arg2.Author.Mention,
+                            //IsInline = true,
                         });
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -304,7 +305,7 @@ namespace Public_Bot.Modules.Handlers
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Author:",
-                                Value = $"<@{msg.AuthorID}>"
+                                Value = $"<@{msg.Author.Id}>"
                             });
                             fields.Add(new EmbedFieldBuilder()
                             {

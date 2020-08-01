@@ -439,7 +439,6 @@ namespace Public_Bot.Modules.Commands
         [DiscordCommand("whois", description = "Shows information about the mentioned user", commandHelp = "Usage: `(PREFIX)whois <mention>`")]
         public async Task WhoIs(params string[] user)
         {
-
             SocketGuildUser userAccount;
             if (user.Length == 0)
                 userAccount = Context.User as SocketGuildUser;

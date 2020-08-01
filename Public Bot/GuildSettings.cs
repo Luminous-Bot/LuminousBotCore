@@ -25,8 +25,7 @@ namespace Public_Bot
         public List<string> MemeSubreddits = new List<string>() { "https://www.reddit.com/r/dankmemes.json" };
         public WelcomeCard WelcomeCard { get; set; }
         public LeaveMessage leaveMessage { get; set; }
-        public AutoModClass autoMod { get; set; } = new AutoModClass();
-
+        public AutoMod AutoModeration { get; set; } = new AutoMod();
         public GuildSettings() { }
 
         public void SaveGuildSettings()

@@ -7,6 +7,8 @@ namespace Public_Bot
 {
     public class MessageRevision
     {
+        [GraphQLSVar]
+        public ulong Id { get; set; }
         [GraphQLSVar, GraphQLProp]
         public DateTime Date { get; set; }
         [GraphQLSVar, GraphQLProp]
@@ -14,6 +16,7 @@ namespace Public_Bot
         public MessageRevision() { }
         public MessageRevision(SocketMessage msg)
         {
+            this.Id = msg.Id;
             this.Content = msg.Content;
             this.Date = msg.EditedTimestamp.HasValue ? msg.EditedTimestamp.Value.DateTime : DateTime.UtcNow;
 
