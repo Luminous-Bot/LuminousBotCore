@@ -212,6 +212,8 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
+            if (arg2.Author.IsBot || arg2.Author.IsWebhook)
+                return;
             if (arg3.GetType() == typeof(SocketTextChannel))
             {
                 var sgc = arg3 as SocketTextChannel;
@@ -265,6 +267,10 @@ namespace Public_Bot.Modules.Handlers
                             IsInline = true,
 
                         });
+
+                        if (fields[0].Name == "{no content}" && fields[1].Name == "{no content}")
+                            return;
+
                         fields.Add(new EmbedFieldBuilder()
                         {
                             Name = "Author:",
