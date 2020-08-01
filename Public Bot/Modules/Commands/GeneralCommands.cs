@@ -243,6 +243,7 @@ namespace Public_Bot.Modules.Commands
             }
 
         }
+        [GuildPermissions(GuildPermission.ManageNicknames)]
         [DiscordCommand("nickname", commandHelp = "`(PREFIX)nickname <@user> <nickname>`", description = "Changes a user's nickname")]
         [Alt("nick")]
         public async Task NicknameUpdate(params string[] args)

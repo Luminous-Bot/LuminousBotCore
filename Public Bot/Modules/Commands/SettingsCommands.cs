@@ -858,7 +858,7 @@ namespace Public_Bot.Modules.Commands
                 new Thread(async () => await MuteHandler.SetupMutedRole(Context.Guild, Context.Channel.Id, Context.User.Id)).Start();
             }
         }
-        [DiscordCommand("permissions", RequiredPermission = true, commandHelp = "`(PREFIX)permissions", description = "Lists all roles with elevated permissions for this bot")]
+        [DiscordCommand("permissions", RequiredPermission = true, commandHelp = "`(PREFIX)permissions`", description = "Lists all roles with elevated permissions for this bot")]
         public async Task permission()
         {
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -892,6 +892,7 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
                 return;
             }
+            GuildSettings.PermissionRoles.Add(role.Id);
             GuildSettings.SaveGuildSettings();
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
@@ -924,6 +925,7 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
                 return;
             }
+            GuildSettings.PermissionRoles.Remove(role.Id);
             GuildSettings.SaveGuildSettings();
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
             {
