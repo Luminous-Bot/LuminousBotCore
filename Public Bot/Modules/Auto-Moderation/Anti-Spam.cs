@@ -22,27 +22,10 @@ namespace Public_Bot.Modules.Auto_Moderation
 
 
         /// <summary>
-        /// Constructor taking the Maximum Characters permitted as the input.
-        /// </summary>
-        /// <param name="mxchs">The maximum permitted characters</param>
-        public Anti_Spam(uint mxchs)
-        {
-            MaxChars = mxchs;
-        }
-        /// <summary>
         /// No parameter constructor of Antispam.
         /// </summary>
         public Anti_Spam() { }
-        /// <summary>
-        /// Construction with max chars integer and DM user? boolean
-        /// </summary>
-        /// <param name="mxchs">The maximum permitted characters</param>
-        /// <param name="DMuser">Whether or not to DM the user.</param>
-        public Anti_Spam(uint mxchs, bool DMuser)
-        {
-            MaxChars = mxchs;
-            DMUser = DMuser;
-        }
+
         /// <summary>
         /// Constructor taking only the <b>DM User Boolean</b>
         /// </summary>
@@ -59,7 +42,6 @@ namespace Public_Bot.Modules.Auto_Moderation
         /// <returns></returns>
         public async Task SimpleSpamCheck(SocketCommandContext ctxt)
         {
-            Logger.Write("Spam Check");
             if (ctxt.Message.Content.Length >= MaxChars) {
                 await ctxt.Message.DeleteAsync();
                 if (!DMUser) return;

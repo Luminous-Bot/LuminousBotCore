@@ -23,9 +23,11 @@ namespace Public_Bot.Modules.Handlers
             var context = new ShardedCommandContext(client, arg as SocketUserMessage);
             try
             {
-                await GuildSettings.Get(context.Guild.Id).autoMod.AutoModeration(context);
+                var x = GuildSettings.Get(context.Guild.Id).autoMod.AutoModeration(context);
+                if (x == null) { return; }
+                await x;
             }
-            catch(Exception) { }
+            catch(NullReferenceException) { }
         }
     }
 }
