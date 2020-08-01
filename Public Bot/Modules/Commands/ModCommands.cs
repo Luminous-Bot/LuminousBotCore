@@ -31,7 +31,7 @@ namespace Public_Bot.Modules.Commands
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "**The bot need better permissions!**",
+                        Title = "**The bot needs better permissions!**",
                         Description = @$"The bot doesnt have the correct permissions for this module, run `{GuildSettings.Prefix}help setup` to see the bots permissions",
                         Color = Color.Red,
                         Timestamp = DateTimeOffset.Now,
@@ -812,17 +812,16 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("lock", RequiredPermission = true, commandHelp = "`(PREFIX)lock #channel`", description = "locks the mentioned channel")]
             public async Task Lock(params string[] args)
             {
+                SocketGuildChannel lockchnl;
                 if (!Context.Message.MentionedChannels.Any())
                 {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "Channel not mentioned",
-                        Description = "You need to mention a channel to lock it!!"
-                    }.WithCurrentTimestamp().Build()
-                    );
-                    return;
+                    //Assuming they want to lock the current channel!
+                    lockchnl = Context.Channel as SocketGuildChannel;
                 }
-                var lockchnl = Context.Message.MentionedChannels.First();
+                else
+                {
+                    lockchnl = Context.Message.MentionedChannels.First();
+                }
                 var lockMSGchnl = lockchnl as SocketTextChannel;
                 EmbedBuilder alfa = new EmbedBuilder();
                 try
@@ -859,17 +858,16 @@ namespace Public_Bot.Modules.Commands
             [DiscordCommand("unlock", commandHelp = "`(PREFIX)unlock #channel`", description = "Unlocks the mentioned channel",RequiredPermission = true)]
             public async Task Unlock(params string[] args)
             {
+                SocketGuildChannel lockchnl;
                 if (!Context.Message.MentionedChannels.Any())
                 {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                    {
-                        Title = "Channel not mentioned",
-                        Description = "You need to mention a channel to unlock it!!"
-                    }.WithCurrentTimestamp().Build()
-                    );
-                    return;
+                    //Assuming they want to lock the current channel.
+                    lockchnl = Context.Channel as SocketGuildChannel;
                 }
-                var lockchnl = Context.Message.MentionedChannels.First();
+                else
+                {
+                    lockchnl = Context.Message.MentionedChannels.First();
+                }
                 var lockMSGchnl = lockchnl as SocketTextChannel;
                 EmbedBuilder alfa = new EmbedBuilder();
                 try
@@ -902,7 +900,45 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                 }
             }
-                
+            [GuildPermissions(GuildPermission.BanMembers)]
+            [DiscordCommand("softban",commandHelp ="`(PREFIX)softban <user>`", description ="Bans and instantly unbans the user to delete 48 hours of their messages.")]
+            public async Task SoftBan(params string[] args)
+            {
+                if (args.Length == 0)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Title = "No user specified",
+                        Description = "Who are we supposed to softban :thinking:",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                var user = GetUser(args[0]);
+                if (user == null)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Title = "No user or id specified",
+                        Description = "Who are we supposed to softban :thinking:",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
+                var id = user.Id;
+                await Context.Guild.AddBanAsync(id, 2, args[1]);
+                await Context.Guild.RemoveBanAsync(id);
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                {
+                    Title = $"Successfully softbanned user",
+                    Description = $"<@{id}> was successfully softbanned",
+                    Color = Blurple,
+                    Footer = new EmbedFooterBuilder
+                    {
+                        Text = "Moderation by Luminous"
+                    }
+                }.WithCurrentTimestamp().Build());
+            }
             [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {
