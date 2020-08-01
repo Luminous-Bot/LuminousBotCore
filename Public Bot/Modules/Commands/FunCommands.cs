@@ -285,14 +285,24 @@ namespace Public_Bot.Modules.Commands
 
         public async Task Pun()
         {
-            Random rand = new Random();
-            int index = rand.Next(puns.Length);
+            try
+            {
+                Random rand = new Random();
+                int index = rand.Next(puns.Length);
 
-            EmbedBuilder b = new EmbedBuilder()
-                .WithTitle($"{puns[index]}")
-                .WithColor(Blurple);
+                EmbedBuilder b = new EmbedBuilder()
+                    .WithTitle($"{puns[index]}")
+                    .WithColor(Blurple);
 
-            await Context.Channel.SendMessageAsync("", false, b.Build());
+                await Context.Channel.SendMessageAsync("", false, b.Build());
+            } catch
+            {
+                EmbedBuilder e = new EmbedBuilder()
+                {
+                    Title = "puns.txt doesn't exist, please contact quin#3017"
+                };
+                await Context.Channel.SendMessageAsync("", false, e.Build());
+            }
         }
 
         //[DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
