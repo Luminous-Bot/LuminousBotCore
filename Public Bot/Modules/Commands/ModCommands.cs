@@ -900,45 +900,45 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                 }
             }
-            [GuildPermissions(GuildPermission.BanMembers)]
-            [DiscordCommand("softban",commandHelp ="`(PREFIX)softban <user>`", description ="Bans and instantly unbans the user to delete 48 hours of their messages.")]
-            public async Task SoftBan(params string[] args)
-            {
-                if (args.Length == 0)
-                {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                    {
-                        Title = "No user specified",
-                        Description = "Who are we supposed to softban :thinking:",
-                        Color = Color.Red
-                    }.WithCurrentTimestamp().Build());
-                    return;
-                }
-                var user = GetUser(args[0]);
-                if (user == null)
-                {
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                    {
-                        Title = "No user or id specified",
-                        Description = "Who are we supposed to softban :thinking:",
-                        Color = Color.Red
-                    }.WithCurrentTimestamp().Build());
-                    return;
-                }
-                var id = user.Id;
-                await Context.Guild.AddBanAsync(id, 2, args[1]);
-                await Context.Guild.RemoveBanAsync(id);
-                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
-                {
-                    Title = $"Successfully softbanned user",
-                    Description = $"<@{id}> was successfully softbanned",
-                    Color = Blurple,
-                    Footer = new EmbedFooterBuilder
-                    {
-                        Text = "Moderation by Luminous"
-                    }
-                }.WithCurrentTimestamp().Build());
-            }
+            //[GuildPermissions(GuildPermission.BanMembers)]
+            //[DiscordCommand("softban",commandHelp ="`(PREFIX)softban <user>`", description ="Bans and instantly unbans the user to delete 48 hours of their messages.", RequiredPermission = true)]
+            //public async Task SoftBan(params string[] args)
+            //{
+            //    if (args.Length == 0)
+            //    {
+            //        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+            //        {
+            //            Title = "No user specified",
+            //            Description = "Who are we supposed to softban :thinking:",
+            //            Color = Color.Red
+            //        }.WithCurrentTimestamp().Build());
+            //        return;
+            //    }
+            //    var user = GetUser(args[0]);
+            //    if (user == null)
+            //    {
+            //        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+            //        {
+            //            Title = "No user or id specified",
+            //            Description = "Who are we supposed to softban :thinking:",
+            //            Color = Color.Red
+            //        }.WithCurrentTimestamp().Build());
+            //        return;
+            //    }
+            //    var id = user.Id;
+            //    await Context.Guild.AddBanAsync(id, 2, args[1]);
+            //    await Context.Guild.RemoveBanAsync(id);
+            //    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+            //    {
+            //        Title = $"Successfully softbanned user",
+            //        Description = $"<@{id}> was successfully softbanned",
+            //        Color = Blurple,
+            //        Footer = new EmbedFooterBuilder
+            //        {
+            //            Text = "Moderation by Luminous"
+            //        }
+            //    }.WithCurrentTimestamp().Build());
+            //}
             [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {

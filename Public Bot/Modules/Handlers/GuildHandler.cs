@@ -22,10 +22,8 @@ namespace Public_Bot
             client.JoinedGuild += AddGuild;
             client.UserJoined += NewUser;
             client.ShardConnected += Init;
-            //load guilds
-            
-
         }
+        
         bool isInitCompt = false;
         private async Task Init(DiscordSocketClient arg)
         {

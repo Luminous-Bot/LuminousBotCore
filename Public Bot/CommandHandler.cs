@@ -51,10 +51,11 @@ namespace Public_Bot
             await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Failed GraphQl!",
-                Description = $"Failed to {type} {method}! Server sent: {StatusCode}\n\n**Json**```json\n{string.Join("", FormatJson(q).Take(1000))}...```" +
-                $"{(error == null ? "" : $"\n**Error**\n```json\n{string.Join("\n\n", error)}```")}",
+                Description = $"Failed to {type} {method}! Server sent: {StatusCode}!",
                 Color = Color.Red
             }.WithCurrentTimestamp().Build());
+            File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{string.Join("\n\n\n", error)}\n\n----------< End Server Response >----------");
+            await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", "");
         }
 
         //private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
@@ -66,8 +67,10 @@ namespace Public_Bot
             handlerService.CreateHandlers();
 
             foreach (var guild in arg.Guilds)
-                GuildSettingsHelper.GetGuildSettings(guild.Id);
-             isReady = true;
+            {
+               GuildSettingsHelper.GetGuildSettings(guild.Id);
+            }
+            isReady = true;
         }
         public static bool IsBotRole(IRole role)
         {
@@ -157,7 +160,7 @@ namespace Public_Bot
                                new EmbedFieldBuilder()
                                {
                                    Name = "Expected input:",
-                                   Value = $"{CommandModuleBase.ReadCurrentCommands(s.Prefix).Find(x => x.CommandName == msg.Content.Split(' ')[0].Remove(0,1)).CommandHelpMessage}"
+                                   Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
                                }
                            },
                            Color = Color.Red,
@@ -182,7 +185,7 @@ namespace Public_Bot
                             new EmbedFieldBuilder()
                             {
                                 Name = "Expected input:",
-                                Value = $"{CommandModuleBase.ReadCurrentCommands(s.Prefix).Find(x => x.CommandName == msg.Content.Split(' ')[0].Remove(0,1)).CommandHelpMessage}"
+                                Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
                             }
                         },
                            Color = Color.Red,

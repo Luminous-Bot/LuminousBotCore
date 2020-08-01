@@ -29,7 +29,7 @@ namespace Public_Bot.Modules.Commands
             {
                 HttpClient client = new HttpClient();
                 var sb = new Random().Next(0, GuildSettings.MemeSubreddits.Count);
-                var sbrt = GuildSettings.MemeSubreddits[sb];
+                var sbrt = GuildSettings.MemeSubreddits[sb] + ".json";
                 var request = await client.GetAsync(sbrt);
                 string response = await request.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
@@ -46,7 +46,7 @@ namespace Public_Bot.Modules.Commands
 
                 EmbedBuilder b = new EmbedBuilder()
                 {
-                    Title = $"Reddit",
+                    Title = $"[r/{data.Data.Children.First().Data.Subreddit}]({GuildSettings.MemeSubreddits[sb]})",
                     ImageUrl = post.Data.Url.ToString(),
                     Footer = new EmbedFooterBuilder()
                     {
@@ -87,10 +87,10 @@ namespace Public_Bot.Modules.Commands
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
-                            string sb = args[1];
+                            string sb = args[2];
                             if (Regex.IsMatch(sb, "r\\/(\\w*?)$"))
                             {
-                                var request = await new HttpClient().GetAsync($"https://www.reddit.com/{sb}");
+                                var request = await new HttpClient().GetAsync($"https://www.reddit.com/{sb}.json");
                                 string response = await request.Content.ReadAsStringAsync();
                                 var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
                                 if (!data.Data.Children.Any())
@@ -119,7 +119,7 @@ namespace Public_Bot.Modules.Commands
                                 {
                                     Title = "Success!",
                                     Color = Color.Green,
-                                    Description = $"Added ({sb})[https://www.reddit.com/{sb}] to the list of meme subreddits"
+                                    Description = $"Added [{sb}](https://www.reddit.com/{sb}) to the list of meme subreddits"
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
@@ -144,7 +144,7 @@ namespace Public_Bot.Modules.Commands
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }
-                            string sub = args[1];
+                            string sub = args[2];
                             if (Regex.IsMatch(sub, "r\\/(\\w*?)$"))
                             {
                                 if(GuildSettings.MemeSubreddits.Count == 1)
@@ -173,7 +173,7 @@ namespace Public_Bot.Modules.Commands
                                 {
                                     Title = "Success!",
                                     Color = Color.Green,
-                                    Description = $"Removed ({sub})[https://www.reddit.com/{sub}] from the list of meme subreddits"
+                                    Description = $"Removed [{sub}](https://www.reddit.com/{sub}) from the list of meme subreddits"
                                 }.WithCurrentTimestamp().Build());
                                 return;
                             }

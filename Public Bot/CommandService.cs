@@ -340,6 +340,7 @@ namespace Public_Bot
 
             [DefaultValue(false)]
             public bool MultipleResults { get; set; }
+            public string commandUsed { get; set; }
             public CommandStatus Result { get; set; }
             public ICommandResult[] Results { get; set; }
             public string ResultMessage { get; set; }
@@ -354,6 +355,7 @@ namespace Public_Bot
             /// <see langword="true"/> the execution of the command is successful
             /// </summary>
             bool IsSuccess { get; }
+            public string commandUsed { get; }
             /// <summary>
             /// The status of the command
             /// </summary>
@@ -412,7 +414,9 @@ namespace Public_Bot
                 return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidParams };
             foreach (var cmd in commandobj)
             {
-                results.Add(await ExecuteCommand(cmd, context, param, s));
+                var r = await ExecuteCommand(cmd, context, param, s);
+                r.commandUsed = cmd.attribute.commandHelp;
+                results.Add(r);
             }
             if (results.Any(x => x.IsSuccess))
                 return results.First(x => x.IsSuccess);

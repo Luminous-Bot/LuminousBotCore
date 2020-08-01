@@ -51,7 +51,7 @@ namespace Public_Bot.Modules.Handlers
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Username Changed",
-                                Value = $"> **Old Username:**\n> {before.Username}\n>**New Username**\n> {after.Username}"
+                                Value = $"> **Old Username:**\n> {before.Username}\n> **New Username**\n> {after.Username}"
                             });
                         }
                         if (before.Discriminator != after.Discriminator)
@@ -59,7 +59,7 @@ namespace Public_Bot.Modules.Handlers
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Discriminator Changed",
-                                Value = $"> **Old Discriminator:**\n> {before.Discriminator}\n>**New Discriminator**\n> {after.Discriminator}"
+                                Value = $"> **Old Discriminator:**\n> {before.Discriminator}\n> **New Discriminator**\n> {after.Discriminator}"
                             });
                         }
                         if (before.AvatarId != after.AvatarId)
@@ -67,7 +67,7 @@ namespace Public_Bot.Modules.Handlers
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Avatar Changed",
-                                Value = $"> **Old Avatar:**\n> (Link)[{before.GetAvatarUrl()}]\n>**New Avatar**\n> (Link)[{after.GetAvatarUrl()}]"
+                                Value = $"> **Old Avatar:**\n> [Link]({before.GetAvatarUrl()})\n> **New Avatar**\n> [Link]({after.GetAvatarUrl()})"
                             });
                         }
 
@@ -269,6 +269,8 @@ namespace Public_Bot.Modules.Handlers
                         });
 
                         if (fields[0].Name == "{no content}" && fields[1].Name == "{no content}")
+                            return;
+                        if (fields[0].Value == fields[1].Value)
                             return;
 
                         fields.Add(new EmbedFieldBuilder()
