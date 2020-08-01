@@ -300,6 +300,7 @@ namespace Public_Bot.Modules.Handlers
                         if (MessageHelper.MessageExists(arg1.Id))
                         {
                             var msg = await MessageHelper.GetMessageAsync(arg1.Id);
+                            if (msg == null) return;
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Author:",

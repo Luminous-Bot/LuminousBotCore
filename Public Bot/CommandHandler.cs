@@ -83,7 +83,7 @@ namespace Public_Bot
         {
             if (!isReady)
             {
-                Logger.Write("Fired command before bot was ready!", Logger.Severity.Error);
+                Logger.Write("Fired command before bot was ready!", Logger.Severity.Warn);
                 return;
             }
 

@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Public_Bot.Modules.Auto_Moderation;
 using Public_Bot.Modules.Handlers;
 using Public_Bot.State.Types;
 using System;
@@ -23,7 +24,9 @@ namespace Public_Bot
         public bool Logging { get; set; } = false;
         public List<string> MemeSubreddits = new List<string>() { "https://www.reddit.com/r/dankmemes.json" };
         public WelcomeCard WelcomeCard { get; set; }
-        public LeaveMessage leaveMessage { get; set; }  
+        public LeaveMessage leaveMessage { get; set; }
+        public AutoModClass autoMod { get; set; } = new AutoModClass();
+
         public GuildSettings() { }
 
         public void SaveGuildSettings()
