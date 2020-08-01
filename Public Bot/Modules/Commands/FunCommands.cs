@@ -18,6 +18,7 @@ namespace Public_Bot.Modules.Commands
     public class FunCommands : CommandModuleBase
     {
         // Variables to use later on
+        static string[] puns = File.ReadAllLines($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}puns.txt");
         int rot = 0;
         private readonly Random _random = new Random();
 
@@ -284,20 +285,6 @@ namespace Public_Bot.Modules.Commands
 
         public async Task Pun()
         {
-            string PunPath = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}puns.txt";
-
-            if (!File.Exists(PunPath))
-            {
-                EmbedBuilder e = new EmbedBuilder()
-                {
-                    Title = "Puns.txt does not exist, please contact quin#3017"
-                };
-
-                await Context.Channel.SendMessageAsync("", false, e.Build());
-                return;
-            }
-
-            string[] puns = File.ReadAllLines(PunPath);
             Random rand = new Random();
             int index = rand.Next(puns.Length);
 
