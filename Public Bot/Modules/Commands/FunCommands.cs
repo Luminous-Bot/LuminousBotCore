@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.IO;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -277,6 +278,34 @@ namespace Public_Bot.Modules.Commands
 
             await Context.Channel.SendMessageAsync("", false, embed.Build());
 
+        }
+
+        [DiscordCommand("pun", commandHelp = "(PREFIX)pun", description = "Sends a random pun from our collection!")]
+
+        public async Task Pun()
+        {
+            string PunPath = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}puns.txt";
+
+            if (!File.Exists(PunPath))
+            {
+                EmbedBuilder e = new EmbedBuilder()
+                {
+                    Title = "Puns.txt does not exist, please contact quin#3017"
+                };
+
+                await Context.Channel.SendMessageAsync("", false, e.Build());
+                return;
+            }
+
+            string[] puns = File.ReadAllLines(PunPath);
+            Random rand = new Random();
+            int index = rand.Next(puns.Length);
+
+            EmbedBuilder b = new EmbedBuilder()
+                .WithTitle($"{puns[index]}")
+                .WithColor(Blurple);
+
+            await Context.Channel.SendMessageAsync("", false, b.Build());
         }
 
         //[DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
