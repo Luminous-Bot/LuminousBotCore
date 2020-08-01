@@ -46,7 +46,7 @@ namespace Public_Bot.Modules.Commands
 
                 EmbedBuilder b = new EmbedBuilder()
                 {
-                    Title = "r/dankmemes",
+                    Title = $"Reddit",
                     ImageUrl = post.Data.Url.ToString(),
                     Footer = new EmbedFooterBuilder()
                     {
