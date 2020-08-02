@@ -64,8 +64,6 @@ namespace Public_Bot
             var gm = new GuildMember(usr);
             if (CurrentGuilds.Any(x => x.Id == GuildId))
                 CurrentGuilds.Find(x => x.Id == GuildId).GuildMembers.Add(gm);
-            else
-                Addguild(gld);
             return gm;
         }
         public static GuildMember GetGuildMember(ulong MemberId, ulong GuildID)
@@ -131,7 +129,16 @@ namespace Public_Bot
             if (CurrentGuilds.Any(x => x.Id == id))
                 return CurrentGuilds.Find(x => x.Id == id);
             else
-                return null;
+            {
+                var g = Guild.Fetch(id);
+                if (g == null)
+                {
+                    Logger.Write("Holy shit they tried a command when there guild didn't exist god help us!", Logger.Severity.Critical);
+                    return null;
+                }
+                else
+                    return g;
+            }
         }
     }
 }
