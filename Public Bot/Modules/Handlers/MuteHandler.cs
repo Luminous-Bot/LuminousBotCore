@@ -80,13 +80,13 @@ namespace Public_Bot.Modules.Handlers
             //roles.OrderByDescending(x => x.Position);
             var num = roles.OrderByDescending(x => x.Position);
             var pos = num.Last().Position;
-            var role = await g.CreateRoleAsync($"Muted by {client.CurrentUser.Username}", new Discord.GuildPermissions(3212288), Color.DarkerGrey, false, false);
+            var role = await g.CreateRoleAsync($"Muted by {client.CurrentUser.Username}", new Discord.GuildPermissions(sendMessages: false, speak: false), Color.DarkerGrey, false, false);
             await role.ModifyAsync(x => x.Position = pos);
             //apply to channels
             var chn = await g.GetTextChannelsAsync();
             foreach(var channel in chn)
             {
-                await channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(66560, 2048));
+                await channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny, speak: PermValue.Deny));
                 await Task.Delay(3000);
             }
 

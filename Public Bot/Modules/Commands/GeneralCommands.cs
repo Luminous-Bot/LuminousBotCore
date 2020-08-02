@@ -437,7 +437,7 @@ namespace Public_Bot.Modules.Commands
             .WithCurrentTimestamp().Build());
         }
         
-        [DiscordCommand("whois", description = "Shows information about the mentioned user", commandHelp = "Usage: `(PREFIX)whois <mention>`")]
+        [DiscordCommand("whois", description = "Shows information about the mentioned user", commandHelp = "Usage: `(PREFIX)whois <@user>`")]
         public async Task WhoIs(params string[] user)
         {
             SocketGuildUser userAccount;

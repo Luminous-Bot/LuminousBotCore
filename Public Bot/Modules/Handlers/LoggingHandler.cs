@@ -268,10 +268,13 @@ namespace Public_Bot.Modules.Handlers
 
                         });
 
-                        if (fields[0].Name == "{no content}" && fields[1].Name == "{no content}")
-                            return;
-                        if (fields[0].Value == fields[1].Value)
-                            return;
+                        if(fields.Count == 2)
+                        {
+                            if (fields[0].Name == "{no content}" && fields[1].Name == "{no content}")
+                                return;
+                            if (fields[0].Value == fields[1].Value)
+                                return;
+                        }
 
                         fields.Add(new EmbedFieldBuilder()
                         {

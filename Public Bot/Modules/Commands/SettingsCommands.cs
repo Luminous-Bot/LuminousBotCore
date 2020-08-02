@@ -1106,6 +1106,18 @@ namespace Public_Bot.Modules.Commands
         [DiscordCommand("joinrole", description = "Gives new users a role", commandHelp = "Usage - `(PREFIX)joinrole <role>", RequiredPermission = true)]
         public async Task Joinrole(string r)
         {
+            if(r == "remove")
+            {
+                GuildSettings.NewMemberRole = 0;
+                GuildSettings.SaveGuildSettings();
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Success!",
+                    Description = $"Removed the join role",
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
             var role = GetRole(r);
             if(role == null)
             {

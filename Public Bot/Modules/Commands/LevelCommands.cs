@@ -910,7 +910,7 @@ namespace Public_Bot.Modules.Commands
         public static List<ulong> CurrentRF = new List<ulong>();
         [DiscordCommand("levelsettings", RequiredPermission = true, description = "Change how the level settings works!", commandHelp = "Usage:" +
             "`(PREFIX)levelsettings list`\n" +
-            "`(PREFIX)levelsettings MaxLevel/messagexp/voicexp/defaultxp/levelmultiplier/color/blacklist/ranks/refresh`")]
+            "`(PREFIX)levelsettings MaxLevel/messagexp/voicexp/defaultxp/levelmultiplier/blacklist/ranks/refresh`")]
         public async Task LevelSettings(params string[] args)
         {
             if (args.Length == 0)
