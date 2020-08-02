@@ -79,7 +79,7 @@ namespace Public_Bot
         static Pen WhitePen = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 4);
         static Pen WhitePenS = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 2);
         static Pen WhitePenSS = new Pen(new SolidBrush(Color.FromArgb(255, 255, 255)), 1);
-        static Font Font = new Font("Bahnschrift", 9);
+        static Font Font = new Font("Bahnschrift", 9, FontStyle.Regular);
         static Font TitleFont = new Font("Bahnschrift", 18);
         public static async Task<Image> Generate(PingData.DiscordApiPing data)
         {
@@ -107,19 +107,17 @@ namespace Public_Bot
             bool odd = true;
             for (float i = 1; i != yMax + 1; i++)
             {
-                if (i % chtr == 0)
-                {
-                    string n = i.ToString();
-                    if (i > 1000)
-                        n = ((double)i / 1000).ToString("0.#k") + " ";
-
-                    ChartGraphics.DrawString($"{n}ms", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF(ChartImage.Width - 70f, (ChartImage.Height - 60) - i * yOffset - 6));
-                    //ChartGraphics.DrawLine(WhitePenS, new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 90f, (ChartImage.Height - 60) - i * yOffset));
-                }
-                if (i % chtr2 == 0)
+               if (i % chtr2 == 0)
                 {
                     if (!odd)
+                    {
+                        string n = i.ToString();
+                        if (i > 1000)
+                            n = ((double)i / 1000).ToString("0.#k") + " ";
                         ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 75f, (ChartImage.Height - 60) - i * yOffset));
+                        ChartGraphics.DrawString($"{n}ms", Font, new SolidBrush(Color.FromArgb(255, 255, 255)), new PointF(ChartImage.Width - 70f, ((ChartImage.Height - 60) - i * yOffset) - 6));
+
+                    }
                     else
                         ChartGraphics.DrawLine(WhitePenSS, new PointF(30f, (ChartImage.Height - 60) - i * yOffset), new PointF(ChartImage.Width - 80f, (ChartImage.Height - 60) - i * yOffset));
                     odd = !odd;

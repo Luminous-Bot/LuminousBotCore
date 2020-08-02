@@ -318,7 +318,7 @@ namespace Public_Bot.Modules.Handlers
                             fields.Add(new EmbedFieldBuilder()
                             {
                                 Name = "Message:",
-                                Value = msg.Content == null ? "{no content}" : msg.Content == "" ? "{no content}" : ""
+                                Value = msg.Content == null ? "{no content}" : msg.Content == "" ? "{no content}" : msg.Content
                             });
                         }
 
