@@ -22,7 +22,7 @@ namespace Public_Bot.Modules.Commands
         int rot = 0;
         private readonly Random _random = new Random();
 
-        [DiscordCommand("meme", commandHelp = "`(PREFIX)meme`", description = "Grabs a random meme from reddit")]
+        [DiscordCommand("meme", commandHelp = "Usage: `(PREFIX)meme \n(PREFIX)meme subs \n(PREFIX)meme subs add <r/sub>`", description = "Grabs a random meme from reddit")]
         public async Task meme(params string[] args)
         {
             if (args.Length == 0)
