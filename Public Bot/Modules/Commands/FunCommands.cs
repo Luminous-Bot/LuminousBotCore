@@ -23,7 +23,6 @@ namespace Public_Bot.Modules.Commands
         private readonly Random _random = new Random();
 
         [DiscordCommand("reddit", commandHelp = "Usage: `(PREFIX)reddit \n(PREFIX)reddit subs \n(PREFIX)reddit subs add <r/sub> \n(PREFIX)reddit subs remove <r/sub>`", description = "Grabs a random post from reddit")]
-
         public async Task meme(params string[] args)
         {
             if (args.Length == 0)
