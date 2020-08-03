@@ -22,7 +22,7 @@ namespace Public_Bot.Modules.Commands
         int rot = 0;
         private readonly Random _random = new Random();
 
-        [DiscordCommand("meme", commandHelp = "Usage: `(PREFIX)meme \n(PREFIX)meme subs \n(PREFIX)meme subs add <r/sub>`", description = "Grabs a random meme from reddit")]
+        [DiscordCommand("meme", commandHelp = "Usage: `(PREFIX)meme \n(PREFIX)meme subs \n(PREFIX)meme subs add <r/sub> \n(PREFIX)meme subs remove <r/sub>`", description = "Grabs a random meme from reddit")]
         public async Task meme(params string[] args)
         {
             if (args.Length == 0)
@@ -71,7 +71,7 @@ namespace Public_Bot.Modules.Commands
                             {
                                 Title = "Current Subreddits",
                                 Color = Blurple,
-                                Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}meme {args[0]} add <r/sub>`"
+                                Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}meme {args[0]} add <r/sub>`\n To remove one do `{GuildSettings.Prefix}meme {args[0]} remove <r/sub>`"
                             }.WithCurrentTimestamp().Build());
                             return;
                         }
