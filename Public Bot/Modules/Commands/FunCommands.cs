@@ -22,20 +22,22 @@ namespace Public_Bot.Modules.Commands
         int rot = 0;
         private readonly Random _random = new Random();
 
-        [DiscordCommand("meme", commandHelp = "Usage: `(PREFIX)meme \n(PREFIX)meme subs \n(PREFIX)meme subs add <r/sub>`", description = "Grabs a random meme from reddit")]
+        [DiscordCommand("reddit", commandHelp = "Usage: `(PREFIX)reddit \n(PREFIX)reddit subs \n(PREFIX)reddit subs add <r/sub> \n(PREFIX)reddit subs remove <r/sub>`", description = "Grabs a random post from reddit")]
+
         public async Task meme(params string[] args)
         {
             if (args.Length == 0)
             {
                 HttpClient client = new HttpClient();
                 var sb = new Random().Next(0, GuildSettings.MemeSubreddits.Count);
-                var sbrt = GuildSettings.MemeSubreddits[sb] + ".json";
+                var sbrt2 = GuildSettings.MemeSubreddits.ToList();
+                var sbrt = sbrt2[sb] + ".json";
                 var request = await client.GetAsync(sbrt);
                 string response = await request.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
                 if (data.Data.Children.Length == 0)
                 {
-                    GuildSettings.MemeSubreddits.RemoveAt(sb);
+                    GuildSettings.MemeSubreddits.Remove(args[2]);
                     GuildSettings.SaveGuildSettings();
                     await meme(args).ConfigureAwait(false);
                 }
@@ -46,7 +48,8 @@ namespace Public_Bot.Modules.Commands
 
                 EmbedBuilder b = new EmbedBuilder()
                 {
-                    Title = $"[r/{data.Data.Children.First().Data.Subreddit}]({GuildSettings.MemeSubreddits[sb]})",
+                    Title = $"r/{data.Data.Children.First().Data.Subreddit}",
+                    Description = $"{post.Data.Title.ToString()}",
                     ImageUrl = post.Data.Url.ToString(),
                     Footer = new EmbedFooterBuilder()
                     {
@@ -71,7 +74,7 @@ namespace Public_Bot.Modules.Commands
                             {
                                 Title = "Current Subreddits",
                                 Color = Blurple,
-                                Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}meme {args[0]} add <r/sub>`"
+                                Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}reddit {args[0]} add <r/sub>`\n To remove one do `{GuildSettings.Prefix}reddit {args[0]} remove <r/sub>`"
                             }.WithCurrentTimestamp().Build());
                             return;
                         }
@@ -85,7 +88,7 @@ namespace Public_Bot.Modules.Commands
                                     {
                                         Title = "No Parameters.",
                                         Color = Color.Red,
-                                        Description = $"Please add some parameters.\nExample: `{GuildSettings.Prefix}meme {args[0]} add r/yoursub`"
+                                        Description = $"Please add some parameters.\nExample: `{GuildSettings.Prefix}reddit {args[0]} add r/yoursub`"
                                     }.WithCurrentTimestamp().Build());
                                     return;
                                 }
@@ -121,7 +124,7 @@ namespace Public_Bot.Modules.Commands
                                     {
                                         Title = "Success!",
                                         Color = Color.Green,
-                                        Description = $"Added [{sb}](https://www.reddit.com/{sb}) to the list of meme subreddits"
+                                        Description = $"Added [{sb}](https://www.reddit.com/{sb}) to the list of subreddits"
                                     }.WithCurrentTimestamp().Build());
                                     return;
                                 }
@@ -131,7 +134,7 @@ namespace Public_Bot.Modules.Commands
                                     {
                                         Title = "Invalid format!",
                                         Color = Color.Red,
-                                        Description = $"Please use the format `r/yourSubreddit` without spaces!\nExample: `{GuildSettings.Prefix}meme {args[0]} add r/yoursub`"
+                                        Description = $"Please use the format `r/yourSubreddit` without spaces!\nExample: `{GuildSettings.Prefix}reddit {args[0]} add r/yoursub`"
                                     }.WithCurrentTimestamp().Build());
                                     return;
                                 }
@@ -142,7 +145,7 @@ namespace Public_Bot.Modules.Commands
                                     {
                                         Title = "No Parameters.",
                                         Color = Color.Red,
-                                        Description = $"Please add some parameters.\nExample: `{GuildSettings.Prefix}meme {args[0]} remove r/yoursub`"
+                                        Description = $"Please add some parameters.\nExample: `{GuildSettings.Prefix}reddit {args[0]} remove r/yoursub`"
                                     }.WithCurrentTimestamp().Build());
                                     return;
                                 }
@@ -185,7 +188,7 @@ namespace Public_Bot.Modules.Commands
                                     {
                                         Title = "Invalid format!",
                                         Color = Color.Red,
-                                        Description = $"Please use the format `r/yourSubreddit` without spaces!\nExample: `{GuildSettings.Prefix}meme {args[0]} remove r/yoursub`"
+                                        Description = $"Please use the format `r/yourSubreddit` without spaces!\nExample: `{GuildSettings.Prefix}reddit {args[0]} remove r/yoursub`"
                                     }.WithCurrentTimestamp().Build());
                                     return;
                                 }
@@ -194,7 +197,7 @@ namespace Public_Bot.Modules.Commands
                                 {
                                     Title = "Current Subreddits",
                                     Color = Blurple,
-                                    Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}meme {args[0]} add <r/sub>`"
+                                    Description = $"Here's the current subreddits for this command:\n```\n{string.Join("\n", GuildSettings.MemeSubreddits)}```\nTo add one do `{GuildSettings.Prefix}reddit {args[0]} add <r/sub>`"
                                 }.WithCurrentTimestamp().Build());
                                 return;
 

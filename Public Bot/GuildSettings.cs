@@ -22,7 +22,7 @@ namespace Public_Bot
         public ulong LogChannel { get; set; } = 0;
         public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
-        public List<string> MemeSubreddits = new List<string>() { "https://www.reddit.com/r/dankmemes" };
+        public HashSet<string> MemeSubreddits = new HashSet<string>() { "https://www.reddit.com/r/dankmemes" };
         public WelcomeCard WelcomeCard { get; set; }
         public LeaveMessage leaveMessage { get; set; }
         public AutoMod AutoModeration { get; set; } = new AutoMod();
