@@ -15,9 +15,14 @@ namespace Public_Bot.Modules.Handlers
         public MessageHandler(DiscordShardedClient c)
         {
             client = c;
+#if DEBUG
+            Logger.Write("Message Loggin DISABLED OWO", Logger.Severity.State);
+#else
+            Logger.Write("Message logging enabled", Logger.Severity.State);
             client.MessageReceived += AddMessage;
             client.MessageUpdated += UpdateMessage;
             client.MessageDeleted += DeleteMessage;
+#endif
         }
 
         private async Task DeleteMessage(Discord.Cacheable<Discord.IMessage, ulong> arg1, ISocketMessageChannel arg2)

@@ -743,7 +743,7 @@ namespace Public_Bot
                     return Context.Guild.Users.First(x => x.Username.Contains(user));
                 else
                     if (Context.Guild.Users.Any(x => x.Nickname != null && x.Nickname.StartsWith(user)))
-                        return Context.Guild.Users.First(x => x.Nickname.StartsWith(user));
+                        return Context.Guild.Users.First(x => x.Nickname != null && x.Nickname.StartsWith(user));
                     else
                         return null;
         }

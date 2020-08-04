@@ -457,7 +457,8 @@ namespace Public_Bot.Modules.Commands
                 return;
             }
             string perms = "```\n";
-            var props = typeof(GuildPermissions).GetProperties();
+            string permsRight = "";
+            var props = typeof(Discord.GuildPermissions).GetProperties();
             var boolProps = props.Where(x => x.PropertyType == typeof(bool));
             var pTypes = boolProps.Where(x => (bool)x.GetValue(userAccount.GuildPermissions) == true).ToList();
             var nTypes = boolProps.Where(x => (bool)x.GetValue(userAccount.GuildPermissions) == false).ToList();
@@ -468,11 +469,30 @@ namespace Public_Bot.Modules.Commands
             {
                 foreach (var perm in pTypes)
                     perms += $"{perm.Name}:".PadRight(pd) + " ✅\n";
-                foreach (var nperm in nTypes)
-                    perms += $"{nperm.Name}:".PadRight(pd) + " ❌\n";
                 perms += "```";
+                permsRight = "```\n";
+                foreach (var nperm in nTypes)
+                    permsRight += $"{nperm.Name}:".PadRight(pd) + " ❌\n";
+                permsRight += "```";
             }
-            
+            var orderedroles = userAccount.Roles.OrderBy(x => x.Position * -1).ToArray();
+            string roles = "";
+            for(int i = 0; i < orderedroles.Count(); i++)
+            {
+                var role = orderedroles[i];
+                if (roles.Length + role.Mention.Length < 1024)
+                    roles += role.Mention + "\n";
+                else
+                {
+                    roles += $"+ {orderedroles.Length - i + 1} more";
+                    break;
+                }
+            }
+            string stats = $"Nickname?: {(userAccount.Nickname == null ? "None" : userAccount.Nickname)}\n" +
+                              $"Id: {userAccount.Id}\n" +
+                              $"Creation Date: {userAccount.CreatedAt.UtcDateTime.ToString("r")}\n" +
+                              $"Joined At: {userAccount.JoinedAt.Value.UtcDateTime.ToString("r")}\n";
+
             EmbedBuilder whois = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
@@ -481,28 +501,51 @@ namespace Public_Bot.Modules.Commands
                     IconUrl = userAccount.GetAvatarUrl()
                 },
                 Color = Blurple,
-                Description = $"Nickname?: {(userAccount.Nickname == null ? "None" : userAccount.Nickname)}\n" +
-                              $"Id: {userAccount.Id}\n" +
-                              $"Creation Date: {userAccount.CreatedAt.UtcDateTime.ToString("r")}\n" +
-                              $"Joined At: {userAccount.JoinedAt.Value.UtcDateTime.ToString("r")}\n",
-                Fields = new List<EmbedFieldBuilder>()
+                Description = permsRight == "" ? "**Stats**\n" + stats : "",
+                Fields = permsRight == "" ? new List<EmbedFieldBuilder>()
                 {
                     new EmbedFieldBuilder()
                     {
                         Name = "Roles",
-                        Value =
-                        string.Join("\n", userAccount.Roles.OrderBy(x => x.Position).Select(x => x.Mention)).Length > 1024
-                        ? $"Unable to display all roles, listing top ten:\n{string.Join("\n", userAccount.Roles.OrderBy(x => x.Position).Select(x => x.Mention).Take(10))}"
-                        : string.Join("\n", userAccount.Roles.Select(x => x.Mention))
+                        Value = roles,
                     },
                     new EmbedFieldBuilder()
                     {
-                        Name = "Permissions",
-                        Value = perms
+                        Name = "Permissions ✅",
+                        Value = perms,
+                        IsInline = true
+                    }
+                } : new List<EmbedFieldBuilder>()
+                {
+                    new EmbedFieldBuilder()
+                    { 
+                        Name = "Stats",
+                        Value = stats,
+                        IsInline = true,
+
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Roles",
+                        Value = roles,
+                        IsInline = false,
+
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Permissions ✅",
+                        Value = perms,
+                        IsInline = true,
                     }
                 }
-            };
-
+            }.WithCurrentTimestamp();
+            if (permsRight != "")
+                whois.Fields.Add(new EmbedFieldBuilder()
+                {
+                    Name = "Permissions ❌",
+                    Value = permsRight,
+                    IsInline = true
+                });
             await Context.Channel.SendMessageAsync("", false, whois.Build());
         }
 
