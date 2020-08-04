@@ -372,6 +372,9 @@ namespace Public_Bot.Modules.Commands
                 if (sb.Length + link.Length >= 2048) continue;
 
                 sb.Append(link);
+
+                b.WithUrl(result.ConstantUrl("en"));
+
             }
 
             b.WithDescription(sb.ToString());

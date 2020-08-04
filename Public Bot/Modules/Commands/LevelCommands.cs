@@ -228,6 +228,7 @@ namespace Public_Bot.Modules.Commands
 
             }
         }
+        [Alt("r")]
         [DiscordCommand("rank", description = "Shows your current rank!", commandHelp = "Usage - `(PREFIX)rank`, `(PREFIX)rank <user>`")]
         public async Task rank(params string[] args)
         {
