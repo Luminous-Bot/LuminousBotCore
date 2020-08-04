@@ -84,7 +84,7 @@ namespace Public_Bot.Modules.Commands
             tenYoungestUsers.Sort((prev, next) => 1/DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
             tenYoungestUsers.Reverse();
             var current = tenYoungestUsers.GetRange(0,test);
-            current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Date}/{x.CreatedAt.Year}" + '\n'));
+            current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Day}/{x.CreatedAt.Year}" + '\n'));
             cty += "```";
             var mmbed = new EmbedBuilder
             {
@@ -114,7 +114,7 @@ namespace Public_Bot.Modules.Commands
             tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
             //tenYoungestUsers.Reverse();
             var current = tenYoungestUsers.GetRange(0, test);
-            current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Date}/{x.CreatedAt.Year}" + '\n'));
+            current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Day}/{x.CreatedAt.Year}" + '\n'));
             cty += "```";
             var mmbed = new EmbedBuilder
             {
