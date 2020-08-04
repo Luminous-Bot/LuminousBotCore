@@ -295,7 +295,7 @@ namespace Public_Bot.Modules.Commands
                         },
                         Color = Color.Red,
                         Title = "Missing Permissions",
-                        Description = "The bot can't change a users nickname that has the same role or a role above the bots!"
+                        Description = "You can't change a users nickname who has the same role or a role above yours!"
                     }.WithCurrentTimestamp().Build());
                     return;
                 }
@@ -450,9 +450,9 @@ namespace Public_Bot.Modules.Commands
             {
                 EmbedBuilder error = new EmbedBuilder()
                 {
-                    Title = "That user is invalid ¯-(ツ)-¯",
+                    Title = "That user is invalid ¯\\_(ツ)_/¯",
                     Description = "Please provide a valid user",
-                    Color = Blurple
+                    Color = Color.Red
                 };
                 await Context.Channel.SendMessageAsync("", false, error.Build());
                 return;

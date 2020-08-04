@@ -123,6 +123,35 @@ namespace Public_Bot
                             Description = $"{client.CurrentUser.Username} is missing these permissions:\n{resp.ResultMessage}This command will not work until you give {client.CurrentUser.Username} these permissions!"
                         }.WithCurrentTimestamp().Build());
                    }
+                   else if(resp.Result == CommandStatus.Error){
+                        var c = client.GetGuild(724798166804725780).GetTextChannel(740141617566056489);
+                        if (c == null)
+                            return;
+                        File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", $"----< Start Exception >----\n\n{resp.Exception.ToString()}\n\n----< End Exception >----");
+                        await c.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", "", false, new EmbedBuilder() 
+                        {
+                            Title = "Command Exception!",
+                            Color = Color.Red,
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Command",
+                                    Value = msg.Content
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Author",
+                                    Value = msg.Author.ToString(),
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Guild",
+                                    Value = context.Guild.Name
+                                }
+                            }
+                        }.Build());
+                    }
                    else if (resp.Result == CommandStatus.InvalidPermissions)
                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                        {
