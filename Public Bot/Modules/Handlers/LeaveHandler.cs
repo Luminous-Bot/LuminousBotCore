@@ -17,6 +17,10 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_UserLeft(SocketGuildUser arg)
         {
+            var gm = GuildHandler.GetGuildMember(arg.Id, arg.Guild.Id);
+            if(gm != null)
+                gm = await gm.UpdateIsInServer(false);
+
             var guildSettings = GuildSettingsHelper.GetGuildSettings(arg.Guild.Id);
             if (guildSettings.leaveMessage.isEnabled)
             {

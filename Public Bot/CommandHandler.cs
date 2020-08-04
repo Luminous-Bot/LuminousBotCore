@@ -46,7 +46,7 @@ namespace Public_Bot
             dynamic parsedJson = JsonConvert.DeserializeObject(json);
             return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
         }
-        public static async Task HandleFailedGql(string q, string method, string type, string StatusCode, List<object> error = null)
+        public static async Task HandleFailedGql(string q, string method, string type, string StatusCode, string resp)
         {
             await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
             {
@@ -54,7 +54,7 @@ namespace Public_Bot
                 Description = $"Failed to {type} {method}! Server sent: {StatusCode}!",
                 Color = Color.Red
             }.WithCurrentTimestamp().Build());
-            File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{string.Join("\n\n\n", error)}\n\n----------< End Server Response >----------");
+            File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
             await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", "");
         }
 

@@ -99,7 +99,7 @@ namespace Public_Bot
             }
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Key}: \\\"{p.Value.ToString()}\\\" ";
+                parms += $"{p.Key}: {(p.Value == null ? "null" : (p.Value.GetType() == typeof(bool) ? ((bool)p.Value ? "true" : "false") : $"\\\"{p.Value}\\\""))} ";
             string query = $"{{\"operationName\": \"{opname}\"," +
                            $"\"variables\": {(hasVars ? $"{{ \"{varName}\": {{ {string.Join(", ", vars)} }} }}" : "{ }")}," +
                            $"\"query\": \"mutation {opname}{(hasVars ? $"(${varName}: {varType})" : "")} {{ {opname}({(hasVars ? $"{varName}: ${varName}, {parms}" : parms)}) {genProps(typeof(T))} }}\" }}";

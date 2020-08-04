@@ -610,13 +610,17 @@ namespace Public_Bot.Modules.Commands
                                 }
                                 await StateService.MutateAsync<dynamic>(GraphQLParser.GenerateGQLMutation<Infraction>("deleteInfraction", false, usrlogs.Infractions[(int)res - 1], "", "", new KeyValuePair<string, object>("id", usrlogs.Infractions[(int)res - 1].Id)));
                                 usrlogs.Infractions.RemoveAt((int)res - 1);
-                                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                                if(usrlogs.Infractions.Count == 0)
                                 {
-                                    Title = $"Cleared {usrlogs.Username}'s Logs!",
-                                    Description = $"Cleared all of <@{usrlogs.UserID}>'s infractions!",
-                                    Color = Color.Green,
-                                    Timestamp = DateTime.Now
-                                }.Build());
+                                    await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                                    {
+                                        Title = $"Cleared {usrlogs.Username}'s Logs!",
+                                        Description = $"Cleared all of <@{usrlogs.UserID}>'s infractions!",
+                                        Color = Color.Green,
+                                        Timestamp = DateTime.Now
+                                    }.Build());
+                                    return;
+                                }
                                 var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.Infractions, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
                                 var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
                                 var msg = await Context.Channel.SendMessageAsync($"Removed log number {args[1]}", false, emb.Build());
@@ -684,6 +688,7 @@ namespace Public_Bot.Modules.Commands
                                 Color = Color.Green,
                                 Timestamp = DateTime.Now
                             }.Build());
+                            return;
                         }
                         var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.Infractions, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
                         var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);

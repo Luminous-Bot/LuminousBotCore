@@ -87,6 +87,13 @@ namespace Public_Bot
                 if (!StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", new KeyValuePair<string, object>("UserID", arg.Id), new KeyValuePair<string, object>("GuildID", arg.Guild.Id))))
                 {
                     var gm = new GuildMember(arg);
+                    // (!gm.IsInServer)
+                    guild.GuildMembers.Add(gm);
+                }
+                else
+                {
+                    var gm = GuildMember.Fetch(arg.Id, arg.Guild.Id);
+                    gm = await gm.UpdateIsInServer(true);
                     guild.GuildMembers.Add(gm);
                 }
             }

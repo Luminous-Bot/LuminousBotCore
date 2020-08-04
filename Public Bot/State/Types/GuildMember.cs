@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Public_Bot
 {
@@ -15,7 +16,21 @@ namespace Public_Bot
         public ulong UserID { get; set; }
         public string Username
             => User.Username;
-        
+        [GraphQLProp]
+        public bool IsInServer { get; set; }
+        [GraphQLProp]
+        public Nullable<DateTime> DateLeft { get; set; }
+
+        public async Task<GuildMember> UpdateIsInServer(bool isInServer)
+        {
+            var q = GraphQLParser.GenerateGQLMutation<GuildMember>("updateGuildMemberServerStatus", false, null, "", "",
+                new KeyValuePair<string, object>("DateLeft", isInServer ? null : DateTime.UtcNow.ToString("o")),
+                new KeyValuePair<string, object>("IsInServer", isInServer), 
+                new KeyValuePair<string, object>("GuildID", this.GuildID),
+                new KeyValuePair<string, object>("UserID", this.UserID));
+            return await StateService.MutateAsync<GuildMember>(q);
+        }
+
         [GraphQLObj]
         public List<Infraction> Infractions { get; set; } = new List<Infraction>();
         [GraphQLObj]

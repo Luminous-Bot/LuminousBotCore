@@ -23,9 +23,9 @@ namespace Public_Bot
 
             Logger.Write($"Sending Gql Query for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
+            string cntnt = await res.Content.ReadAsStringAsync();
             if (res.IsSuccessStatusCode)
             {
-                string cntnt = await res.Content.ReadAsStringAsync();
                 var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cntnt);
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
                 if (rtn.data == null)
@@ -35,7 +35,7 @@ namespace Public_Bot
             else
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
-                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "query", res.StatusCode.ToString());
+                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "query", res.StatusCode.ToString(), cntnt);
                 return default;
             }
         }
@@ -49,18 +49,28 @@ namespace Public_Bot
 
             Logger.Write($"Sending Gql Mutation for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
-            var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(await res.Content.ReadAsStringAsync());
-            if (res.IsSuccessStatusCode && rtn.errors == null)
+            var cont = await res.Content.ReadAsStringAsync();
+            if (res.IsSuccessStatusCode)
             {
-                Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
-                if (rtn.data == null)
+                var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cont);
+                if(rtn.errors == null)
+                {
+                    Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                    if (rtn.data == null)
+                        return default;
+                    return rtn.data.First().Value;
+                }
+                else
+                {
+                    Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
+                    await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), cont);
                     return default;
-                return rtn.data.First().Value;
+                }
             }
             else
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
-                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), rtn.errors);
+                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), cont);
                 return default;
             }
         }
@@ -72,7 +82,8 @@ namespace Public_Bot
 
             Logger.Write($"Sending Raw GQL for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
-            var rtn = JsonConvert.DeserializeObject<GqlError>(await res.Content.ReadAsStringAsync());
+            string cont = await res.Content.ReadAsStringAsync();
+            var rtn = JsonConvert.DeserializeObject<GqlError>(cont);
             if (res.IsSuccessStatusCode && rtn.errors == null)
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
@@ -80,7 +91,7 @@ namespace Public_Bot
             else
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
-                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), rtn.errors);
+                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), cont);
             }
         }
         public static bool Exists<T>(string q)
