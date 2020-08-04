@@ -18,7 +18,8 @@ namespace Public_Bot
         public MessageRevision(SocketMessage msg)
         {
             this.Id = msg.Id;
-            this.Content = JsonConvert.SerializeObject(msg.Content);
+            string c = JsonConvert.SerializeObject(msg.Content);
+            this.Content = c.Remove(0, 1).Remove(c.Length - 2, 1);
             this.Date = msg.EditedTimestamp.HasValue ? msg.EditedTimestamp.Value.DateTime : DateTime.UtcNow;
 
             //mutation
