@@ -350,7 +350,7 @@ namespace Public_Bot.Modules.Commands
             foreach (WikiSearchResult result in response.Query.SearchResults)
             {
                 string link =
-                    $"{result.Preview}\n\n";
+                    $"{result.Preview}...\n\n";
 
                 string title = $"{result.Title}";
 
