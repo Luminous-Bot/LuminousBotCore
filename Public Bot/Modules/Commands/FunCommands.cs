@@ -325,6 +325,16 @@ namespace Public_Bot.Modules.Commands
 
         public async Task SearchWikipedia(params string[] arg1)
         {
+            if(arg1.Length == 0)
+            {
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
+                {
+                    Title = "No Arguments",
+                    Description = $"What wiki do you want to search for? Please provide some arguments: `{GuildSettings.Prefix}wiki <wiki>`",
+                    Color = Color.Orange
+                }.Build());
+                return;
+            }
 
             var args = String.Join(' ', arg1);
 

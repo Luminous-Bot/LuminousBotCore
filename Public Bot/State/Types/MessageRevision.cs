@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Public_Bot
         public MessageRevision(SocketMessage msg)
         {
             this.Id = msg.Id;
-            this.Content = msg.Content;
+            this.Content = JsonConvert.SerializeObject(msg.Content);
             this.Date = msg.EditedTimestamp.HasValue ? msg.EditedTimestamp.Value.DateTime : DateTime.UtcNow;
 
             //mutation
