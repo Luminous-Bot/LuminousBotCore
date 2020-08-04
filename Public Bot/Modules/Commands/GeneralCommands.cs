@@ -265,6 +265,7 @@ namespace Public_Bot.Modules.Commands
             var cgu = Context.Guild.GetUser(Context.User.Id);
 
             var user = GetUser(args[0]);
+
             if (user != null && user.Id != cgu.Id)
             {
                 if (user.Id == Context.Guild.OwnerId)
@@ -283,7 +284,7 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                     return;
                 }
-                if (user.Hierarchy >= Context.Guild.CurrentUser.Hierarchy)
+                if (user.Hierarchy >= cgu.Hierarchy)
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
                     {
