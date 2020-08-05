@@ -35,26 +35,46 @@ namespace Public_Bot.Modules.Commands
                 var sbrt = sbrt2[sb] + ".json";
                 var request = await client.GetAsync(sbrt);
                 string response = await request.Content.ReadAsStringAsync();
+                Console.WriteLine(response);
                 var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
                 if (data.Data.Children.Length == 0)
                 {
-                    GuildSettings.MemeSubreddits.Remove(args[2]);
+                    GuildSettings.MemeSubreddits.Remove(sbrt.Replace(".json", ""));
+                    if (GuildSettings.MemeSubreddits.Count == 0)
+                        GuildSettings.MemeSubreddits.Add("https://reddit.com/r/dankmemes");
                     GuildSettings.SaveGuildSettings();
                     await meme(args).ConfigureAwait(false);
                 }
                 Regex r = new Regex(@"https:\/\/i.redd.it\/(.*?)\.");
                 var childs = data.Data.Children.Where(x => r.IsMatch(x.Data.Url.ToString())).ToList();
+                if(childs.Count == 0)
+                {
+                    GuildSettings.MemeSubreddits.Remove(sbrt.Replace(".json", ""));
+                    if (GuildSettings.MemeSubreddits.Count == 0)
+                        GuildSettings.MemeSubreddits.Add("https://reddit.com/r/dankmemes");
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Error",
+                        Description = $"Unable to find good posts on [r/{data.Data.Children.First().Data.Subreddit}]({sbrt.Replace(".json", "")}). Because of this we are going to remove it from the list!",
+                        Color = Color.Orange,
+                        
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
                 Random rnd = new Random();
-                var post = childs[rnd.Next(0, childs.Count())];
-
+                var indx = rnd.Next(0, childs.Count);
+                Console.WriteLine($"I: {indx} C: {childs.Count}");
+                var post = childs[indx];
                 EmbedBuilder b = new EmbedBuilder()
                 {
                     Title = $"r/{data.Data.Children.First().Data.Subreddit}",
+                    Url = $"{sbrt.Replace(".json", "")}",
                     Description = $"{post.Data.Title.ToString()}",
                     ImageUrl = post.Data.Url.ToString(),
                     Footer = new EmbedFooterBuilder()
                     {
-                        Text = "u/" + post.Data.Author
+                        Text = $"u/{post.Data.Author}",
                     }
                 };
 
