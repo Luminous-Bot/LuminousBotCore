@@ -56,7 +56,8 @@ namespace Public_Bot.Modules.Commands
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder {
                 Title = "User Avatar",
                 Description = $"Here are the avatar links:\n1. **[PNG]({png})**\n2. **[JPEG]({jpeg})**\n3. **[WEBP]({webp})**",
-                ImageUrl = jpeg
+                ImageUrl = jpeg,
+                Color = Blurple
             }.WithCurrentTimestamp().Build());
         }
         [DiscordCommand("testleave",description ="test your leave message!",commandHelp ="`(PREFIX)testleave`")]
@@ -89,7 +90,8 @@ namespace Public_Bot.Modules.Commands
             var mmbed = new EmbedBuilder
             {
                 Title = "Youngest Users!",
-                Description = cty
+                Description = cty,
+                Color = Blurple
             }.WithCurrentTimestamp().Build();
             await Context.Channel.SendMessageAsync("",false,mmbed);
         }
@@ -119,7 +121,8 @@ namespace Public_Bot.Modules.Commands
             var mmbed = new EmbedBuilder
             {
                 Title = "Eldest Users!",
-                Description = cty
+                Description = cty,
+                Color = Blurple
             }.WithCurrentTimestamp().Build();
             await Context.Channel.SendMessageAsync("", false, mmbed);
         }

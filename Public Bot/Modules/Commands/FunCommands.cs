@@ -23,7 +23,7 @@ namespace Public_Bot.Modules.Commands
         static string[] puns = File.ReadAllLines($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}puns.txt");
         int rot = 0;
         private readonly Random _random = new Random();
-
+        [Alt("meme")]
         [DiscordCommand("reddit", commandHelp = "Usage: `(PREFIX)reddit \n(PREFIX)reddit subs \n(PREFIX)reddit subs add <r/sub> \n(PREFIX)reddit subs remove <r/sub>`", description = "Grabs a random post from reddit")]
         public async Task meme(params string[] args)
         {
@@ -376,7 +376,13 @@ namespace Public_Bot.Modules.Commands
                 await Context.Message.Channel.SendMessageAsync("", false, b.Build());
                 return;
             }
-
+            //Extra protection I guess
+            if (response.Query.SearchResults.Length == 0)
+            {
+                b.WithDescription("No results could be found :(");
+                await Context.Message.Channel.SendMessageAsync("", false, b.Build());
+                return;
+            }
             foreach (WikiSearchResult result in response.Query.SearchResults)
             {
                 string link =
@@ -413,5 +419,6 @@ namespace Public_Bot.Modules.Commands
 
 
         //}
+
     }
 }
