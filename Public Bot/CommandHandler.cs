@@ -204,19 +204,19 @@ namespace Public_Bot
                            Title = "**The parameters you provided were invalid!**",
                            Description = @$"Here's how to use the command",
                            Fields = new List<EmbedFieldBuilder>()
-                        {
-                            new EmbedFieldBuilder()
-                            {
-                                Name = "Your input:",
-                                Value = msg.Content,
-                                IsInline = true
-                            },
-                            new EmbedFieldBuilder()
-                            {
-                                Name = "Expected input:",
-                                Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
-                            }
-                        },
+                           {
+                               new EmbedFieldBuilder()
+                               {
+                                   Name = "Your input:",
+                                   Value = msg.Content,
+                                   IsInline = true
+                               },
+                               new EmbedFieldBuilder()
+                               {
+                                   Name = "Expected input:",
+                                   Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
+                               }
+                           },
                            Color = Color.Red,
                            Timestamp = DateTimeOffset.Now,
                        }.Build());

@@ -69,6 +69,11 @@ namespace Public_Bot
             public object variables { get; set; }
             public string query { get; set; }
         }
+        public static string CleanUserContent(string msg)
+        {
+            string c = JsonConvert.SerializeObject(msg);
+            return c.Remove(0, 1).Remove(c.Length - 2, 1);
+        }
         public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params KeyValuePair<string, object>[] Params)
         {
             Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);

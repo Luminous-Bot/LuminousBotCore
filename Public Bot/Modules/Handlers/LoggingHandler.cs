@@ -153,7 +153,7 @@ namespace Public_Bot.Modules.Handlers
                 if (arg1.IsHoisted != arg2.IsHoisted)
                     body += $"__Hoisted Changed:__\n> Old Value:  {(arg1.IsHoisted ? "✅" : "❌")}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}\n__\n__\n";
                 if (body == "")
-                    body = "Can't find changes :(";
+                    return;
                 if (logchan != null)
                 {
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
