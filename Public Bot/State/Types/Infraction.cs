@@ -31,7 +31,7 @@ namespace Public_Bot
             this.ModeratorID = ModeratorId;
             this.GuildID = GuildID;
             this.Action = action;
-            this.Reason = Reason;
+            this.Reason = GraphQLParser.CleanUserContent(Reason);
             this.Time = time;
             var guild = GuildHandler.GetGuild(GuildID);
             if (guild != null)

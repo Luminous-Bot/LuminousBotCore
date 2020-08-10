@@ -29,7 +29,7 @@ namespace Public_Bot
         public User(IUser user) 
         {
             this.Id = user.Id;
-            this.Username = user.Username + "#" + user.DiscriminatorValue;
+            this.Username = GraphQLParser.CleanUserContent(user.Username + "#" + user.DiscriminatorValue);
             StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "data", "CreateUserInput!"));
         }
         public static bool UserExists(ulong Id)

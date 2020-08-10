@@ -61,7 +61,7 @@ namespace Public_Bot
         public LevelUser(SocketGuildUser user)
         {
             MemberID = user.Id;
-            Username = user.ToString();
+            Username = GraphQLParser.CleanUserContent(user.ToString());
             GuildID = user.Guild.Id;
             Save();
         }
