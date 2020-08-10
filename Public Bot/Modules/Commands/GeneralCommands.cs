@@ -50,9 +50,10 @@ namespace Public_Bot.Modules.Commands
                 }.WithCurrentTimestamp().Build());
                 return;
             }
-            var png = use.GetAvatarUrl(ImageFormat.Png);
-            var jpeg = use.GetAvatarUrl(ImageFormat.Jpeg);
-            var webp = use.GetAvatarUrl(ImageFormat.WebP);
+            var png = use.GetAvatarUrl(ImageFormat.Png, 1024);
+
+            var jpeg = use.GetAvatarUrl(ImageFormat.Jpeg,1024);
+            var webp = use.GetAvatarUrl(ImageFormat.WebP,1024);
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder {
                 Title = "User Avatar",
                 Description = $"Here are the avatar links:\n1. **[PNG]({png})**\n2. **[JPEG]({jpeg})**\n3. **[WEBP]({webp})**",
@@ -82,7 +83,14 @@ namespace Public_Bot.Modules.Commands
             string cty = "```";
             var tenYoungestUsers = yus.ToList();
             tenYoungestUsers.RemoveAll(x => x.IsBot);
-            tenYoungestUsers.Sort((prev, next) => 1/DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            try
+            {
+                tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            }
+            catch
+            {
+                tenYoungestUsers.Sort((prev, next) => 0);
+            }
             tenYoungestUsers.Reverse();
             var current = tenYoungestUsers.GetRange(0,test);
             current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Day}/{x.CreatedAt.Year}" + '\n'));
@@ -113,7 +121,14 @@ namespace Public_Bot.Modules.Commands
             string cty = "```";
             var tenYoungestUsers = yus.ToList();
             tenYoungestUsers.RemoveAll(x => x.IsBot);
-            tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            try
+            {
+                tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            }
+            catch
+            {
+                tenYoungestUsers.Sort((prev, next) => 0);
+            }
             //tenYoungestUsers.Reverse();
             var current = tenYoungestUsers.GetRange(0, test);
             current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Day}/{x.CreatedAt.Year}" + '\n'));
