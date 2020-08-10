@@ -45,8 +45,10 @@ namespace Public_Bot
         }
         public static void SaveGuildSettings(GuildSettings gs)
         {
+            Logger.Write($"Saving {gs.GuildID}'s settings");
             string json = JsonConvert.SerializeObject(gs);
             File.WriteAllText(GuildSettingsFolder + $"{Path.DirectorySeparatorChar}{gs.GuildID}.gs", json);
+            Logger.Write($"Saved {gs.GuildID}");
         }
     }
 }

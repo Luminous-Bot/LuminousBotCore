@@ -25,6 +25,7 @@ namespace Public_Bot
     {
         public string ModuleName { get; set; }
         public string ModuleDescription { get; set; }
+        public bool IsDevCommands { get; set; }
         /// <summary>
         /// The prefix for all commands in this class.
         /// </summary>

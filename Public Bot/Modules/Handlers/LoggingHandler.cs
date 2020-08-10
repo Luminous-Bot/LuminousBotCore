@@ -248,10 +248,14 @@ namespace Public_Bot.Modules.Handlers
                             if (MessageHelper.MessageExists(arg1.Id))
                             {
                                 var msg = await MessageHelper.GetMessageAsync(arg1.Id);
+                                var oval = "{no content}";
+                                if (msg.Content != null)
+                                    if (msg.Content != "")
+                                        oval = msg.Content;
                                 fields.Add(new EmbedFieldBuilder()
                                 {
                                     Name = "Old Message:",
-                                    Value = msg.Content,
+                                    Value = oval,
                                     IsInline = true,
                                 });
                             }

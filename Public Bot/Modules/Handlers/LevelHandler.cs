@@ -193,9 +193,10 @@ namespace Public_Bot.Modules.Handlers
                     var gs = GuildSettings.Get(guild.Id);
                     if (gs.ModulesSettings["🧪 Levels 🧪"])
                     {
+                        var gl = GuildLevels.Find(x => x.GuildID == guild.Id);
+
                         foreach (var user in guild.Users.Where(x => x.VoiceChannel != null))
                         {
-                            var gl = GuildLevels.Find(x => x.GuildID == guild.Id);
                             if (!gl.Settings.BlacklistedChannels.Contains(user.VoiceChannel.Id))
                             {
                                 if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))

@@ -1019,9 +1019,9 @@ namespace Public_Bot.Modules.Commands
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
-                    Title = "You didn't provide any arguments!",
-                    Description = $"Please see `{GuildSettings.Prefix}help logs` for how to use this command",
-                    Color = Color.Red
+                    Title = "Logs",
+                    Description = $"Here are the current log settings:\n\nEnabled?: {(GuildSettings.Logging ? "✅" : "❌")}\nChannel?: {(GuildSettings.LogChannel == 0 ? "❌" : $"<#{GuildSettings.LogChannel}>")}",
+                    Color = Blurple
                 }.WithCurrentTimestamp().Build());
                 return;
             }
