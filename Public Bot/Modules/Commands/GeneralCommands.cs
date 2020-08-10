@@ -82,7 +82,14 @@ namespace Public_Bot.Modules.Commands
             string cty = "```";
             var tenYoungestUsers = yus.ToList();
             tenYoungestUsers.RemoveAll(x => x.IsBot);
-            tenYoungestUsers.Sort((prev, next) => 1/DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            try
+            {
+                tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            }
+            catch
+            {
+                tenYoungestUsers.Sort((prev, next) => 0);
+            }
             tenYoungestUsers.Reverse();
             var current = tenYoungestUsers.GetRange(0,test);
             current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Day}/{x.CreatedAt.Year}" + '\n'));
@@ -113,7 +120,14 @@ namespace Public_Bot.Modules.Commands
             string cty = "```";
             var tenYoungestUsers = yus.ToList();
             tenYoungestUsers.RemoveAll(x => x.IsBot);
-            tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            try
+            {
+                tenYoungestUsers.Sort((prev, next) => 1 / DateTimeOffset.Compare(prev.CreatedAt, next.CreatedAt));
+            }
+            catch
+            {
+                tenYoungestUsers.Sort((prev, next) => 0);
+            }
             //tenYoungestUsers.Reverse();
             var current = tenYoungestUsers.GetRange(0, test);
             current.ForEach(x => cty += (x.Username + '\t' + $"{x.CreatedAt.Month}/{x.CreatedAt.Day}/{x.CreatedAt.Year}" + '\n'));
