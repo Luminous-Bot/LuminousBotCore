@@ -327,29 +327,41 @@ namespace Public_Bot.Modules.Handlers
                     var gl = GuildLevels.Find(x => x.GuildID == g.Id);
                     if (!gl.Settings.BlacklistedChannels.Contains(sm.Channel.Id))
                     {
+                        LevelUser usr;
                         if (gl.CurrentUsers.Any(x => x.MemberID == sm.Author.Id))
-                        {
-                            var usr = gl.CurrentUsers.Find(x => x.MemberID == sm.Author.Id);
-                            if (usr.Username != sm.Author.ToString())
-                                usr.Username = sm.Author.ToString();
-                            usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
-                            if (usr.CurrentXP >= usr.NextLevelXP)
-                                LevelUpUser(usr);
-                            Logger.Write($"{sm.Author} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                            _xpBucket.Add(usr);
-                        }
+                            usr = gl.CurrentUsers.Find(x => x.MemberID == sm.Author.Id);
                         else
-                        {
-                            var usr = new LevelUser(arg.Author as SocketGuildUser);
-                            if (usr.Username != sm.Author.ToString())
-                                usr.Username = sm.Author.ToString();
-                            usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
-                            if (usr.CurrentXP >= usr.NextLevelXP)
-                                LevelUpUser(usr);
+                        { 
+                            usr = new LevelUser(arg.Author as SocketGuildUser);
                             gl.CurrentUsers.Add(usr);
-                            Logger.Write($"{sm.Author} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
                             usr.Save();
                         }
+
+                        if (usr.Username != sm.Author.ToString())
+                            usr.Username = sm.Author.ToString();
+
+                        usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
+
+                        if (usr.CurrentXP >= usr.NextLevelXP)
+                            LevelUpUser(usr);
+
+                        if (gl.Settings.RankRoles.Any(x => x.Level <= usr.CurrentLevel))
+                        {
+                            foreach (var rid in gl.Settings.RankRoles.Where(x => x.Level <= usr.CurrentLevel))
+                            {
+                                try
+                                {
+                                    var user = client.GetGuild(gs.GuildID).GetUser(usr.MemberID);
+                                    if (!user.Roles.Any(x => x.Id == rid.Role))
+                                    {
+                                        await user.AddRoleAsync(client.GetGuild(usr.GuildID).GetRole(rid.Role));
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                        Logger.Write($"{sm.Author} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
+                        _xpBucket.Add(usr);
                     }
                 }
             }
@@ -385,7 +397,8 @@ namespace Public_Bot.Modules.Handlers
                     Color = Color.Green
                 }.WithCurrentTimestamp().Build()).Result;
             }
-            //LevelCommands.CurrentRF.Remove(gl.GuildID);
+            if(LevelCommands.CurrentRF.Contains(gl.GuildID))
+                LevelCommands.CurrentRF.Remove(gl.GuildID);
         }
         public async Task RemoveFromRole(GuildLeaderboards gl, SocketRole role)
         {

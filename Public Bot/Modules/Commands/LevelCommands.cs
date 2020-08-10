@@ -608,6 +608,7 @@ namespace Public_Bot.Modules.Commands
                             }
                         }
                         lusr.CurrentLevel = res;
+                        LevelUpUser(lusr);
                     }
                     else
                     {
@@ -628,6 +629,7 @@ namespace Public_Bot.Modules.Commands
                         }
                         lusr.CurrentLevel = res;
                         gl.CurrentUsers.Add(lusr);
+                        LevelUpUser(lusr);
                     }
                     lusr.Save();
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -694,12 +696,14 @@ namespace Public_Bot.Modules.Commands
                     {
                         lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
                         lusr.CurrentXP = res;
+                        LevelUpUser(lusr);
                     }
                     else
                     {
                         lusr = new LevelUser(user);
                         lusr.CurrentXP = res;
                         gl.CurrentUsers.Add(lusr);
+                        LevelUpUser(lusr);
                     }
                     lusr.Save();
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -790,6 +794,7 @@ namespace Public_Bot.Modules.Commands
                             }
                         }
                         lusr.CurrentLevel += res;
+                        LevelUpUser(lusr);
                     }
                     else
                     {

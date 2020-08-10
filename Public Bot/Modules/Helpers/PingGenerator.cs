@@ -145,15 +145,15 @@ namespace Public_Bot
         }
         public static async Task<string> GetImageLink(string fPath)
         {
-            var client = new RestClient("https://drive.hapsy.net/upload");
+            var client = new RestClient("https://upload.hapsy.net/upload");
             client.Timeout = -1;
             var request = new RestRequest(Method.POST);
-            request.AddHeader("Authorization", "b3bb9d86-ca90-44ea-8836-ce44b08b52a0");
+            request.AddHeader("Authorization", "4e06ce55-9373-4ef9-b66f-aec02687f6a3");
             request.AddFile("file", fPath);
             IRestResponse response = client.Execute(request);
             //Console.WriteLine(response.Content);
-            var json = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
-            return json["url"].ToString();
+            var json = JsonConvert.DeserializeObject<dynamic>(response.Content);
+            return json.files[0].url;
         }
     }
 }
