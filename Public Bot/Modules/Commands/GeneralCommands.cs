@@ -317,7 +317,21 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                     return;
                 }
-
+                if(user.Hierarchy >= Context.Guild.CurrentUser.Hierarchy)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                    {
+                        Author = new EmbedAuthorBuilder
+                        {
+                            IconUrl = cgu.GetAvatarUrl(),
+                            Name = "Error!"
+                        },
+                        Color = Color.Red,
+                        Title = "Missing Permissions",
+                        Description = "You can't change a users nickname who's role is the same or above the bot's role"
+                    }.WithCurrentTimestamp().Build());
+                    return;
+                }
                 if (cgu.GuildPermissions.ManageNicknames || cgu.GuildPermissions.Administrator)
                 {
                     try
