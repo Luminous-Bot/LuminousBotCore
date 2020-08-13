@@ -581,7 +581,7 @@ namespace Public_Bot.Modules.Commands
                         if (args[1] == "all" || args[1] == "clear")
                         {
                             var bucket = new MutationBucket<Infraction>("deleteInfraction");
-                            usrlogs.Infractions.ForEach(x => bucket.Add(x, new KeyValuePair<string, object>("id", x.Id)));
+                            usrlogs.Infractions.ForEach(x => bucket.Add(x, new KeyValuePair<string, object>("id", $"\\\"{x.Id}\\\"")));
                             await StateService.MutateAsync<dynamic>(bucket.Build());
                             usrlogs.Infractions.Clear();
                             //deleteLogs
@@ -661,7 +661,7 @@ namespace Public_Bot.Modules.Commands
                                     return;
                                 }
                                 var infrac = usrlogs.Infractions[(int)res - 1];
-                                bucket.Add(infrac, new KeyValuePair<string, object>("id", infrac.Id));
+                                bucket.Add(infrac, new KeyValuePair<string, object>("id", $"\\\"{infrac.Id}\\\""));
                                 removed.Add(infrac);
                             }
                             else
