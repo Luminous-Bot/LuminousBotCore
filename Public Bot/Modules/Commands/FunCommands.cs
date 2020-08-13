@@ -35,7 +35,7 @@ namespace Public_Bot.Modules.Commands
                 var sbrt = sbrt2[sb] + ".json";
                 var request = await client.GetAsync(sbrt);
                 string response = await request.Content.ReadAsStringAsync();
-                Console.WriteLine(response);
+                //Console.WriteLine(response);
                 var data = JsonConvert.DeserializeObject<Public_Bot.Modules.Handlers.RedditHandler>(response);
                 if (data.Data.Children.Length == 0)
                 {

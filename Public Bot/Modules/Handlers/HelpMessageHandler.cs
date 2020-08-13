@@ -120,57 +120,24 @@ namespace Public_Bot.Modules.Handlers
         }
         public static Embed HelpEmbedBuilder(int page, HelpPages p)
         {
-            if (p == HelpPages.Public)
+            if (page > HelpPagesStaffCount)
+                page = page - 1;
+            var em = new EmbedBuilder()
             {
-                //if (curpage == HelpPagesPublicCount)
+                Title = $"**Help**",
+                Color = Color.Green,
+                Description = "Here are the commands!",
+                Fields = new List<EmbedFieldBuilder>(),
+                //Footer = new EmbedFooterBuilder()
                 //{
-                //    await msg.RemoveReactionAsync(arg3.Emote, arg3.User.Value);
-                //    return;
+                //    Text = "Staff help message"
                 //}
-                if (page > HelpPagesPublicCount)
-                    page = page - 1;
-                //var rs = HelpPagesPublic.Skip((page - 1) * HelpmsgPerPage).Take(HelpmsgPerPage);
-                var em = new EmbedBuilder()
-                {
-                    Title = $"**Help**",
-                    Color = Color.Green,
-                    Description = "Here are the commands!",
-                    Footer = new EmbedFooterBuilder()
-                    {
-                        Text = "Public help message"
-                    },
-                    Fields = new List<EmbedFieldBuilder>()
-                };
-                foreach(var h in HelpPagesPublic.OrderBy(x => x.Value.Split('\n').Length * -1))
-                {
-                    em.Fields.Add(new EmbedFieldBuilder() { Name = h.Key, Value = $"```{h.Value}```", IsInline = true });
-                }
-                return em.Build();
-            }
-            else if (p == HelpPages.Staff)
+            };
+            foreach (var h in HelpPagesStaff.OrderBy(x => x.Value.Split('\n').Length * -1))
             {
-
-                if (page > HelpPagesStaffCount)
-                    page = page - 1;
-                var em = new EmbedBuilder()
-                {
-                    Title = $"**Help**",
-                    Color = Color.Green,
-                    Description = "Here are the commands!",
-                    Fields = new List<EmbedFieldBuilder>(),
-                    Footer = new EmbedFooterBuilder()
-                    {
-                        Text = "Staff help message"
-                    }
-                };
-                foreach (var h in HelpPagesStaff.OrderBy(x => x.Value.Split('\n').Length * -1))
-                {
-                    em.Fields.Add(new EmbedFieldBuilder() { Name = h.Key, Value = $"```\n{h.Value}```", IsInline = true });
-                }
-                return em.Build();
+                em.Fields.Add(new EmbedFieldBuilder() { Name = h.Key, Value = $"```\n{h.Value}```", IsInline = true });
             }
-            else
-                return null;
+            return em.Build();
         }
         public static HelpPages CalcHelpPage(SocketGuildUser usr, GuildSettings s)
         {
