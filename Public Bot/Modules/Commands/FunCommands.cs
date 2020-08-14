@@ -64,7 +64,7 @@ namespace Public_Bot.Modules.Commands
                 }
                 Random rnd = new Random();
                 var indx = rnd.Next(0, childs.Count);
-                Console.WriteLine($"I: {indx} C: {childs.Count}");
+                //Console.WriteLine($"I: {indx} C: {childs.Count}");
                 var post = childs[indx];
                 EmbedBuilder b = new EmbedBuilder()
                 {
