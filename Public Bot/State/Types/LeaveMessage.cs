@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using RestSharp.Extensions;
+
 namespace Public_Bot.State.Types
 {
     public class LeaveMessage
@@ -13,9 +16,16 @@ namespace Public_Bot.State.Types
         public string leaveTitle { get; set; } = "We lost a comrade";
         public ulong leaveChannel { get; set; }
         public ulong GuildID { get; set; }
-
+        public string EmbedColor { get; set; } = $"#7289DA";
+       
         public async Task<Embed> GenerateLeaveMessage(SocketUser x, SocketGuild gld)
         {
+            var title = leaveTitle.CompileVarMessage(gld, x);
+            if (title.Length > 256)
+                title = new string(title.Take(252).ToArray()) + "...";
+            var body = leaveMessage.CompileVarMessage(gld, x);
+            if (body.Length > 1024)
+                body = new string(body.Take(1020).ToArray()) + "...";
             var xyz = new EmbedBuilder
             {
                 Author = new EmbedAuthorBuilder()
@@ -23,10 +33,11 @@ namespace Public_Bot.State.Types
                     IconUrl = x.GetAvatarUrl(),
                     Name = x.ToString()
                 },
-                Description = leaveTitle.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString()),
-                Color = CommandModuleBase.Blurple,
+                Title = title,
+                Description = body,
+                Color = HexColorConverter.DiscordColorFromHex(EmbedColor),
                 
-            }.WithDescription(leaveMessage.Replace("{user}", x.Username).Replace("{guild}", gld.Name).Replace("{guild.count}", gld.MemberCount.ToString())).WithCurrentTimestamp().Build();
+            }.WithCurrentTimestamp().Build();
             return xyz;
         }
         public LeaveMessage() { }

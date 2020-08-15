@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace Public_Bot.Modules.Helpers
             return re;
         }
 
+        
         public static Message GetMessage(ulong id)
             => GetMessageAsync(id).GetAwaiter().GetResult();
         public static async Task<Message> GetMessageAsync(ulong id)

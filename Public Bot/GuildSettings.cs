@@ -18,7 +18,6 @@ namespace Public_Bot
         public List<ulong> PermissionRoles { get; set; } = new List<ulong>();
         public Dictionary<string, bool> ModulesSettings { get; set; } = new Dictionary<string, bool>();
         public ulong MutedRoleID { get; set; } = 0;
-        public bool Leveling { get; set; } = true;
         public ulong LogChannel { get; set; } = 0;
         public ulong NewMemberRole { get; set; } = 0;
         public bool Logging { get; set; } = false;
@@ -71,8 +70,7 @@ namespace Public_Bot
 
             PermissionRoles.AddRange(guild.Roles.Where(x => x.Permissions.Administrator && !CommandHandler.IsBotRole(x)).Select(x => x.Id));
 
-            if (Leveling)
-                new GuildLeaderboards(guild);
+            _ = new GuildLeaderboards(guild);
 
             if (this == null)
                 Console.WriteLine("UH OH: THIS IS NULL ");

@@ -250,9 +250,12 @@ namespace Public_Bot.Modules.Commands
             {
                 var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
                 var userlvl = cu.Find(x => x.MemberID == user.Id);
-
+                var u = Context.Guild.GetUser(userlvl.MemberID);
+                var av = u.GetAvatarUrl();
+                if (av == null)
+                    av = u.GetDefaultAvatarUrl();
                 var img = RankBuilder.MakeRank(userlvl.Username,
-                    Context.Guild.GetUser(userlvl.MemberID).GetAvatarUrl(),
+                    av,
                     (int)userlvl.CurrentLevel,
                     (int)userlvl.CurrentXP,
                     (int)userlvl.NextLevelXP,

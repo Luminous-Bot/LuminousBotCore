@@ -47,7 +47,10 @@ namespace Public_Bot.Modules.Handlers
                 $"Rickrollin' someone",
                 $"Some get him some milk!",
                 $"Databases are sick!",
-                $"Beep boop?"
+                $"Beep boop?",
+                $"Bugs being squashed",
+                $"Invading space",
+                $"Claiming prizes"
             };
         public StatusHandler(DiscordShardedClient c)
         {
@@ -64,7 +67,7 @@ namespace Public_Bot.Modules.Handlers
                 alusr += g.MemberCount;
             Logger.Write($"Count of {alusr}");
             
-            await client.SetGameAsync($"[0.5.2 | https://luminousbot.com] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
+            await client.SetGameAsync($"[0.5.4 | https://luminousbot.com] - {status[new Random().Next(0, status.Length)].Replace("(UC)", alusr.ToString()).Replace("(GC)", client.Guilds.Count.ToString())}", null, ActivityType.Playing);
         }
     }
 }

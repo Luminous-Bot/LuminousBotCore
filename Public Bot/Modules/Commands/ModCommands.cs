@@ -201,7 +201,6 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                     }
                 }
-
             }
             [DiscordCommand("warn", RequiredPermission = true, description = "Warns a user", commandHelp = "Usage - `(PREFIX)warn <@user> <reason>`")]
             public async Task Warn(params string[] args)
@@ -416,6 +415,15 @@ namespace Public_Bot.Modules.Commands
                         Timestamp = DateTime.Now
                     }.Build());
                     return;
+                }
+                if((datetime - DateTime.UtcNow).TotalMilliseconds > int.MaxValue)
+                {
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
+                    {
+                        Title = "Error",
+                        Description = $"The time you entered is wayy too long, The max time is {TimeSpan.FromMilliseconds(int.MaxValue).ToString("h'h 'm'm 's's'")}",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
                 }
                 string reason = string.Join(' ', args.Skip(2));
                 try

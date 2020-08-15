@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -162,7 +163,15 @@ namespace Public_Bot.Modules.Commands
                           "`(PREFIX)welcomer <enable/on>`\n" +
                           "`(PREFIX)welcomer <disable/off>`\n" +
                           "`(PREFIX)welcomer dm <true/false>`\n" +
-                          "`(PREFIX)welcomer mentions <true/false>`",
+                          "`(PREFIX)welcomer mentions <true/false>`\n\n" +
+                          "You can use custom variables in the welcome message, here they are:\n" +
+                            "**{user}** - Mentions the user\n" +
+                            "**{user.name}** - The user's name without the tag. Example: quin\n" +
+                            "**{user.username}** - The users full username. Example: quin#3017" +
+                            "**{user.tag}** - The users discriminator. Example: 3017" +
+                            "**{guild}** - The guilds name. Example: Swiss001 Official Discord Server" +
+                            "**{guild.count}** - The guilds User count. Example: 8241" +
+                            "**{guild.count.format}** - The guilds User count with st, nd, rd, and th. Example: 8241st",
             description = "Welcomes new users into your guild!", RequiredPermission = true)]
         public async Task welcomer(params string[] args)
         {
@@ -179,24 +188,56 @@ namespace Public_Bot.Modules.Commands
                         IconUrl = Context.Client.CurrentUser.GetAvatarUrl(),
                         Name = "Welcomer Settings"
                     },
-                    Description = "Here's your current settings for welcoming new users:\n" +
-                    $"**Enabled?**: {ws.isEnabled}\n" +
-                    $"**Welcome Channel**: <#{ws.WelcomeChannel}>\n" +
-                    $"**Welcome Message**:\n> {ws.WelcomeMessage}\n" +
-                    $"**Background Image**: [Click me!]({ws.BackgroundUrl} \"ooo you found a easter egg! maybe theres more...?\")\n" +
-                    $"**Mentions Users**: {ws.MentionsUsers}\n" +
-                    $"**Sent in Dm's**: {ws.DMs}\n",
+                    Description = "Here is how to setup the welcomer ```\n" + (
+                          "(PREFIX)welcomer\n" +
+                          "(PREFIX)welcomer channel <#channel>\n" +
+                          "(PREFIX)welcomer message <your welcome message for new users>\n" +
+                          "(PREFIX)welcomer image <image_url>" +
+                          "(PREFIX)welcomer <enable/on>\n" +
+                          "(PREFIX)welcomer <disable/off>\n" +
+                          "(PREFIX)welcomer dm <true/false>\n" +
+                          "(PREFIX)welcomer mentions <true/false>```\n Here's the current settings:").Replace("(PREFIX)", GuildSettings.Prefix),
                     Color = Blurple,
                     Fields = new List<EmbedFieldBuilder>()
                     {
                         new EmbedFieldBuilder()
                         {
+                            Name = "Enabled?",
+                            Value = ws.isEnabled.ToString()
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Welcome Channel:",
+                            Value = $"<#{ws.WelcomeChannel}>"
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Image?:",
+                            Value = ws.BackgroundUrl == null ? "None" : $"[Click me!]({ws.BackgroundUrl} \"ooo you found a easter egg! maybe theres more...?\")"
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Mentions User:",
+                            Value = $"{ws.MentionsUsers}"
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Sent in Dm's:",
+                            Value = $"{ws.DMs}"
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Raw Welcome Message",
+                            Value = $"```\n{ws.WelcomeMessage}```"
+                        },
+                        new EmbedFieldBuilder()
+                        {
                             Name = "Compiled Welcome Message",
-                            Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
+                            Value = $"{ws.WelcomeMessage.CompileVarMessage(Context.Guild, Context.User)}"
                         }
                     },
                     //ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png").GetAwaiter().GetResult()
-                }.WithCurrentTimestamp().Build()) ;
+                }.WithCurrentTimestamp().Build());
                 return;
             }
 
@@ -246,6 +287,15 @@ namespace Public_Bot.Modules.Commands
                     }.WithCurrentTimestamp().Build());
                     break;
                 case "message":
+
+                   // s.Replace("{guild}", guild.Name)
+                   //.Replace("{guild.count.format}", guild.MemberCount.DisplayWithSuffix())
+                   //.Replace("{guild.count}", guild.MemberCount.ToString())
+                   //.Replace("{user}", user.Mention)
+                   //.Replace("{user.name}", user.Username)
+                   //.Replace("{user.username}", user.ToString())
+                   //.Replace("{user.tag}", user.Discriminator);
+
                     if (args.Length == 1)
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -256,21 +306,24 @@ namespace Public_Bot.Modules.Commands
                                 Name = "Welcomer Settings"
                             },
                             Description = $"You can specify variables, heres a list of them:\n" +
-                            $"**{{user}}** - The user's full name. Example: quin#3017\n" +
-                            $"**{{user.name}}** - The user's username. Example: quin\n" +
-                            $"**{{guild.name}}** - The guilds name. Example: Swiss001 Official Discord Server" +
-                            $"**{{guild.count}}** - The guilds User count. Example: 8241",
+                            $"**{{user}}** - Mentions the user\n" +
+                            $"**{{user.name}}** - The user's name without the tag. Example: quin\n" +
+                            $"**{{user.username}}** - The users full username. Example: quin#3017\n" +
+                            $"**{{user.tag}}** - The users discriminator. Example: 3017\n" +
+                            $"**{{guild}}** - The guilds name. Example: Swiss001 Official Discord Server\n" +
+                            $"**{{guild.count}}** - The guilds User count. Example: 8241\n" +
+                            $"**{{guild.count.format}}** - The guilds User count with st, nd, rd, and th. Example: 8241st",
                             Fields = new List<EmbedFieldBuilder>()
                             {
                                 new EmbedFieldBuilder()
                                 {
                                     Name = "Raw:",
-                                    Value = $"{ws.WelcomeMessage}"
+                                    Value = $"```\n{ws.WelcomeMessage}```",
                                 },
                                 new EmbedFieldBuilder()
                                 {
                                     Name = "Compiled:",
-                                    Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
+                                    Value = $"{ws.WelcomeMessage.CompileVarMessage(Context.Guild, Context.User)}",
                                 }
                             },
                             Color = Blurple
@@ -290,20 +343,34 @@ namespace Public_Bot.Modules.Commands
                         Description = $"Welcome Message has been changed!",
                         Fields = new List<EmbedFieldBuilder>()
                             {
-                                new EmbedFieldBuilder()
+                               new EmbedFieldBuilder()
                                 {
                                     Name = "Raw:",
-                                    Value = $"{ws.WelcomeMessage}"
+                                    Value = $"```\n{ws.WelcomeMessage}```",
                                 },
                                 new EmbedFieldBuilder()
                                 {
                                     Name = "Compiled:",
-                                    Value = $"{ws.GenerateWelcomeMessage(Context.User as SocketGuildUser, Context.Guild)}"
+                                    Value = $"{ws.WelcomeMessage.CompileVarMessage(Context.Guild, Context.User)}",
                                 }
                             },
                         Color = Color.Green
                     }.WithCurrentTimestamp().Build());
                     return;
+                case "image":
+                    if(args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Welcomer Image",
+                            Description = ws.BackgroundUrl == null ? $"No image set, you can set one with `{GuildSettings.Prefix}welcomer image <url>" : $"The current image is set to [this]({ws.BackgroundUrl})",
+                            ImageUrl = ws.BackgroundUrl == null ? "" : ws.BackgroundUrl,
+                            Color = Blurple
+                        }.Build());
+                    }
+                    var url = args[1];
+
+                    break;
                 case "dm":
                     if(args.Length == 1)
                     {
@@ -478,6 +545,94 @@ namespace Public_Bot.Modules.Commands
                         Color = Color.Green
                     }.WithCurrentTimestamp().Build());
                     return;
+                case "color":
+                    if (args.Length == 1)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Embed Color",
+                            Description = $"The leave message color is {GuildSettings.WelcomeCard.EmbedColor}. Thats this embeds color",
+                            Color = HexColorConverter.DiscordColorFromHex(GuildSettings.leaveMessage.EmbedColor)
+                        }.Build());
+                        return;
+                    }
+
+                    if (args.Length == 2)
+                    {
+                        string hexColor = args[1];
+                        var regex = new Regex(@"(\d|[a-f]){6}");
+                        if (regex.IsMatch(args[1]))
+                        {
+                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            //set here
+                            this.GuildSettings.WelcomeCard.EmbedColor = "#" + hex;
+                            GuildSettings.SaveGuildSettings();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Welcome Card messages Color to this Embed's Color ({GuildSettings.WelcomeCard.EmbedColor})",
+                                Color = HexColorConverter.DiscordColorFromHex(GuildSettings.WelcomeCard.EmbedColor)
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid Hex Code!",
+                                Description = $"The hex code you provided was invalid!",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    if (args.Length == 4)
+                    {
+                        if (int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
+                        {
+                            if (R > 255 || G > 255 || B > 255)
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid parameters",
+                                    Description = $"Please use the RGB format values between 0 and 255, for example: `25 255 0`",
+                                    Color = Color.Red
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            //set here
+                            this.GuildSettings.WelcomeCard.EmbedColor = HexColorConverter.HexFromColor(System.Drawing.Color.FromArgb(R, G, B));
+                            GuildSettings.SaveGuildSettings();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Welcome Card's message Color to this Embed's Color ({GuildSettings.WelcomeCard.EmbedColor})",
+                                Color = HexColorConverter.DiscordColorFromHex(GuildSettings.WelcomeCard.EmbedColor)
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid parameters",
+                                Description = $"Please use the RGB format, for example: `25 255 0`",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Invalid parameters",
+                            Description = $"Please use the RGB format or Hex format, for example: `25 255 0` or `#00ff00`",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    break;
             }
         }
         [DiscordCommand("leave-message",
@@ -488,10 +643,13 @@ namespace Public_Bot.Modules.Commands
                          "`(PREFIX)leave-message channel #newleavemsgchnl`\n" + 
                          "\n\n" +
                          "*Use the below variables for the leave message:* \n"+
-                         "*{user} - Username of the user who left*\n"+
-                         "*{guild} - Name of your server*\n" + 
-                         "*{guild.count} - The number of members in your server*"
-            ,
+                         "**{user}** - Mentions the user\n" +
+                         "**{user.name}** - The user's name without the tag. Example: quin\n" +
+                            "**{user.username}** - The users full username. Example: quin#3017\n" +
+                            "**{user.tag}** - The users discriminator. Example: 3017\n" +
+                            "**{guild}** - The guilds name. Example: Swiss001 Official Discord Server\n" +
+                            "**{guild.count}** - The guilds User count. Example: 8241\n" +
+                            "**{guild.count.format}** - The guilds User count with st, nd, rd, and th. Example: 8241st",
             description ="gives the leave message settings", 
             RequiredPermission = true)]
         [Alt("leave")]
@@ -505,12 +663,17 @@ namespace Public_Bot.Modules.Commands
                 }
                 var mBED = new EmbedBuilder
                 {
-                    Title = "Current Leave Message Settings"
+                    Author = new EmbedAuthorBuilder() 
+                    {
+                        Name = "Leave Message Settings",
+                        IconUrl = Context.Client.CurrentUser.GetAvatarUrl()
+                    },
+                    Color = Blurple
                 }
-                .AddField("Enabled?",GuildSettings.leaveMessage.isEnabled)
-                .AddField("Leave Embed Title", GuildSettings.leaveMessage.leaveTitle)
-                .AddField("Embed Message", GuildSettings.leaveMessage.leaveMessage)
-                .AddField("Leave Channel", $"<#{GuildSettings.leaveMessage.leaveChannel}>")
+                .AddField("**Enabled?**",GuildSettings.leaveMessage.isEnabled)
+                .AddField("**Leave Embed Title:**", GuildSettings.leaveMessage.leaveTitle)
+                .AddField("**Embed Message:**", GuildSettings.leaveMessage.leaveMessage)
+                .AddField("**Leave Channel:**", $"<#{GuildSettings.leaveMessage.leaveChannel}>")
                 .WithFooter($"Do {GuildSettings.Prefix}help leave-message to get the variables!!")
                 .WithCurrentTimestamp().Build();
                 await Context.Channel.SendMessageAsync("", false, mBED);
@@ -524,61 +687,265 @@ namespace Public_Bot.Modules.Commands
             {
                 case "enable":
                     GuildSettings.leaveMessage.isEnabled = true;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now enabled!" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    { 
+                        Title = "Leave Message Settings Updated", 
+                        Description = "Leave Message is now enabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "on":
                     GuildSettings.leaveMessage.isEnabled = true;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now enabled!" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    { 
+                        Title = "Leave Message Settings Updated", 
+                        Description = "Leave Message is now enabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "true":
                     GuildSettings.leaveMessage.isEnabled = true;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now enabled!" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    { 
+                        Title = "Leave Message Settings Updated", 
+                        Description = "Leave Message is now enabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "disable":
                     GuildSettings.leaveMessage.isEnabled = false;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now disabled!" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    { 
+                        Title = "Leave Message Settings Updated", 
+                        Description = "Leave Message is now disabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "off":
                     GuildSettings.leaveMessage.isEnabled = false;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now disabled!" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    { 
+                        Title = "Leave Message Settings Updated", 
+                        Description = "Leave Message is now disabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "false":
                     GuildSettings.leaveMessage.isEnabled = false;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = "Leave Message is now disabled!" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    {
+                        Title = "Leave Message Settings Updated", 
+                        Description = "Leave Message is now disabled!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "message":
-                    if (args.Length < 2) { 
-                        await Context.Channel.SendMessageAsync("You got to give the updated leave message!\n");
+                    if (args.Length < 2) {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Leave Message",
+                            Description = "You can specify variables for the leave message, here they are\n\n" +
+                            $"**{{user}}** - Mentions the user\n" +
+                            $"**{{user.name}}** - The user's name without the tag. Example: quin\n" +
+                            $"**{{user.username}}** - The users full username. Example: quin#3017\n" +
+                            $"**{{user.tag}}** - The users discriminator. Example: 3017\n" +
+                            $"**{{guild}}** - The guilds name. Example: Swiss001 Official Discord Server\n" +
+                            $"**{{guild.count}}** - The guilds User count. Example: 8241\n" +
+                            $"**{{guild.count.format}}** - The guilds User count with st, nd, rd, and th. Example: 8241st",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Raw:",
+                                    Value = $"```\n{GuildSettings.leaveMessage.leaveMessage}```",
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Compiled:",
+                                    Value = $"{GuildSettings.leaveMessage.leaveMessage.CompileVarMessage(Context.Guild, Context.User)}",
+                                }
+                            },
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
                         return; 
                     }
                     GuildSettings.leaveMessage.leaveMessage = string.Join(' ', args.Skip(1));
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message is now {GuildSettings.leaveMessage.leaveMessage}" }.WithCurrentTimestamp().Build());
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    {
+                        Title = "Leave Message Settings Updated",
+                        Description = $"Leave Message is now {GuildSettings.leaveMessage.leaveMessage}",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "title":
                     if (args.Length < 2)
                     {
-                        await Context.Channel.SendMessageAsync("You got to give the updated leave message title!\n");
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Leave Message",
+                            Description = "You can specify variables for the leave message, here they are\n\n" +
+                            $"**{{user}}** - Mentions the user\n" +
+                            $"**{{user.name}}** - The user's name without the tag. Example: quin\n" +
+                            $"**{{user.username}}** - The users full username. Example: quin#3017\n" +
+                            $"**{{user.tag}}** - The users discriminator. Example: 3017\n" +
+                            $"**{{guild}}** - The guilds name. Example: Swiss001 Official Discord Server\n" +
+                            $"**{{guild.count}}** - The guilds User count. Example: 8241\n" +
+                            $"**{{guild.count.format}}** - The guilds User count with st, nd, rd, and th. Example: 8241st",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Raw",
+                                    //IsInline = true,
+                                    Value = $"```\n{GuildSettings.leaveMessage.leaveMessage}```"
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Compiled",
+                                    //IsInline = true,
+                                    Value = $"{GuildSettings.leaveMessage.leaveMessage.CompileVarMessage(Context.Guild, Context.User)}"
+                                }
+                            },
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    GuildSettings.leaveMessage.leaveTitle = string.Join(' ', args.Skip(1));
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message Title is now {GuildSettings.leaveMessage.leaveTitle}" }.WithCurrentTimestamp().Build());
+                    string msg = string.Join(' ', args.Skip(1));
+                    if (msg.Length > 256)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Error",
+                            Description = $"The max title lengh is 256 characters! The length you provided was {msg.Length}.",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    GuildSettings.leaveMessage.leaveTitle = msg;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    { 
+                        Title = "Leave Message Settings Updated", 
+                        Description = $"Leave Message Title is now {GuildSettings.leaveMessage.leaveTitle}",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "channel":
-                    if (!Context.Message.MentionedChannels.Any())
+                    if(args.Length == 1)
                     {
-                        await Context.Channel.SendMessageAsync("You need to mention the channel you want to set as the Leave Message Channel!");
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Leave message Channel",
+                            Description = $"The current channel for leave messages to be posted is <#{GuildSettings.leaveMessage.leaveChannel}>",
+                            Color = Blurple
+                        }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    GuildSettings.leaveMessage.leaveChannel = Context.Message.MentionedChannels.First().Id;
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder { Title = "Leave Message Settings Updated", Description = $"Leave Message Channel is now <#{GuildSettings.leaveMessage.leaveChannel}>" }.WithCurrentTimestamp().Build());
+                    var chan = GetChannel(args[1]);
+                    if(chan == null)
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder
+                        {
+                            Title = "Invalid Channel",
+                            Description = $"The channel you provided was not found, please make sure you check spelling or its a channel the bot has access to",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+                    GuildSettings.leaveMessage.leaveChannel = chan.Id;
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder 
+                    {
+                        Title = "Leave Message Settings Updated", 
+                        Description = $"Leave Message Channel is now <#{GuildSettings.leaveMessage.leaveChannel}>",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
                     break;
                 case "color":
                     if (args.Length == 1)
                     {
-                        await Context.Channel.SendMessageAsync("You need to specify the colour you want to set as the Leave Embed Colour!");
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Embed Color",
+                            Description = $"The leave message color is {GuildSettings.leaveMessage.EmbedColor}. This embed is that color",
+                            Color = HexColorConverter.DiscordColorFromHex(GuildSettings.leaveMessage.EmbedColor)
+                        }.Build());
                         return;
                     }
-                    await Context.Channel.SendMessageAsync("We havent implemented this yet ;)");
+
+                    if (args.Length == 2)
+                    {
+                        string hexColor = args[1];
+                        var regex = new Regex(@"(\d|[a-f]){6}");
+                        if (regex.IsMatch(args[1]))
+                        {
+                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            //set here
+                            this.GuildSettings.leaveMessage.EmbedColor = "#"+hex;
+                            GuildSettings.SaveGuildSettings();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Leave messages Color to this Embed's Color ({GuildSettings.leaveMessage.EmbedColor})",
+                                Color = HexColorConverter.DiscordColorFromHex(GuildSettings.leaveMessage.EmbedColor)
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid Hex Code!",
+                                Description = $"The hex code you provided was invalid!",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    if (args.Length == 4)
+                    {
+                        if (int.TryParse(args[1], out var R) && int.TryParse(args[2], out var G) && int.TryParse(args[3], out var B))
+                        {
+                            if (R > 255 || G > 255 || B > 255)
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid parameters",
+                                    Description = $"Please use the RGB format values between 0 and 255, for example: `25 255 0`",
+                                    Color = Color.Red
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            //set here
+                            this.GuildSettings.leaveMessage.EmbedColor = HexColorConverter.HexFromColor(System.Drawing.Color.FromArgb(R, G, B));
+                            GuildSettings.SaveGuildSettings();
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Set the Leave messages Color to this Embed's Color ({GuildSettings.leaveMessage.EmbedColor})",
+                                Color = HexColorConverter.DiscordColorFromHex(GuildSettings.leaveMessage.EmbedColor)
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Invalid parameters",
+                                Description = $"Please use the RGB format, for example: `25 255 0`",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Invalid parameters",
+                            Description = $"Please use the RGB format or Hex format, for example: `25 255 0` or `#00ff00`",
+                            Color = Color.Red
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
                     break;
             };
             GuildSettings.SaveGuildSettings();

@@ -33,7 +33,7 @@ namespace Public_Bot.Modules.Handlers
                 //img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}WelcomeCard.png", ImageFormat.Png);
                 if (GuildSettings.WelcomeCard.DMs)
                 {
-                    var chan =await client.GetUser(arg.Id).GetOrCreateDMChannelAsync();
+                    var chan = await client.GetUser(arg.Id).GetOrCreateDMChannelAsync();
                     if(chan != null)
                     {
                         try
@@ -93,7 +93,7 @@ namespace Public_Bot.Modules.Handlers
             WelcomeGraphics.DrawString(guild.Name, new Font("Bahnschrift", 40, FontStyle.Regular), new SolidBrush(System.Drawing.Color.White), new RectangleF(60, 50, WelcomeImage.Width - 120, 60), stringFormat);
             var textArea = new Rectangle(50, 310, 860, 200);
             //WelcomeGraphics.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(200, 255, 40, 40)), LevelCommands.RankBuilder.RoundedRect(textArea, 30));
-            WelcomeGraphics.DrawString($"{welc.GenerateWelcomeMessage(user, guild)}", font, brush, textArea, stringFormat);
+            //WelcomeGraphics.DrawString($"{welc.GenerateWelcomeMessage(user, guild)}", font, brush, textArea, stringFormat);
            
             return WelcomeImage;
         }
