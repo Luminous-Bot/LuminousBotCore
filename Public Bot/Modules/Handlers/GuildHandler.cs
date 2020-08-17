@@ -17,23 +17,23 @@ namespace Public_Bot
         public GuildHandler(DiscordShardedClient c)
         {
             client = c;
-            string q = GraphQLParser.GenerateGQLQuery<Guild>("guilds");
-            CurrentGuilds = StateService.Query<List<Guild>>(q);
+            //string q = GraphQLParser.GenerateGQLQuery<Guild>("guilds");
+            CurrentGuilds = new List<Guild>();
             client.JoinedGuild += AddGuild;
             client.UserJoined += NewUser;
-            client.ShardConnected += Init;
+            //client.ShardConnected += Init;
         }
         
-        bool isInitCompt = false;
-        private async Task Init(DiscordSocketClient arg)
-        {
-            if (!isInitCompt)
-            {
-                //await CheckGuilds();
-                CheckGuilds().GetAwaiter().GetResult();
-                isInitCompt = true;
-            }
-        }
+        //bool isInitCompt = false;
+        //private async Task Init(DiscordSocketClient arg)
+        //{
+        //    if (!isInitCompt)
+        //    {
+        //        //await CheckGuilds();
+        //        CheckGuilds().GetAwaiter().GetResult();
+        //        isInitCompt = true;
+        //    }
+        //}
         public static GuildMember GetOrCreateGuildMember(ulong MemberID, ulong GuildID)
         {
             if (!GuildMemberExists(MemberID, GuildID))
@@ -41,17 +41,43 @@ namespace Public_Bot
                 if (!GuildMember.Exists(MemberID, GuildID))
                     return CreateGuildMember(MemberID, GuildID);
                 else
-                    return GuildMember.Fetch(MemberID, GuildID);
+                {
+                    var gm = GuildMember.Fetch(MemberID, GuildID);
+                    AddGuildMember(gm);
+                    return gm;
+                }    
             }
             else
                 return CurrentGuilds.Find(x => x.Id == GuildID).GuildMembers.Find(x => x.UserID == MemberID);
         }
+        public static void AddGuildMember(GuildMember gm)
+        {
+            if(CurrentGuilds.Any(x => x.Id == gm.GuildID))
+                CurrentGuilds.Find(x => x.Id == gm.GuildID).GuildMembers.Add(gm);
+            else if(Guild.Exists(gm.GuildID))
+            {
+                var g = Guild.Fetch(gm.GuildID);
+                if (!g.GuildMembers.Any(x => x.UserID == gm.UserID))
+                    g.GuildMembers.Add(gm);
+                CurrentGuilds.Add(g);
+            }
+        }
         public static bool GuildMemberExists(ulong MemberId, ulong GuildID)
         {
             if (!CurrentGuilds.Any(x => x.Id == GuildID))
-                return false;
-            var gld = CurrentGuilds.Find(x => x.Id == GuildID);
-            return gld.GuildMembers.Any(x => x.UserID == MemberId);
+                if (Guild.Exists(GuildID))
+                {
+                    var g = Guild.Fetch(GuildID);
+                    CurrentGuilds.Add(g);
+                    return g.GuildMembers.Any(x => x.UserID == MemberId);
+                }
+                else
+                    return GuildMember.Exists(MemberId, GuildID);
+            else
+            {
+                var gld = CurrentGuilds.Find(x => x.Id == GuildID);
+                return gld.GuildMembers.Any(x => x.UserID == MemberId);
+            }
         }
         public static GuildMember CreateGuildMember(ulong Idm, ulong GuildId)
         {
@@ -64,6 +90,15 @@ namespace Public_Bot
             var gm = new GuildMember(usr);
             if (CurrentGuilds.Any(x => x.Id == GuildId))
                 CurrentGuilds.Find(x => x.Id == GuildId).GuildMembers.Add(gm);
+            else
+            {
+                if(Guild.Exists(GuildId))
+                {
+                    var g = Guild.Fetch(GuildId);
+                    if (!g.GuildMembers.Any(x => x.UserID == Idm))
+                        g.GuildMembers.Add(gm);
+                }
+            }
             return gm;
         }
         public static GuildMember GetGuildMember(ulong MemberId, ulong GuildID)
@@ -73,10 +108,26 @@ namespace Public_Bot
                 var guild = CurrentGuilds.Find(x => x.Id == GuildID);
                 if (guild.GuildMembers.Any(x => x.UserID == MemberId))
                     return guild.GuildMembers.Find(x => x.UserID == MemberId);
-                return GuildMember.Fetch(MemberId, GuildID);
+                else
+                {
+                    var m = GuildMember.Fetch(MemberId, GuildID);
+                    guild.GuildMembers.Add(m);
+                    return m;
+                }
             }
             else
-                return GuildMember.Fetch(MemberId, GuildID);
+            {
+                if (Guild.Exists(GuildID))
+                {
+                    var g = Guild.Fetch(GuildID);
+                    if (g.GuildMembers.Any(x => x.UserID == MemberId))
+                        return g.GuildMembers.Find(x => x.UserID == MemberId);
+                    else
+                        return null;
+                }
+                else
+                    return null;
+            }
         }
         private async Task NewUser(SocketGuildUser arg)
         {
@@ -93,7 +144,7 @@ namespace Public_Bot
                 else
                 {
                     var gm = GuildMember.Fetch(arg.Id, arg.Guild.Id);
-                    gm = await gm.UpdateIsInServer(true);
+                    //gm = await gm.UpdateIsInServer(true);
                     guild.GuildMembers.Add(gm);
                 }
             }
@@ -107,20 +158,25 @@ namespace Public_Bot
             }
         }
 
-        public async Task CheckGuilds()
-        {
-            foreach(var guild in client.Guilds)
-            {
-                if(!CurrentGuilds.Any(x => x.Id == guild.Id))
-                {
-                    await AddGuild(guild);
-                }
-            }
-        }
+        //public async Task CheckGuilds()
+        //{
+        //    foreach(var guild in client.Guilds)
+        //    {
+        //        if(!CurrentGuilds.Any(x => x.Id == guild.Id))
+        //        {
+        //            await AddGuild(guild);
+        //        }
+        //    }
+        //}
 
         private async Task AddGuild(SocketGuild arg)
         {
-            var g = new Guild(arg);
+            Guild g;
+            if (Guild.Exists(arg.Id))
+                g = Guild.Fetch(arg.Id);
+            else
+                g = new Guild(arg);
+
             CurrentGuilds.Add(g);
             LevelHandler.GuildLevels.Add(g.Leaderboard);
         }
