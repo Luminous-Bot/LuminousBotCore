@@ -44,8 +44,9 @@ namespace Public_Bot
         {
             this.GuildID = user.Guild.Id;
             this.UserID = user.Id;
-            if (!UserHandler.Exists(this.UserID))
-                UserHandler.CreateUser(UserID);
+            if (!UserHandler.Users.Any(x => x.Id == this.UserID))
+                if (!User.UserExists(UserID))
+                    UserHandler.CreateUser(UserID);
             var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
             this.User = mt.User;
         }

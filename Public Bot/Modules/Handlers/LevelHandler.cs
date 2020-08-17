@@ -19,7 +19,7 @@ namespace Public_Bot.Modules.Handlers
         public static string LeaderboardFolder = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Levels";
         public static DiscordShardedClient client;
         public static List<string> facts { get; set; }
-        public static List<GuildLeaderboards> GuildLevels { get; set; } = new List<GuildLeaderboards>();
+        public static List<GuildLeaderboards> GuildLevels { get; set; }
         public static XPBucket _xpBucket = new XPBucket();
         public LevelHandler(DiscordShardedClient c)
         {
@@ -126,7 +126,7 @@ namespace Public_Bot.Modules.Handlers
 "Server occasions are a popular way for communities on Discord to share interests.",
 "Discord is rumored to shut down in November 2020.",
             };
-            //GuildLevels = StateService.Query<List<GuildLeaderboards>>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboards"));
+            GuildLevels = StateService.Query<List<GuildLeaderboards>>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboards"));
             new System.Timers.Timer() { AutoReset = true, Interval = 60000, Enabled = true }.Elapsed += GiveVCPoints;
             new System.Timers.Timer() { AutoReset = true, Interval = 3000, Enabled = true }.Elapsed += ClearBucket;
             client.MessageReceived += HandleLevelAdd;
@@ -188,50 +188,44 @@ namespace Public_Bot.Modules.Handlers
             var _bucket = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
             foreach (var guild in client.Guilds)
             {
-                if (!GuildLevels.Any(x => x.GuildID == guild.Id)) 
+                if (GuildLevels.Any(x => x.GuildID == guild.Id))
                 {
-                    var g = GuildHandler.GetGuild(guild.Id);
-                    if (g == null)
-                        continue;
-                    GuildLevels.Add(g.Leaderboard);
-                }
-
-                var gs = GuildSettings.Get(guild.Id);
-                if (gs.ModulesSettings["🧪 Levels 🧪"])
-                {
-                    var gl = GuildLevels.Find(x => x.GuildID == guild.Id);
-
-                    foreach (var user in guild.Users.Where(x => x.VoiceChannel != null))
+                    var gs = GuildSettings.Get(guild.Id);
+                    if (gs.ModulesSettings["🧪 Levels 🧪"])
                     {
-                        if (!gl.Settings.BlacklistedChannels.Contains(user.VoiceChannel.Id))
+                        var gl = GuildLevels.Find(x => x.GuildID == guild.Id);
+
+                        foreach (var user in guild.Users.Where(x => x.VoiceChannel != null))
                         {
-                            if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                            if (!gl.Settings.BlacklistedChannels.Contains(user.VoiceChannel.Id))
                             {
-                                var usr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
-                                usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
-                                if (usr.CurrentXP >= usr.NextLevelXP)
-                                    LevelUpUser(usr);
-                                Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                                _bucket.Add(usr,
-                                    new KeyValuePair<string, object>("guildId", $"\\\"{usr.GuildID}\\\""),
-                                    new KeyValuePair<string, object>("userId", $"\\\"{usr.MemberID}\\\""),
-                                    new KeyValuePair<string, object>("level", usr.CurrentLevel),
-                                    new KeyValuePair<string, object>("xp", usr.CurrentXP));
-                            }
-                            else
-                            {
-                                var usr = new LevelUser(user);
-                                usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
-                                if (usr.CurrentXP >= usr.NextLevelXP)
-                                    LevelUpUser(usr);
-                                gl.CurrentUsers.Add(usr);
-                                Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                                usr.Save();
+                                if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                                {
+                                    var usr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                                    usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
+                                    if (usr.CurrentXP >= usr.NextLevelXP)
+                                        LevelUpUser(usr);
+                                    Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
+                                    _bucket.Add(usr,
+                                        new KeyValuePair<string, object>("guildId", $"\\\"{usr.GuildID}\\\""),
+                                        new KeyValuePair<string, object>("userId", $"\\\"{usr.MemberID}\\\""),
+                                        new KeyValuePair<string, object>("level", usr.CurrentLevel),
+                                        new KeyValuePair<string, object>("xp", usr.CurrentXP));
+                                }
+                                else
+                                {
+                                    var usr = new LevelUser(user);
+                                    usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
+                                    if (usr.CurrentXP >= usr.NextLevelXP)
+                                        LevelUpUser(usr);
+                                    gl.CurrentUsers.Add(usr);
+                                    Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
+                                    usr.Save();
+                                }
                             }
                         }
                     }
                 }
-
             }
             if(_bucket.Count > 0)
                 StateService.ExecuteNoReturnAsync<List<LevelUser>>(_bucket.Build()).GetAwaiter().GetResult();
@@ -329,51 +323,47 @@ namespace Public_Bot.Modules.Handlers
             var gs = GuildSettings.Get(g.Id);
             if (gs.ModulesSettings["🧪 Levels 🧪"])
             {
-                if (!GuildLevels.Any(x => x.GuildID == g.Id))
+                if (GuildLevels.Any(x => x.GuildID == g.Id))
                 {
-                    var gld = GuildHandler.GetGuild(g.Id);
-                    if (gld == null)
-                        return;
-                    GuildLevels.Add(gld.Leaderboard);
-                }
-                var gl = GuildLevels.Find(x => x.GuildID == g.Id);
-                if (!gl.Settings.BlacklistedChannels.Contains(sm.Channel.Id))
-                {
-                    LevelUser usr;
-                    if (gl.CurrentUsers.Any(x => x.MemberID == sm.Author.Id))
-                        usr = gl.CurrentUsers.Find(x => x.MemberID == sm.Author.Id);
-                    else
+                    var gl = GuildLevels.Find(x => x.GuildID == g.Id);
+                    if (!gl.Settings.BlacklistedChannels.Contains(sm.Channel.Id))
                     {
-                        usr = new LevelUser(arg.Author as SocketGuildUser);
-                        gl.CurrentUsers.Add(usr);
-                        usr.Save();
-                    }
-
-                    if (usr.Username != sm.Author.ToString())
-                        usr.Username = sm.Author.ToString();
-
-                    usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
-
-                    if (usr.CurrentXP >= usr.NextLevelXP)
-                        LevelUpUser(usr);
-
-                    if (gl.Settings.RankRoles.Any(x => x.Level <= usr.CurrentLevel))
-                    {
-                        foreach (var rid in gl.Settings.RankRoles.Where(x => x.Level <= usr.CurrentLevel))
-                        {
-                            try
-                            {
-                                var user = client.GetGuild(gs.GuildID).GetUser(usr.MemberID);
-                                if (!user.Roles.Any(x => x.Id == rid.Role))
-                                {
-                                    await user.AddRoleAsync(client.GetGuild(usr.GuildID).GetRole(rid.Role));
-                                }
-                            }
-                            catch { }
+                        LevelUser usr;
+                        if (gl.CurrentUsers.Any(x => x.MemberID == sm.Author.Id))
+                            usr = gl.CurrentUsers.Find(x => x.MemberID == sm.Author.Id);
+                        else
+                        { 
+                            usr = new LevelUser(arg.Author as SocketGuildUser);
+                            gl.CurrentUsers.Add(usr);
+                            usr.Save();
                         }
+
+                        if (usr.Username != sm.Author.ToString())
+                            usr.Username = sm.Author.ToString();
+
+                        usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
+
+                        if (usr.CurrentXP >= usr.NextLevelXP)
+                            LevelUpUser(usr);
+
+                        if (gl.Settings.RankRoles.Any(x => x.Level <= usr.CurrentLevel))
+                        {
+                            foreach (var rid in gl.Settings.RankRoles.Where(x => x.Level <= usr.CurrentLevel))
+                            {
+                                try
+                                {
+                                    var user = client.GetGuild(gs.GuildID).GetUser(usr.MemberID);
+                                    if (!user.Roles.Any(x => x.Id == rid.Role))
+                                    {
+                                        await user.AddRoleAsync(client.GetGuild(usr.GuildID).GetRole(rid.Role));
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                        Logger.Write($"{sm.Author} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
+                        _xpBucket.Add(usr);
                     }
-                    Logger.Write($"{sm.Author} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                    _xpBucket.Add(usr);
                 }
             }
         }

@@ -49,8 +49,9 @@ namespace Public_Bot
         }
         public LevelUser Save()
         {
-            if(!UserHandler.Exists(this.MemberID))
-                UserHandler.CreateUser(this.MemberID);
+            if(!UserHandler.Users.Any(x => x.Id == this.MemberID))
+                if (!User.UserExists(this.MemberID))
+                    UserHandler.CreateUser(this.MemberID);
             if(!GuildHandler.GuildMemberExists(this.MemberID, this.GuildID))
                 if (!GuildMember.Exists(this.MemberID, this.GuildID))
                     GuildHandler.CreateGuildMember(this.MemberID, this.GuildID);
