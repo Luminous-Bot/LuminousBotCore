@@ -34,50 +34,52 @@ namespace Public_Bot
                 isInitCompt = true;
             }
         }
-        public static GuildMember GetOrCreateGuildMember(ulong MemberID, ulong GuildID)
-        {
-            if (!GuildMemberExists(MemberID, GuildID))
-            {
-                if (!GuildMember.Exists(MemberID, GuildID))
-                    return CreateGuildMember(MemberID, GuildID);
-                else
-                    return GuildMember.Fetch(MemberID, GuildID);
-            }
-            else
-                return CurrentGuilds.Find(x => x.Id == GuildID).GuildMembers.Find(x => x.UserID == MemberID);
-        }
-        public static bool GuildMemberExists(ulong MemberId, ulong GuildID)
-        {
-            if (!CurrentGuilds.Any(x => x.Id == GuildID))
-                return false;
-            var gld = CurrentGuilds.Find(x => x.Id == GuildID);
-            return gld.GuildMembers.Any(x => x.UserID == MemberId);
-        }
-        public static GuildMember CreateGuildMember(ulong Idm, ulong GuildId)
-        {
-            var gld = client.GetGuild(GuildId);
-            if (gld == null)
-                return null;
-            var usr = gld.GetUser(Idm);
-            if (usr == null)
-                return null;
-            var gm = new GuildMember(usr);
-            if (CurrentGuilds.Any(x => x.Id == GuildId))
-                CurrentGuilds.Find(x => x.Id == GuildId).GuildMembers.Add(gm);
-            return gm;
-        }
-        public static GuildMember GetGuildMember(ulong MemberId, ulong GuildID)
-        {
-            if(CurrentGuilds.Any(x => x.Id == GuildID))
-            {
-                var guild = CurrentGuilds.Find(x => x.Id == GuildID);
-                if (guild.GuildMembers.Any(x => x.UserID == MemberId))
-                    return guild.GuildMembers.Find(x => x.UserID == MemberId);
-                return GuildMember.Fetch(MemberId, GuildID);
-            }
-            else
-                return GuildMember.Fetch(MemberId, GuildID);
-        }
+        #region old
+        //public static GuildMember GetOrCreateGuildMember(ulong MemberID, ulong GuildID)
+        //{
+        //    if (!GuildMemberExists(MemberID, GuildID))
+        //    {
+        //        if (!GuildMember.Exists(MemberID, GuildID))
+        //            return CreateGuildMember(MemberID, GuildID);
+        //        else
+        //            return GuildMember.Fetch(MemberID, GuildID);
+        //    }
+        //    else
+        //        return CurrentGuilds.Find(x => x.Id == GuildID).GuildMembers.Find(x => x.UserID == MemberID);
+        //}
+        //public static bool GuildMemberExists(ulong MemberId, ulong GuildID)
+        //{
+        //    if (!CurrentGuilds.Any(x => x.Id == GuildID))
+        //        return false;
+        //    var gld = CurrentGuilds.Find(x => x.Id == GuildID);
+        //    return gld.GuildMembers.Any(x => x.UserID == MemberId);
+        //}
+        //public static GuildMember CreateGuildMember(ulong Idm, ulong GuildId)
+        //{
+        //    var gld = client.GetGuild(GuildId);
+        //    if (gld == null)
+        //        return null;
+        //    var usr = gld.GetUser(Idm);
+        //    if (usr == null)
+        //        return null;
+        //    var gm = new GuildMember(usr);
+        //    if (CurrentGuilds.Any(x => x.Id == GuildId))
+        //        CurrentGuilds.Find(x => x.Id == GuildId).GuildMembers.Add(gm);
+        //    return gm;
+        //}
+        //public static GuildMember GetGuildMember(ulong MemberId, ulong GuildID)
+        //{
+        //    if(CurrentGuilds.Any(x => x.Id == GuildID))
+        //    {
+        //        var guild = CurrentGuilds.Find(x => x.Id == GuildID);
+        //        if (guild.GuildMembers.Any(x => x.UserID == MemberId))
+        //            return guild.GuildMembers.Find(x => x.UserID == MemberId);
+        //        return GuildMember.Fetch(MemberId, GuildID);
+        //    }
+        //    else
+        //        return GuildMember.Fetch(MemberId, GuildID);
+        //}
+        #endregion old
         private async Task NewUser(SocketGuildUser arg)
         {
             var guild = CurrentGuilds.Any(x => x.Id == arg.Guild.Id) ? CurrentGuilds.Find(x => x.Id == arg.Guild.Id) : Guild.Fetch(arg.Guild.Id);
@@ -88,13 +90,13 @@ namespace Public_Bot
                 {
                     var gm = new GuildMember(arg);
                     // (!gm.IsInServer)
-                    guild.GuildMembers.Add(gm);
+                    guild.GuildMembers.AddGuildMember(gm);
                 }
                 else
                 {
                     var gm = GuildMember.Fetch(arg.Id, arg.Guild.Id);
                     gm = await gm.UpdateIsInServer(true);
-                    guild.GuildMembers.Add(gm);
+                    guild.GuildMembers.AddGuildMember(gm);
                 }
             }
             else
@@ -103,7 +105,7 @@ namespace Public_Bot
                 var user = new User(arg);
                 //create guildmember
                 var gm = new GuildMember(arg) { User = user};
-                guild.GuildMembers.Add(gm);
+                guild.GuildMembers.AddGuildMember(gm);
             }
         }
 

@@ -46,9 +46,25 @@ namespace Public_Bot
             this.UserID = user.Id;
             if (!UserHandler.Users.Any(x => x.Id == this.UserID))
                 if (!User.UserExists(UserID))
-                    UserHandler.CreateUser(UserID);
+                    UserCache.CreateUser(UserID);
             var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
             this.User = mt.User;
+
+            //add to cache 
+            GuildCache.AddGuildMember(this);
+        }
+        public GuildMember(ulong UserId, ulong GuildId)
+        {
+            this.GuildID = GuildId;
+            this.UserID = UserId;
+            if (!UserHandler.Users.Any(x => x.Id == this.UserID))
+                if (!User.UserExists(UserID))
+                    UserCache.CreateUser(UserID);
+            var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
+            this.User = mt.User;
+
+            //add to cache 
+            GuildCache.AddGuildMember(this);
         }
     }
 }

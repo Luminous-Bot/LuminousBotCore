@@ -50,11 +50,12 @@ namespace Public_Bot
         public LevelUser Save()
         {
             if(!UserHandler.Users.Any(x => x.Id == this.MemberID))
-                if (!User.UserExists(this.MemberID))
-                    UserHandler.CreateUser(this.MemberID);
-            if(!GuildHandler.GuildMemberExists(this.MemberID, this.GuildID))
-                if (!GuildMember.Exists(this.MemberID, this.GuildID))
-                    GuildHandler.CreateGuildMember(this.MemberID, this.GuildID);
+                if (!UserCache.UserExists(this.MemberID))
+                    UserCache.CreateUser(this.MemberID);
+
+            var guild = GuildCache.GetGuild(this.GuildID);
+            if (!guild.GuildMembers.GuildMemberExists(this.MemberID))
+                guild.GuildMembers.CreateGuildMember(this.MemberID);
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public LevelUser() { }

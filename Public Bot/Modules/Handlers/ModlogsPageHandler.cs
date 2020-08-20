@@ -76,7 +76,8 @@ namespace Public_Bot.Modules.Handlers
             for (int i = 0; i != rs.Count(); i++)
             {
                 var log = rs[i];
-                var md = GuildHandler.GetGuildMember(log.ModeratorID, log.GuildID);
+                var gu = GuildCache.GetGuild(log.GuildID);
+                var md = gu.GuildMembers.GetGuildMember(log.ModeratorID, log.GuildID);
                 b.Fields.Add(new EmbedFieldBuilder()
                 {
                     IsInline = false,

@@ -94,7 +94,8 @@ namespace Public_Bot.Modules.Commands
                 string reason = string.Join(' ', args.Skip(1));
                 Infraction m = new Infraction(user.Id, context.User.Id, context.Guild.Id, action, reason, DateTime.UtcNow);
                 bool Dmed = true;
-                var md = GuildHandler.GetGuildMember(m.ModeratorID, m.GuildID);
+                var g = GuildCache.GetGuild(Context.Guild.Id);
+                var md = g.GuildMembers.GetGuildMember(context.User.Id);
                 try
                 {
                     await user.SendMessageAsync("", false, new EmbedBuilder()
@@ -527,10 +528,10 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var guild = GuildHandler.GetGuild(Context.Guild.Id);
-
-                if (guild.GuildMembers.Any(x => x.UserID == user.Id && x.Infractions.Count > 0))
+                var gm = guild.GuildMembers.GetGuildMember(user.Id);
+                if (gm.Infractions.Count > 0)
                 {
-                    var userlog = guild.GuildMembers.Find(x => x.UserID == user.Id);
+                    var userlog = gm;
                     var pg = ModlogsPageHandler.BuildHelpPage(userlog.Infractions, 0, user.Id, Context.Guild.Id, Context.User.Id);
                     var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
                     var msg = await Context.Channel.SendMessageAsync("", false, emb.Build());
@@ -577,10 +578,10 @@ namespace Public_Bot.Modules.Commands
                 }
 
                 var guild = GuildHandler.GetGuild(Context.Guild.Id);
-
-                if (guild.GuildMembers.Any(x => x.UserID == usr.Id))
+                var gm = guild.GuildMembers.GetGuildMember(usr.Id);
+                if (gm.Infractions.Count > 0)
                 {
-                    var usrlogs = guild.GuildMembers.Find(x => x.UserID == usr.Id);
+                    var usrlogs = gm;
                     if (args.Length == 1)
                     {
                         await modlogs(args);

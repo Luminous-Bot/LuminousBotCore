@@ -70,6 +70,8 @@ namespace Public_Bot
 
             PermissionRoles.AddRange(guild.Roles.Where(x => x.Permissions.Administrator && !CommandHandler.IsBotRole(x)).Select(x => x.Id));
 
+            if (!Guild.Exists(guild.Id))
+                _ = new Guild(guild);
             _ = new GuildLeaderboards(guild);
 
             if (this == null)

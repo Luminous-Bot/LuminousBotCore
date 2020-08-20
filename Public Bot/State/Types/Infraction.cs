@@ -37,8 +37,8 @@ namespace Public_Bot
             if (guild != null)
             {
                 GuildMember member;
-                if (guild.GuildMembers.Any(x => x.UserID == this.MemberID))
-                    member = guild.GuildMembers.Find(x => x.UserID == this.MemberID);
+                if (guild.GuildMembers.GuildMemberExists(this.MemberID))
+                    member = guild.GuildMembers.GetGuildMember(this.MemberID);
                 else
                 {
                     var gm = GuildHandler.client.GetGuild(GuildID).GetUser(this.MemberID);

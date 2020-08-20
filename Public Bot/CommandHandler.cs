@@ -48,14 +48,21 @@ namespace Public_Bot
         }
         public static async Task HandleFailedGql(string q, string method, string type, string StatusCode, string resp)
         {
-            await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
+            try
             {
-                Title = "Failed GraphQl!",
-                Description = $"Failed to {type} {method}! Server sent: {StatusCode}!",
-                Color = Color.Red
-            }.WithCurrentTimestamp().Build());
-            File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
-            await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", "");
+                await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Failed GraphQl!",
+                    Description = $"Failed to {type} {method}! Server sent: {StatusCode}!",
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+                File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
+                await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", "");
+            }
+            catch(Exception x)
+            {
+                Console.WriteLine($"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
+            }
         }
 
         //private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)

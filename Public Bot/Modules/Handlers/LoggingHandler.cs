@@ -151,7 +151,7 @@ namespace Public_Bot.Modules.Handlers
                 if (arg1.IsMentionable != arg2.IsMentionable)
                     body += $"__Mention Changed:__\n> Old Value:  {(arg1.IsMentionable ? "✅" : "❌")}\n> New Value: {(arg2.IsMentionable ? "✅" : "❌")}\n__\n__\n";
                 if (arg1.IsHoisted != arg2.IsHoisted)
-                    body += $"__Hoisted Changed:__\n> Old Value:  {(arg1.IsHoisted ? "✅" : "❌")}\n> New Value: {(arg1.IsHoisted ? "✅" : "❌")}\n__\n__\n";
+                    body += $"__Hoisted Changed:__\n> Old Value:  {(arg1.IsHoisted ? "✅" : "❌")}\n> New Value: {(arg2.IsHoisted ? "✅" : "❌")}\n__\n__\n";
                 if (body == "")
                     return;
                 if (logchan != null)

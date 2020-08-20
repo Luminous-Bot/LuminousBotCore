@@ -53,12 +53,12 @@ namespace Public_Bot.Modules.Handlers
             var guild = channel.Guild;
             var gs = GuildSettings.Get(guild.Id);
 
-            if (!UserHandler.Users.Any(x => x.Id == arg.Author.Id))
-                if (!User.UserExists(arg.Author.Id))
-                    UserHandler.CreateUser(arg.Author.Id);
-            if (!GuildHandler.GuildMemberExists(arg.Author.Id, guild.Id))
-                if (!GuildMember.Exists(arg.Author.Id, guild.Id))
-                    GuildHandler.CreateGuildMember(arg.Author.Id, guild.Id);
+            if (!UserCache.UserExists(arg.Author.Id))
+                UserCache.CreateUser(arg.Author.Id);
+
+            var g = GuildCache.GetGuild(guild.Id);
+            if (!g.GuildMembers.GuildMemberExists(arg.Author.Id))
+                g.GuildMembers.CreateGuildMember(arg.Author.Id);
 
             if (gs.Logging)
                 new Message(arg, channel);

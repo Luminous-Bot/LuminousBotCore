@@ -17,7 +17,8 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_UserLeft(SocketGuildUser arg)
         {
-            var gm = GuildHandler.GetGuildMember(arg.Id, arg.Guild.Id);
+            var guild = GuildCache.GetGuild(arg.Guild.Id);
+            var gm = guild.GuildMembers.GetGuildMember(arg.Id, arg.Guild.Id);
             if(gm != null)
                 gm = await gm.UpdateIsInServer(false);
 

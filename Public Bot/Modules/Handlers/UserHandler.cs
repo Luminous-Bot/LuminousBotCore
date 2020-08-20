@@ -17,28 +17,30 @@ namespace Public_Bot
 
             Users = StateService.Query<List<User>>(GraphQLParser.GenerateGQLQuery<User>("users"));
         }
-        public static User CreateUser(ulong Id)
-        {
-            var usr = client.GetUser(Id);
-            var u = new User(usr);
-            Users.Add(u);
-            return u;
-        }
-        public static User GetUser(ulong id)
-        {
-            if (Users.Any(x => x.Id == id))
-                return Users.Find(x => x.Id == id);
-            else
-            {
-                var u = User.Fetch(id);
-                if (u != null)
-                {
-                    Users.Add(u);
-                    return u;
-                }
-                else
-                    return null;
-            }    
-        }
+        #region old
+        //public static User CreateUser(ulong Id)
+        //{
+        //    var usr = client.GetUser(Id);
+        //    var u = new User(usr);
+        //    Users.Add(u);
+        //    return u;
+        //}
+        //public static User GetUser(ulong id)
+        //{
+        //    if (Users.Any(x => x.Id == id))
+        //        return Users.Find(x => x.Id == id);
+        //    else
+        //    {
+        //        var u = User.Fetch(id);
+        //        if (u != null)
+        //        {
+        //            Users.Add(u);
+        //            return u;
+        //        }
+        //        else
+        //            return null;
+        //    }    
+        //}
+        #endregion old
     }
 }
