@@ -20,15 +20,21 @@ namespace Public_Bot
         public double XpPerMessage { get; set; } = 1;
         [GraphQLProp, GraphQLSVar]
         public double XpPerVCMinute { get; set; } = 5;
-        //[GraphQLProp, GraphQLSVar]
+        [GraphQLProp, GraphQLSVar]
         public double XpPerVCStream { get; set; } = 7;
         [GraphQLProp, GraphQLSVar]
         public ulong LevelUpChan { get; set; }
         [GraphQLProp, GraphQLSVar]
         public List<ulong> BlacklistedChannels { get; set; } = new List<ulong>();
         public static GuildLevelSettings Get(ulong id)
-            => LevelHandler.GuildLevels.Any(x => x.GuildID == id) 
-               ? LevelHandler.GuildLevels.Find(x => x.GuildID == id).Settings 
-               : null;
+        {
+            var g = GuildCache.GetGuild(id);
+            if (g == null)
+                return null;
+            if (g.Leaderboard == null)
+                return null;
+            return g.Leaderboard.Settings;
+        }
+
     }
 }

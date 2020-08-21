@@ -29,8 +29,311 @@ namespace Public_Bot.Modules.Handlers
             client.RoleUpdated += Client_RoleUpdated;
             client.UserUnbanned += Client_UserUnbanned;
             client.UserUpdated += Client_UserUpdated;
+            client.GuildMemberUpdated += Client_GuildMemberUpdated;
+            client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
             client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
-            
+            client.UserJoined += Client_UserJoined;
+            client.UserLeft += Client_UserLeft;
+        }
+
+        private async Task Client_UserLeft(SocketGuildUser arg)
+        {
+            var gs = GuildSettings.Get(arg.Guild.Id);
+            if (gs.LogChannel == 0 || !gs.Logging)
+                return;
+            var logchan = arg.Guild.GetTextChannel(gs.LogChannel);
+            if (logchan == null)
+                return;
+
+            await logchan.SendMessageAsync("", false, new EmbedBuilder()
+            {
+                Title = "⚡ User Left ⚡",
+                Description = $"{arg.Mention} left the server!",
+                Color = Color.Red,
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = $"Members: {arg.Guild.MemberCount}",
+                    IconUrl = arg.Guild.IconUrl
+                }
+            }.WithCurrentTimestamp().Build());
+        }
+
+        private async Task Client_UserJoined(SocketGuildUser arg)
+        {
+            var gs = GuildSettings.Get(arg.Guild.Id);
+            if (gs.LogChannel == 0 || !gs.Logging)
+                return;
+            var logchan = arg.Guild.GetTextChannel(gs.LogChannel);
+            if (logchan == null)
+                return;
+
+            await logchan.SendMessageAsync("", false, new EmbedBuilder() 
+            { 
+                Title = "⚡ New User ⚡",
+                Description = $"{arg.Mention} joined the server!",
+                Color = Color.Green,
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = $"Members: {arg.Guild.MemberCount}",
+                    IconUrl = arg.Guild.IconUrl
+                }
+            }.WithCurrentTimestamp().Build());
+        }
+
+        private async Task Client_GuildMemberUpdated(SocketGuildUser arg1, SocketGuildUser arg2)
+        {
+            var gs = GuildSettings.Get(arg1.Guild.Id);
+            if (gs.LogChannel == 0 || !gs.Logging)
+                return;
+            var logchan = arg1.Guild.GetTextChannel(gs.LogChannel);
+            if (logchan == null)
+                return;
+            if (arg1.Roles != arg2.Roles)
+            {
+                //role change
+                List<SocketRole> RemovedRoles = new List<SocketRole>();
+                List<SocketRole> AddedRoles = new List<SocketRole>();
+                foreach (var item in arg1.Roles)
+                    if (!arg2.Roles.Contains(item))
+                        RemovedRoles.Add(item);
+                foreach (var item in arg2.Roles)
+                    if (!arg1.Roles.Contains(item))
+                        AddedRoles.Add(item);
+
+                List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+                if (AddedRoles.Any())
+                {
+                    fields.Add(new EmbedFieldBuilder()
+                    {
+                        IsInline = true,
+                        Name = $"Got Role{(AddedRoles.Count == 1 ? "" : "s")}:",
+                        Value = $"{string.Join("\n", AddedRoles.Select(x => x.Mention))}"
+                    });
+                }
+                if (RemovedRoles.Any())
+                {
+                    fields.Add(new EmbedFieldBuilder()
+                    {
+                        IsInline = true,
+                        Name = $"Lost Role{(RemovedRoles.Count == 1 ? "" : "s")}:",
+                        Value = $"{string.Join(",\n", RemovedRoles.Select(x => x.Mention))}"
+                    });
+                }
+
+                await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "⚡ User Roles Changed ⚡",
+                    Color = Color.Green,
+                    Description = $"{arg1.Mention} Roles were changed",
+                    Fields = fields,
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = $"User Id {arg1.Id}"
+                    }
+                }.WithCurrentTimestamp().Build());
+            }
+            if(arg1.Nickname != arg2.Nickname)
+            {
+                //nick change
+                List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+                fields.Add(new EmbedFieldBuilder()
+                {
+                    Name = "Old Nickname:",
+                    Value = $"{(arg1.Nickname == null ? "none" : arg1.Nickname)}"
+                });
+                fields.Add(new EmbedFieldBuilder() 
+                { 
+                    Name = "New Nickname",
+                    Value = $"{(arg2.Nickname == null ? "none" : arg2.Nickname)}"
+                });
+                await logchan.SendMessageAsync("", false, new EmbedBuilder() 
+                {
+                    Title = "⚡ User Nickname Changed ⚡",
+                    Description = $"{arg1.Mention} Nickname was changed.\n",
+                    Color = Color.Green,
+                    Fields = fields
+                }.Build());
+
+            }
+            if(arg1.PremiumSince != arg2.PremiumSince)
+            {
+                //boost change
+                if(!arg1.PremiumSince.HasValue && arg2.PremiumSince.HasValue)
+                {
+                    //they boosted
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder() 
+                    {
+                        Title = "✨ Server Boosted ✨",
+                        Description = $"{arg1.Mention} boosted the server!",
+                        Color = new Color(244, 127, 255),
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = $"Total Server Boosts: {arg1.Guild.PremiumSubscriptionCount}",
+                            IconUrl = "https://ponyvilleplaza.com/files/img/boost.png"
+                        }
+                    }.WithCurrentTimestamp().Build());
+                }
+                if(arg1.PremiumSince.HasValue && !arg2.PremiumSince.HasValue)
+                {
+                    //there boost expired
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "✨ Server Boost Lost ✨",
+                        Description = $"{arg1.Mention} boost expired!",
+                        Color = new Color(244, 127, 255),
+                        Footer = new EmbedFooterBuilder()
+                        {
+                            Text = $"Total Server Boosts: {arg1.Guild.PremiumSubscriptionCount}",
+                            IconUrl = "https://ponyvilleplaza.com/files/img/boost.png"
+                        }
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+        }
+
+        private async Task Client_UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+        {
+            var chan = arg2.VoiceChannel == null ? arg3.VoiceChannel : arg2.VoiceChannel;
+            if (chan == null)
+                return;
+            var guild = chan.Guild;
+            if (guild == null)
+                return;
+            var gs = GuildSettings.Get(guild.Id);
+
+            if (arg2.VoiceChannel == null && arg3.VoiceChannel != null)
+            {
+                //user joined
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder() 
+                    {
+                        Title = $"🔊 User Joined Voice Channel 🔊",
+                        Description = $"{arg1.Mention} joined `{chan.Name}`",
+                        Color = Color.Teal
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            if(arg2.VoiceChannel != null && arg3.VoiceChannel == null)
+            {
+                //user left
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"🔊 User Left Voice Channel 🔊",
+                        Description = $"{arg1.Mention} Left `{chan.Name}`",
+                        Color = Color.Orange
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            if(arg2.VoiceChannel != null && arg3.VoiceChannel != null)
+            {
+                //switched
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"🔊 User Switched Voice Channel 🔊",
+                        Description = $"{arg1.Mention} Left `{chan.Name}`",
+                        Color = Color.Purple
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            if(!arg2.IsMuted && arg3.IsMuted)
+            {
+                //user got server muted lol
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"🔊 User Was Server Muted 🔊",
+                        Description = $"{arg1.Mention} was server muted in `{chan.Name}`",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            if(arg2.IsMuted && !arg3.IsMuted)
+            {
+                //user was unmuted
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"🔊 User Was Server Un-Muted 🔊",
+                        Description = $"{arg1.Mention} was server unmuted in `{chan.Name}`",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            if(!arg2.IsDeafened && arg3.IsDeafened)
+            {
+                //user was server deafened
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"🔊 User Was Server Deafened 🔊",
+                        Description = $"{arg1.Mention} was server deafened in `{chan.Name}`",
+                        Color = Color.Red
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
+            if(arg2.IsDeafened && !arg3.IsDeafened)
+            {
+                //user was undeafened
+                if (gs.LogChannel != 0 && gs.Logging)
+                {
+                    var logchan = guild.GetTextChannel(gs.LogChannel);
+                    if (logchan == null)
+                        return;
+                    var av = arg1.GetAvatarUrl();
+                    if (av == null)
+                        av = arg1.GetDefaultAvatarUrl();
+                    await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"🔊 User Was Server Un-Deafened 🔊",
+                        Description = $"{arg1.Mention} was server undeafened in `{chan.Name}`",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
+                }
+            }
         }
 
         private async Task Client_UserUpdated(SocketUser before, SocketUser after)
@@ -45,7 +348,7 @@ namespace Public_Bot.Modules.Handlers
                     if (logchan != null)
                     {
                         var fields = new List<EmbedFieldBuilder>();
-
+                        string url = "";
                         if (before.Username != after.Username)
                         {
                             fields.Add(new EmbedFieldBuilder()
@@ -69,6 +372,11 @@ namespace Public_Bot.Modules.Handlers
                                 Name = "Avatar Changed",
                                 Value = $"> **Old Avatar:**\n> [Link]({before.GetAvatarUrl()})\n> **New Avatar**\n> [Link]({after.GetAvatarUrl()})"
                             });
+                            var old = before.GetAvatarUrl(ImageFormat.Jpeg, 256);
+                            if (old == null)
+                                old = before.GetDefaultAvatarUrl();
+                            var _new = after.GetAvatarUrl(ImageFormat.Jpeg, 256);
+                            url = ProfileChangeHelper.BuildImage(old, _new);
                         }
 
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
@@ -76,8 +384,14 @@ namespace Public_Bot.Modules.Handlers
                             Title = "⚡ User Updated ⚡",
                             Color = Color.Orange,
                             Description = $"<@{after.Id}> was Updated",
-                            Fields = fields
-                        }.Build());
+                            Fields = fields,
+                            ImageUrl = url == "" ? null : url,
+                            Footer = new EmbedFooterBuilder() 
+                            {
+                                Text = $"User ID: {after.Id}"
+                            }
+                            
+                        }.WithCurrentTimestamp().Build());
                     }
                 }
             }
@@ -289,9 +603,14 @@ namespace Public_Bot.Modules.Handlers
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Message Edited ⚡",
-                            Description = $"Message edited in {sgc.Mention}",
+                            Description = $"Message edited in {sgc.Mention}, [Jump!]({arg2.GetJumpUrl()})",
                             Fields = fields,
-                            Color = Color.Orange
+                            Color = Color.Orange,
+                            Footer = new EmbedFooterBuilder()
+                            {
+                                Text = $"Message ID: {arg2.Id}"
+                            }
+                            
                         }.WithCurrentTimestamp().Build());
                     }
                 }

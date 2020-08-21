@@ -19,7 +19,7 @@ namespace Public_Bot.Modules.Handlers
         public static string LeaderboardFolder = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Levels";
         public static DiscordShardedClient client;
         public static List<string> facts { get; set; }
-        public static List<GuildLeaderboards> GuildLevels { get; set; }
+        //public static List<GuildLeaderboards> GuildLevels { get; set; }
         public static XPBucket _xpBucket = new XPBucket();
         public LevelHandler(DiscordShardedClient c)
         {
@@ -126,7 +126,7 @@ namespace Public_Bot.Modules.Handlers
 "Server occasions are a popular way for communities on Discord to share interests.",
 "Discord is rumored to shut down in November 2020.",
             };
-            GuildLevels = StateService.Query<List<GuildLeaderboards>>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboards"));
+            //GuildLevels = StateService.Query<List<GuildLeaderboards>>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboards"));
             new System.Timers.Timer() { AutoReset = true, Interval = 60000, Enabled = true }.Elapsed += GiveVCPoints;
             new System.Timers.Timer() { AutoReset = true, Interval = 3000, Enabled = true }.Elapsed += ClearBucket;
             client.MessageReceived += HandleLevelAdd;
@@ -188,12 +188,15 @@ namespace Public_Bot.Modules.Handlers
             var _bucket = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
             foreach (var guild in client.Guilds)
             {
-                if (GuildLevels.Any(x => x.GuildID == guild.Id))
+                if (GuildCache.GuildExists(guild.Id))
                 {
                     var gs = GuildSettings.Get(guild.Id);
                     if (gs.ModulesSettings["🧪 Levels 🧪"])
                     {
-                        var gl = GuildLevels.Find(x => x.GuildID == guild.Id);
+                        var g = GuildCache.GetGuild(guild.Id);
+                        if (g == null)
+                            return;
+                        var gl = g.Leaderboard;
 
                         foreach (var user in guild.Users.Where(x => x.VoiceChannel != null))
                         {
@@ -201,9 +204,9 @@ namespace Public_Bot.Modules.Handlers
                             {
                                 bool Streaming = user.IsStreaming;
                                 
-                                if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                                if (gl.CurrentUsers.LevelUserExists(user.Id))
                                 {
-                                    var usr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                                    var usr = gl.CurrentUsers.GetLevelUser(user.Id);
                                     usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
@@ -220,7 +223,7 @@ namespace Public_Bot.Modules.Handlers
                                     usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
-                                    gl.CurrentUsers.Add(usr);
+                                    gl.CurrentUsers.AddLevelUser(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
                                     usr.Save();
                                 }
@@ -325,18 +328,18 @@ namespace Public_Bot.Modules.Handlers
             var gs = GuildSettings.Get(g.Id);
             if (gs.ModulesSettings["🧪 Levels 🧪"])
             {
-                if (GuildLevels.Any(x => x.GuildID == g.Id))
+                if (GuildCache.GuildExists(g.Id))
                 {
-                    var gl = GuildLevels.Find(x => x.GuildID == g.Id);
+                    var gl = GuildCache.GetGuild(g.Id).Leaderboard;
                     if (!gl.Settings.BlacklistedChannels.Contains(sm.Channel.Id))
                     {
                         LevelUser usr;
-                        if (gl.CurrentUsers.Any(x => x.MemberID == sm.Author.Id))
-                            usr = gl.CurrentUsers.Find(x => x.MemberID == sm.Author.Id);
+                        if (gl.CurrentUsers.LevelUserExists(sm.Author.Id))
+                            usr = gl.CurrentUsers.GetLevelUser(sm.Author.Id);
                         else
                         { 
                             usr = new LevelUser(arg.Author as SocketGuildUser);
-                            gl.CurrentUsers.Add(usr);
+                            gl.CurrentUsers.AddLevelUser(usr);
                             usr.Save();
                         }
 
@@ -373,7 +376,7 @@ namespace Public_Bot.Modules.Handlers
         {
             var guild = client.GetGuild(gl.GuildID);
             int count = 0;
-            foreach (var user in guild.Users.Where(x => gl.CurrentUsers.Find(y => y.MemberID == x.Id) != null && gl.CurrentUsers.Find(y => y.MemberID == x.Id).CurrentLevel >= level))
+            foreach (var user in guild.Users.Where(x => gl.CurrentUsers.GetLevelUser(x.Id) != null && gl.CurrentUsers.GetLevelUser(x.Id).CurrentLevel >= level))
             {
                 if (!user.Roles.Contains(role))
                 {

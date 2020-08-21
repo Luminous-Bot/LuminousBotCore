@@ -32,6 +32,8 @@ namespace Public_Bot
             else
                 return Guild.Exists(Id);
         }
+        public static void AddGuild(Guild g)
+            => Guilds.Add(g);
         /// <summary>
         /// Gets a guild
         /// </summary>

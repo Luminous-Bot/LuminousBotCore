@@ -35,8 +35,9 @@ namespace Public_Bot.Modules.Commands
             //}
             List<string> lm = new List<string>();
             int rnk = 1;
-            int space = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).Take(15).Select(x => x.Username).Max(x => x.Length);
-            foreach (var item in gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).Take(15))
+            var levelmembers = gl.GetTop(15);
+            int space = levelmembers.Select(x => x.Username).Max(x => x.Length);
+            foreach (var item in levelmembers)
             {
                 lm.Add($"#{rnk} - {(item.Username == "" ? Context.Guild.GetUser(item.MemberID).ToString().PadRight(space) : item.Username.PadRight(space))} Level: {item.CurrentLevel} XP: {(uint)item.CurrentXP}/{(uint)item.NextLevelXP}");
                 rnk++;
@@ -213,7 +214,7 @@ namespace Public_Bot.Modules.Commands
             {
                 var user = GetUser(usr);
                 var guildlvl = GuildLeaderboards.Get(Context.Guild.Id);
-                var leveluser = guildlvl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                var leveluser = guildlvl.CurrentUsers.GetLevelUser(user.Id);
                 if (url == "none")
                     leveluser.BackgroundUrl = null;
                 else
@@ -246,7 +247,7 @@ namespace Public_Bot.Modules.Commands
                 return;
             }
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
-            if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+            if (gl.CurrentUsers.LevelUserExists(user.Id))
             {
                 var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
                 var userlvl = cu.Find(x => x.MemberID == user.Id);
@@ -286,13 +287,13 @@ namespace Public_Bot.Modules.Commands
                 return;
 
             LevelUser usr;
-            if (!levelsettings.CurrentUsers.Any(x => x.MemberID == Context.User.Id))
+            if (!levelsettings.CurrentUsers.LevelUserExists(Context.User.Id))
             {
                 usr = new LevelUser(Context.Guild.GetUser(Context.User.Id));
-                levelsettings.CurrentUsers.Add(usr);
+                levelsettings.CurrentUsers.AddLevelUser(usr);
             }
             else
-                usr = levelsettings.CurrentUsers.Find(x => x.MemberID == Context.User.Id);
+                usr = levelsettings.CurrentUsers.GetLevelUser(Context.User.Id);
 
             if (args.Length == 0)
             {
@@ -593,9 +594,9 @@ namespace Public_Bot.Modules.Commands
                         return;
                     }
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                    if (gl.CurrentUsers.LevelUserExists(user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                        lusr = gl.CurrentUsers.GetLevelUser(user.Id);
                         if (res > lusr.CurrentLevel)
                         {
                             for (uint i = lusr.CurrentLevel; i != res; i++)
@@ -631,7 +632,7 @@ namespace Public_Bot.Modules.Commands
                             }
                         }
                         lusr.CurrentLevel = res;
-                        gl.CurrentUsers.Add(lusr);
+                        gl.CurrentUsers.AddLevelUser(lusr);
                         LevelUpUser(lusr);
                     }
                     lusr.Save();
@@ -695,9 +696,9 @@ namespace Public_Bot.Modules.Commands
                 {
                     var gl = GuildLeaderboards.Get(Context.Guild.Id);
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                    if (gl.CurrentUsers.LevelUserExists(user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                        lusr = gl.CurrentUsers.GetLevelUser(user.Id);
                         lusr.CurrentXP = res;
                         LevelUpUser(lusr);
                     }
@@ -705,7 +706,7 @@ namespace Public_Bot.Modules.Commands
                     {
                         lusr = new LevelUser(user);
                         lusr.CurrentXP = res;
-                        gl.CurrentUsers.Add(lusr);
+                        gl.CurrentUsers.AddLevelUser(lusr);
                         LevelUpUser(lusr);
                     }
                     lusr.Save();
@@ -779,9 +780,9 @@ namespace Public_Bot.Modules.Commands
                         return;
                     }
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                    if (gl.CurrentUsers.LevelUserExists(user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                        lusr = gl.CurrentUsers.GetLevelUser(user.Id);
                         if (res > lusr.CurrentLevel)
                         {
                             for (uint i = lusr.CurrentLevel; i != res; i++)
@@ -817,7 +818,7 @@ namespace Public_Bot.Modules.Commands
                             }
                         }
                         lusr.CurrentLevel += res;
-                        gl.CurrentUsers.Add(lusr);
+                        gl.CurrentUsers.AddLevelUser(lusr);
                     }
                     lusr.Save();
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -880,9 +881,9 @@ namespace Public_Bot.Modules.Commands
                 {
                     var gl = GuildLeaderboards.Get(Context.Guild.Id);
                     LevelUser lusr = null;
-                    if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
+                    if (gl.CurrentUsers.LevelUserExists(user.Id))
                     {
-                        lusr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
+                        lusr = gl.CurrentUsers.GetLevelUser(user.Id);
                         lusr.CurrentXP += res;
                         //The below line will ensure he reaches maxlevel possible if given enough xp
                         LevelUpUser(lusr);
@@ -891,7 +892,7 @@ namespace Public_Bot.Modules.Commands
                     {
                         lusr = new LevelUser(user);
                         lusr.CurrentXP += res;
-                        gl.CurrentUsers.Add(lusr);
+                        gl.CurrentUsers.AddLevelUser(lusr);
                         //As he's already been added he can now be levelled up.
                         LevelUpUser(lusr);
                     }
@@ -949,10 +950,10 @@ namespace Public_Bot.Modules.Commands
                 gnrl.Add("XP Multiplier:", ls.LevelMultiplier.ToString());
                 gnrl.Add("XP/Message:", ls.XpPerMessage.ToString());
                 gnrl.Add("XP/Minute in VC:", ls.XpPerVCMinute.ToString());
-                gnrl.Add("Xp/Minute of Streaming", ls.XpPerVCStream.ToString());
+                gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
                 gnrl.Add("Max Level:", ls.MaxLevel.ToString());
                 gnrl.Add("Levelup Channel:", ch.Name);
-                gnrl.Add("Default XP", ls.DefaultBaseLevelXp.ToString());
+                gnrl.Add("Default XP:", ls.DefaultBaseLevelXp.ToString());
                 int leng = gnrl.Keys.Max(x => x.Length);
                 List<string> final = new List<string>();
                 foreach (var itm in gnrl)
@@ -1014,11 +1015,12 @@ namespace Public_Bot.Modules.Commands
                     }
                     Dictionary<string, string> gnrl = new Dictionary<string, string>();
                     gnrl.Add("XP Multiplier:", ls.LevelMultiplier.ToString());
-                    gnrl.Add("XP Per Message:", ls.XpPerMessage.ToString());
-                    gnrl.Add("XP Per Minute in VC:", ls.XpPerVCMinute.ToString());
+                    gnrl.Add("XP/Message:", ls.XpPerMessage.ToString());
+                    gnrl.Add("XP/Minute in VC:", ls.XpPerVCMinute.ToString());
+                    gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
                     gnrl.Add("Max Level:", ls.MaxLevel.ToString());
                     gnrl.Add("Levelup Channel:", ch.Name);
-                    gnrl.Add("Default XP", ls.DefaultBaseLevelXp.ToString());
+                    gnrl.Add("Default XP:", ls.DefaultBaseLevelXp.ToString());
                     int leng = gnrl.Keys.Max(x => x.Length);
                     List<string> final = new List<string>();
                     foreach (var itm in gnrl)
