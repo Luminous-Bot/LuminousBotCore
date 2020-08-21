@@ -29,11 +29,11 @@ namespace Public_Bot
         public int Count
             => Mutations.Count;
         private string opname { get; set; }
-        public void Add(T obj, params KeyValuePair<string, object>[] Params)
+        public void Add(T obj, params (string, object)[] Params)
         {
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Key}: {p.Value.ToString()} ";
+                parms += $"{p.Item1}: {p.Item2.ToString()} ";
 
             Mutations.Add($"_{Mutations.Count}: {opname}({parms}) {GraphQLParser.genProps(typeof(T))}");
         }
@@ -74,7 +74,7 @@ namespace Public_Bot
             string c = JsonConvert.SerializeObject(msg);
             return c.Remove(0, 1).Remove(c.Length - 2, 1);
         }
-        public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params KeyValuePair<string, object>[] Params)
+        public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params (string, object)[] Params)
         {
             Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);
             var classtype = typeof(T);
@@ -104,7 +104,7 @@ namespace Public_Bot
             }
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Key}: {(p.Value == null ? "null" : (p.Value.GetType() == typeof(bool) ? ((bool)p.Value ? "true" : "false") : $"\\\"{p.Value}\\\""))} ";
+                parms += $"{p.Item1}: {(p.Item2 == null ? "null" : (p.Item2.GetType() == typeof(bool) ? ((bool)p.Item2 ? "true" : "false") : $"\\\"{p.Item2}\\\""))} ";
             string query = $"{{\"operationName\": \"{opname}\"," +
                            $"\"variables\": {(hasVars ? $"{{ \"{varName}\": {{ {string.Join(", ", vars)} }} }}" : "{ }")}," +
                            $"\"query\": \"mutation {opname}{(hasVars ? $"(${varName}: {varType})" : "")} {{ {opname}({(hasVars ? $"{varName}: ${varName}, {parms}" : parms)}) {genProps(typeof(T))} }}\" }}";
@@ -168,12 +168,12 @@ namespace Public_Bot
             return $"[ {{ {string.Join(" }, { ", fn)} }} ]";
 
         }
-        public static string GenerateGQLQuery<T>(string method, params KeyValuePair<string, object>[] Params)
+        public static string GenerateGQLQuery<T>(string method, params (string, object)[] Params)
         {
             Logger.Write($"Making Query for method {method}", Logger.Severity.State);
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Key}: \"{p.Value.ToString()}\" ";
+                parms += $"{p.Item1}: \"{p.Item2.ToString()}\" ";
             string query = $"{{ {method}{(Params.Length > 0 ? $"({parms})" : " ")} {{ ";
             var classType = typeof(T);
 

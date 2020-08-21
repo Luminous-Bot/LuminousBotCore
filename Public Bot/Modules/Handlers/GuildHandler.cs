@@ -83,10 +83,10 @@ namespace Public_Bot
         private async Task NewUser(SocketGuildUser arg)
         {
             var guild = CurrentGuilds.Any(x => x.Id == arg.Guild.Id) ? CurrentGuilds.Find(x => x.Id == arg.Guild.Id) : Guild.Fetch(arg.Guild.Id);
-            if (StateService.Exists<User>(GraphQLParser.GenerateGQLQuery<User>("user", new KeyValuePair<string, object>("id", arg.Id))))
+            if (StateService.Exists<User>(GraphQLParser.GenerateGQLQuery<User>("user", ("id", arg.Id))))
             {
                 //check if guildmember exists
-                if (!StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", new KeyValuePair<string, object>("UserID", arg.Id), new KeyValuePair<string, object>("GuildID", arg.Guild.Id))))
+                if (!StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", arg.Id), ("GuildID", arg.Guild.Id))))
                 {
                     var gm = new GuildMember(arg);
                     // (!gm.IsInServer)

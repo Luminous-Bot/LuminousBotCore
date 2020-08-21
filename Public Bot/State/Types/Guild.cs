@@ -22,7 +22,7 @@ namespace Public_Bot
         public static bool Exists(ulong id)
             => StateService.Exists<ExistNullBase>("{\"operationName\":null,\"variables\":{},\"query\":\"{ guild(id: \\\"" + id + "\\\") { Id }}\"}");
         public static Guild Fetch(ulong id)
-            => StateService.Query<Guild>(GraphQLParser.GenerateGQLQuery<Guild>("guild", new KeyValuePair<string, object>("id", id)));
+            => StateService.Query<Guild>(GraphQLParser.GenerateGQLQuery<Guild>("guild", ("id", id)));
         public Guild() 
         {
             GuildMembers = new GuildMemberCache(this);
@@ -31,7 +31,7 @@ namespace Public_Bot
         {
             this.Id = g.Id;
             this.Name = g.Name;
-            StateService.Mutate<Guild>(GraphQLParser.GenerateGQLMutation<Guild>("createGuild", false, this, "", "", new KeyValuePair<string, object>("Name", this.Name), new KeyValuePair<string, object>("Id", this.Id)));
+            StateService.Mutate<Guild>(GraphQLParser.GenerateGQLMutation<Guild>("createGuild", false, this, "", "", ("Name", this.Name), ("Id", this.Id)));
             this.Leaderboard = new GuildLeaderboards(g);
             GuildMembers = new GuildMemberCache(this);
         }

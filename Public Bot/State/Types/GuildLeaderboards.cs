@@ -23,12 +23,12 @@ namespace Public_Bot
         public static GuildLeaderboards Get(ulong id)
             => GuildLevels.Any(x => x.GuildID == id) ? GuildLevels.Find(x => x.GuildID == id) : null;
         public void Save()
-            => StateService.Mutate<GuildLeaderboards>(GraphQLParser.GenerateGQLMutation<GuildLeaderboards>("createOrUpdateGuildLeaderboard", true, this, "GuildLevelSettings", "GuildLevelSettingsInput!", new KeyValuePair<string, object>("GuildID", this.GuildID)));
+            => StateService.Mutate<GuildLeaderboards>(GraphQLParser.GenerateGQLMutation<GuildLeaderboards>("createOrUpdateGuildLeaderboard", true, this, "GuildLevelSettings", "GuildLevelSettingsInput!", ("GuildID", this.GuildID)));
         public async Task SaveAsync()
-            => await StateService.MutateAsync<GuildLeaderboards>(GraphQLParser.GenerateGQLMutation<GuildLeaderboards>("createOrUpdateGuildLeaderboard", true, this, "GuildLevelSettings", "GuildLevelSettingsInput!", new KeyValuePair<string, object>("GuildID", this.GuildID)));
+            => await StateService.MutateAsync<GuildLeaderboards>(GraphQLParser.GenerateGQLMutation<GuildLeaderboards>("createOrUpdateGuildLeaderboard", true, this, "GuildLevelSettings", "GuildLevelSettingsInput!", ("GuildID", this.GuildID)));
 
         public static GuildLeaderboards Fetch(ulong id)
-            => StateService.Query<GuildLeaderboards>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboard", new KeyValuePair<string, object>("GuildID", id)));
+            => StateService.Query<GuildLeaderboards>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboard", ("GuildID", id)));
         public GuildLeaderboards() { }
         public GuildLeaderboards(IGuild g)
         {

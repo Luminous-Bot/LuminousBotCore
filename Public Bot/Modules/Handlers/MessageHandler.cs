@@ -28,7 +28,7 @@ namespace Public_Bot.Modules.Handlers
         private async Task DeleteMessage(Discord.Cacheable<Discord.IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
             if (MessageHelper.MessageExists(arg1.Id))
-                await StateService.MutateAsync<Message>(GraphQLParser.GenerateGQLMutation<Message>("deleteMessage", false, null, "", "", new KeyValuePair<string, object>("id", arg1.Id)));
+                await StateService.MutateAsync<Message>(GraphQLParser.GenerateGQLMutation<Message>("deleteMessage", false, null, "", "", ("id", arg1.Id)));
         }
 
         private async Task UpdateMessage(Discord.Cacheable<Discord.IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)

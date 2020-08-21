@@ -33,8 +33,8 @@ namespace Public_Bot
             StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "data", "CreateUserInput!"));
         }
         public static bool UserExists(ulong Id)
-            => StateService.Exists<User>(GraphQLParser.GenerateGQLQuery<User>("user", new KeyValuePair<string, object>("id", Id)));
+            => StateService.Exists<User>(GraphQLParser.GenerateGQLQuery<User>("user", ("id", Id)));
         public static User Fetch(ulong Id)
-            => StateService.Query<User>(GraphQLParser.GenerateGQLQuery<User>("user", new KeyValuePair<string, object>("id", Id)));
+            => StateService.Query<User>(GraphQLParser.GenerateGQLQuery<User>("user", ("id", Id)));
     }
 }

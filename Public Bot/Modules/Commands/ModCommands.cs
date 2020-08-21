@@ -591,7 +591,7 @@ namespace Public_Bot.Modules.Commands
                         if (args[1] == "all" || args[1] == "clear")
                         {
                             var bucket = new MutationBucket<Infraction>("deleteInfraction");
-                            usrlogs.Infractions.ForEach(x => bucket.Add(x, new KeyValuePair<string, object>("id", $"\\\"{x.Id}\\\"")));
+                            usrlogs.Infractions.ForEach(x => bucket.Add(x, ("id", $"\\\"{x.Id}\\\"")));
                             await StateService.MutateAsync<dynamic>(bucket.Build());
                             usrlogs.Infractions.Clear();
                             //deleteLogs
@@ -618,7 +618,7 @@ namespace Public_Bot.Modules.Commands
                                     }.WithCurrentTimestamp().Build());
                                     return;
                                 }
-                                await StateService.MutateAsync<dynamic>(GraphQLParser.GenerateGQLMutation<Infraction>("deleteInfraction", false, usrlogs.Infractions[(int)res - 1], "", "", new KeyValuePair<string, object>("id", usrlogs.Infractions[(int)res - 1].Id)));
+                                await StateService.MutateAsync<dynamic>(GraphQLParser.GenerateGQLMutation<Infraction>("deleteInfraction", false, usrlogs.Infractions[(int)res - 1], "", "", ("id", usrlogs.Infractions[(int)res - 1].Id)));
                                 usrlogs.Infractions.RemoveAt((int)res - 1);
                                 if(usrlogs.Infractions.Count == 0)
                                 {
@@ -671,7 +671,7 @@ namespace Public_Bot.Modules.Commands
                                     return;
                                 }
                                 var infrac = usrlogs.Infractions[(int)res - 1];
-                                bucket.Add(infrac, new KeyValuePair<string, object>("id", $"\\\"{infrac.Id}\\\""));
+                                bucket.Add(infrac, ("id", $"\\\"{infrac.Id}\\\""));
                                 removed.Add(infrac);
                             }
                             else

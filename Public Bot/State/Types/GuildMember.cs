@@ -24,10 +24,10 @@ namespace Public_Bot
         public async Task<GuildMember> UpdateIsInServer(bool isInServer)
         {
             var q = GraphQLParser.GenerateGQLMutation<GuildMember>("updateGuildMemberServerStatus", false, null, "", "",
-                new KeyValuePair<string, object>("DateLeft", isInServer ? null : DateTime.UtcNow.ToString("o")),
-                new KeyValuePair<string, object>("IsInServer", isInServer), 
-                new KeyValuePair<string, object>("GuildID", this.GuildID),
-                new KeyValuePair<string, object>("UserID", this.UserID));
+                ("DateLeft", isInServer ? null : DateTime.UtcNow.ToString("o")),
+                ("IsInServer", isInServer), 
+                ("GuildID", this.GuildID),
+                ("UserID", this.UserID));
             return await StateService.MutateAsync<GuildMember>(q);
         }
 
@@ -36,9 +36,9 @@ namespace Public_Bot
         [GraphQLObj]
         public User User { get; set; }
         public static GuildMember Fetch(ulong id, ulong GuildID)
-            => StateService.Query<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", new KeyValuePair<string, object>("UserID", id), new KeyValuePair<string, object>("GuildID", GuildID)));
+            => StateService.Query<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", id), ("GuildID", GuildID)));
         public static bool Exists(ulong Id, ulong GuildID)
-            => StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", new KeyValuePair<string, object>("UserID", Id), new KeyValuePair<string, object>("GuildID", GuildID)));
+            => StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", Id), ("GuildID", GuildID)));
         public GuildMember() { }
         public GuildMember(SocketGuildUser user)
         {

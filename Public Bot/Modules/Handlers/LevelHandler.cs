@@ -176,10 +176,10 @@ namespace Public_Bot.Modules.Handlers
                     return null;
                 var b = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
                 lbuck.ForEach(x => b.Add(x.LevelUser,
-                                        new KeyValuePair<string, object>("guildId", $"\\\"{x.GuildId}\\\""),
-                                        new KeyValuePair<string, object>("userId", $"\\\"{x.UserId}\\\""),
-                                        new KeyValuePair<string, object>("level", x.LevelUser.CurrentLevel),
-                                        new KeyValuePair<string, object>("xp", x.LevelUser.CurrentXP)));
+                                        ("guildId", $"\\\"{x.GuildId}\\\""),
+                                        ("userId", $"\\\"{x.UserId}\\\""),
+                                        ("level", x.LevelUser.CurrentLevel),
+                                        ("xp", x.LevelUser.CurrentXP)));
                return b.Build();
             }
         }
@@ -199,23 +199,25 @@ namespace Public_Bot.Modules.Handlers
                         {
                             if (!gl.Settings.BlacklistedChannels.Contains(user.VoiceChannel.Id))
                             {
+                                bool Streaming = user.IsStreaming;
+                                
                                 if (gl.CurrentUsers.Any(x => x.MemberID == user.Id))
                                 {
                                     var usr = gl.CurrentUsers.Find(x => x.MemberID == user.Id);
-                                    usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
+                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
                                     _bucket.Add(usr,
-                                        new KeyValuePair<string, object>("guildId", $"\\\"{usr.GuildID}\\\""),
-                                        new KeyValuePair<string, object>("userId", $"\\\"{usr.MemberID}\\\""),
-                                        new KeyValuePair<string, object>("level", usr.CurrentLevel),
-                                        new KeyValuePair<string, object>("xp", usr.CurrentXP));
+                                        ("guildId", $"\\\"{usr.GuildID}\\\""),
+                                        ("userId", $"\\\"{usr.MemberID}\\\""),
+                                        ("level", usr.CurrentLevel),
+                                        ("xp", usr.CurrentXP));
                                 }
                                 else
                                 {
                                     var usr = new LevelUser(user);
-                                    usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerVCMinute;
+                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
                                     gl.CurrentUsers.Add(usr);

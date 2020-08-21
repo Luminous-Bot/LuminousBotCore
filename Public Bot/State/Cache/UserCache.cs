@@ -18,6 +18,11 @@ namespace Public_Bot
         }
         private static ConcurrentBag<User> Users = new ConcurrentBag<User>();
 
+        /// <summary>
+        /// Creates a User
+        /// </summary>
+        /// <param name="id">The users ID</param>
+        /// <returns>The newly created user</returns>
         public static User CreateUser(ulong id)
         {
             var user = client.GetUser(id);
@@ -26,6 +31,11 @@ namespace Public_Bot
             else
                 return CreateUser(user);
         }
+        /// <summary>
+        /// Creates a User
+        /// </summary>
+        /// <param name="user">The user to create</param>
+        /// <returns>The newly created user</returns>
         public static User CreateUser(IUser user)
         {
             var u = new User(user);

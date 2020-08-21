@@ -21,7 +21,7 @@ namespace Public_Bot.Modules.Helpers
             => GetMessageAsync(id).GetAwaiter().GetResult();
         public static async Task<Message> GetMessageAsync(ulong id)
         {
-            var q = GraphQLParser.GenerateGQLQuery<Message>("message", new KeyValuePair<string, object>("id", id));
+            var q = GraphQLParser.GenerateGQLQuery<Message>("message", ("id", id));
             return await StateService.QueryAsync<Message>(q);
         }
     }

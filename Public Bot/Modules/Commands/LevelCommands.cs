@@ -922,20 +922,76 @@ namespace Public_Bot.Modules.Commands
             "`(PREFIX)levelsettings MaxLevel/messagexp/voicexp/defaultxp/levelmultiplier/blacklist/ranks/refresh`")]
         public async Task LevelSettings(params string[] args)
         {
-            if (args.Length == 0)
-            {
-                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                {
-                    Title = $"What setting do you want to change?",
-                    Description = $"Run the command `{GuildSettings.Prefix}help levelsettings` to see how to customize levels",
-                    Color = Color.Orange
-                }.WithCurrentTimestamp().Build());
-                return;
-            }
             var ls = GuildLevelSettings.Get(Context.Guild.Id);
             if (ls == null)
                 ls = new GuildLevelSettings();
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
+
+            if (args.Length == 0)
+            {
+                var ch = Context.Guild.GetTextChannel(ls.LevelUpChan);
+
+                List<string> bc = new List<string>();
+                foreach (var chan in ls.BlacklistedChannels)
+                {
+                    var rch = Context.Guild.GetChannel(chan);
+                    if (rch.GetType() == typeof(SocketTextChannel))
+                        bc.Add($"⌨️ - {rch.Name}");
+                    if (rch.GetType() == typeof(SocketVoiceChannel))
+                        bc.Add($"🔊 - {rch.Name}");
+                }
+                List<string> rl = new List<string>();
+                foreach (var chan in ls.RankRoles.OrderBy(x => x.Level * -1))
+                {
+                    rl.Add($"{chan.Level} - <@&{chan.Role}>");
+                }
+                Dictionary<string, string> gnrl = new Dictionary<string, string>();
+                gnrl.Add("XP Multiplier:", ls.LevelMultiplier.ToString());
+                gnrl.Add("XP/Message:", ls.XpPerMessage.ToString());
+                gnrl.Add("XP/Minute in VC:", ls.XpPerVCMinute.ToString());
+                gnrl.Add("Xp/Minute of Streaming", ls.XpPerVCStream.ToString());
+                gnrl.Add("Max Level:", ls.MaxLevel.ToString());
+                gnrl.Add("Levelup Channel:", ch.Name);
+                gnrl.Add("Default XP", ls.DefaultBaseLevelXp.ToString());
+                int leng = gnrl.Keys.Max(x => x.Length);
+                List<string> final = new List<string>();
+                foreach (var itm in gnrl)
+                    final.Add(itm.Key.PadRight(leng) + " " + itm.Value);
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "Here's your guilds Level settings",
+                    Description = $"All settings are customizable",
+                    Fields = new List<EmbedFieldBuilder>()
+                        {
+                            new EmbedFieldBuilder()
+                            {
+                                //IsInline = true,
+                                Name = "General",
+                                Value = $"```{string.Join('\n', final)}```"
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                IsInline = true,
+                                Name = "Blacklisted Channels",
+                                Value = $"{(bc.Count > 0 ? string.Join('\n', bc) : $"You have no blacklisted channels, you can add one with `{GuildSettings.Prefix}blacklist <channel_name>`")}"
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                IsInline = true,
+                                Name = "Level Roles",
+                                Value = $"{(rl.Count > 0 ? string.Join('\n', rl) : $"You dont have any roles setup! Run `{GuildSettings.Prefix}levelsettings ranks`")}"
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Here's how to change your settings:",
+                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <levelsettings>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
+                            }
+                        },
+                    Color = Color.Green
+                }.WithCurrentTimestamp().Build());
+                return;
+            }
+            
 
             switch (args[0].ToLower())
             {
@@ -990,6 +1046,11 @@ namespace Public_Bot.Modules.Commands
                                 IsInline = true,
                                 Name = "Level Roles",
                                 Value = $"{(rl.Count > 0 ? string.Join('\n', rl) : $"You dont have any roles setup! Run `{GuildSettings.Prefix}levelsettings ranks`")}"
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Here's how to change your settings:",
+                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <levelsettings>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
                             }
                         },
                         Color = Color.Green
@@ -1137,6 +1198,46 @@ namespace Public_Bot.Modules.Commands
                             }.WithCurrentTimestamp().Build());
                             gl.Save();
                             return;
+                        }
+                    }
+                    break;
+                case "streamxp":
+                    {
+                        if(args.Length == 1)
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "XP per Streaming Minute",
+                                Description = $"Users who are streaming in a vc will get {ls.XpPerVCStream} xp every minute.",
+                                Color = Blurple
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        if(args.Length == 2)
+                        {
+                            if (uint.TryParse(args[1], out var res))
+                            {
+                                gl.Settings.XpPerVCStream = res;
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "XP per Streaming Minute",
+                                    Description = $"Users will now get {ls.XpPerVCMinute} xp every minute of streaming!",
+                                    Color = Color.Green
+                                }.WithCurrentTimestamp().Build());
+                                gl.Save();
+                                return;
+                            }
+                            else
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "Invalid Value",
+                                    Description = $"Please provide a __positive whole__ number!",
+                                    Color = Color.Red
+                                }.WithCurrentTimestamp().Build());
+                                gl.Save();
+                                return;
+                            }
                         }
                     }
                     break;
