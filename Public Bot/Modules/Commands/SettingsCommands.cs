@@ -5,8 +5,10 @@ using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -156,6 +158,16 @@ namespace Public_Bot.Modules.Commands
         //        .Build());
         //    }
         //}
+        bool IsImageUrl(string URL)
+        {
+            var req = (HttpWebRequest)HttpWebRequest.Create(URL);
+            req.Method = "HEAD";
+            using (var resp = req.GetResponse())
+            {
+                return resp.ContentType.ToLower(CultureInfo.InvariantCulture)
+                           .StartsWith("image/");
+            }
+        }
         [DiscordCommand("welcomer",
             commandHelp = "`(PREFIX)welcomer`\n" +
                           "`(PREFIX)welcomer channel <#channel>`\n" +
@@ -367,8 +379,59 @@ namespace Public_Bot.Modules.Commands
                             ImageUrl = ws.BackgroundUrl == null ? "" : ws.BackgroundUrl,
                             Color = Blurple
                         }.Build());
+                        return;
                     }
                     var url = args[1];
+
+                    if(url == "clear")
+                    {
+                        GuildSettings.WelcomeCard.BackgroundUrl = null;
+                        GuildSettings.SaveGuildSettings();
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
+                        {
+                            Title = "Success!",
+                            Description = "Cleared the welcomer image!",
+                            Color = Color.Green
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+
+                    bool o = false;
+                    if(args.Length == 3)
+                        if (args[2] == "-o")
+                            o = true;
+
+                    if (o)
+                    {
+                        GuildSettings.WelcomeCard.BackgroundUrl = url;
+                        GuildSettings.SaveGuildSettings();
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Success!",
+                            Description = $"Image now set to [this]({url}) image!",
+                            Color = Color.Green
+                        }.WithCurrentTimestamp().Build());
+                        return;
+                    }
+
+                    if(!IsImageUrl(url))
+                    {
+                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "Invalid Image!",
+                            Description = $"The image you provided was invalid, this is cause because the server didnt tell us its an image. if your 100% sure the url is an image you can add `-o` to the end of the command to overwrite it, like this: `{GuildSettings.Prefix}welcomer image {url} -o`",
+                            Color = Color.Red
+                        }.Build());
+                        return;
+                    }
+                    GuildSettings.WelcomeCard.BackgroundUrl = url;
+                    GuildSettings.SaveGuildSettings();
+                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "Success!",
+                        Description = $"Image now set to [this]({url}) image!",
+                        Color = Color.Green
+                    }.WithCurrentTimestamp().Build());
 
                     break;
                 case "dm":

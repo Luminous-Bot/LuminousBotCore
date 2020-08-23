@@ -88,7 +88,9 @@ namespace Public_Bot.Modules.Handlers
             var logchan = arg1.Guild.GetTextChannel(gs.LogChannel);
             if (logchan == null)
                 return;
-            if (arg1.Roles != arg2.Roles)
+            ulong[]  old = arg1.Roles.Select(x => x.Id).ToArray();
+            ulong[] _new = arg2.Roles.Select(x => x.Id).ToArray();
+            if (!old.SequenceEqual(_new))
             {
                 //role change
                 List<SocketRole> RemovedRoles = new List<SocketRole>();
@@ -239,7 +241,7 @@ namespace Public_Bot.Modules.Handlers
                     }.WithCurrentTimestamp().Build());
                 }
             }
-            if(arg2.VoiceChannel != null && arg3.VoiceChannel != null)
+            if((arg2.VoiceChannel != null && arg3.VoiceChannel != null) && arg2.VoiceChannel.Id != arg3.VoiceChannel.Id)
             {
                 //switched
                 if (gs.LogChannel != 0 && gs.Logging)
@@ -253,7 +255,7 @@ namespace Public_Bot.Modules.Handlers
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = $"🔊 User Switched Voice Channel 🔊",
-                        Description = $"{arg1.Mention} Left `{chan.Name}`",
+                        Description = $"{arg1.Mention} switched from `{arg2.VoiceChannel.Name}` to `{arg3.VoiceChannel.Name}`",
                         Color = Color.Purple
                     }.WithCurrentTimestamp().Build());
                 }

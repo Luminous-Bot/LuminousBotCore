@@ -15,7 +15,7 @@ namespace Public_Bot
         public ulong GuildID { get; set; }
         [GraphQLObj, GraphQLSObj]
         public GuildLevelSettings Settings { get; set; } = new GuildLevelSettings();
-        [GraphQLObj]
+        //[GraphQLObj]
         //[GraphQLName("LevelMembers"), JsonProperty("LevelMembers")]
         //public List<LevelUser> CurrentUsers { get; set; } = new List<LevelUser>();
         public LevelMemberCache CurrentUsers { get; set; }

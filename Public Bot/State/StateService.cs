@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,19 @@ namespace Public_Bot
         private static HttpClient client = new HttpClient();
         public static string Url
             => ConfigLoader.StateUrl;
+
+        public static string cs = "Server=5.135.180.140;Port=5423;Username=admin;Password=administratorPassword#124;Database=luminous-db";
+        public static NpgsqlConnection c = new NpgsqlConnection(cs);
+        public static bool Opened = false;
+        public static object ExecuteScalar(string q)
+        {
+            if (!Opened)
+            { c.Open(); Opened = true; }
+            Logger.Write($"Sending RAW sql query:\n{q}", Logger.Severity.State);
+            NpgsqlCommand cmd = new NpgsqlCommand(q, c);
+            Logger.Write("Success!", Logger.Severity.State);
+            return cmd.ExecuteScalar();
+        }
         public static T Query<T>(string q)
             => QueryAsync<T>(q).GetAwaiter().GetResult();
         public static async Task<T> QueryAsync<T>(string q)

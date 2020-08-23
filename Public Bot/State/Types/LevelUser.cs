@@ -26,6 +26,7 @@ namespace Public_Bot
         [GraphQLProp]
         [GraphQLSVar]
         public double NextLevelXP { get; set; } = 30;
+        public double TotalXP { get; set; }
         [GraphQLProp]
         public string BarColor { get; set; } = "00ff00";
         [GraphQLProp]
@@ -47,21 +48,45 @@ namespace Public_Bot
             var fin = new Discord.Color(c.R, c.G, c.B);
             return fin;
         }
+        public long GetRank()
+        {
+            string q = 
+                $"SELECT COUNT(\"GuildID\") " +
+                $"FROM \"levelMembers\"" +
+                $"WHERE \"GuildID\" = '{GuildID}'" +
+                $"AND \"CurrentLevel\" > " +
+                "(" +
+                    $"SELECT \"CurrentLevel\"" +
+                    $"FROM \"levelMembers\"" +
+                    $"WHERE \"GuildID\" = '{GuildID}'" +
+                    $"AND \"MemberID\" = '{MemberID}'" +
+                ")";
+            return (long)StateService.ExecuteScalar(q);
+        }
+        private double CalculateTotalXP()
+        {
+            var g = GuildCache.GetGuild(GuildID);
+            double res = g.Leaderboard.Settings.DefaultBaseLevelXp;
+            for (int i = 0; i != CurrentLevel; i++)
+                res *= g.Leaderboard.Settings.LevelMultiplier;
+            return (int)res;
+
+        }
         public LevelUser Save()
         {
-            if(!UserHandler.Users.Any(x => x.Id == this.MemberID))
-                if (!UserCache.UserExists(this.MemberID))
-                    UserCache.CreateUser(this.MemberID);
+            if (!UserCache.UserExists(this.MemberID))
+                UserCache.CreateUser(this.MemberID);
 
             var guild = GuildCache.GetGuild(this.GuildID);
             if (!guild.GuildMembers.GuildMemberExists(this.MemberID))
                 guild.GuildMembers.CreateGuildMember(this.MemberID);
+            TotalXP = CalculateTotalXP();
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public static LevelUser Fetch(ulong GuildId, ulong UserId)
-            => StateService.Query<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"\\\"{GuildId}\\\""), ("UserID", $"\\\"{UserId}\\\"")));
+            => StateService.Query<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"{GuildId}"), ("UserID", $"{UserId}")));
         public static bool Exists(ulong GuildId, ulong UserId)
-            => StateService.Exists<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"\\\"{GuildId}\\\""), ("UserID", $"\\\"{UserId}\\\"")));
+            => StateService.Exists<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"{GuildId}"), ("UserID", $"{UserId}")));
         public LevelUser() { }
         public LevelUser(SocketGuildUser user)
         {

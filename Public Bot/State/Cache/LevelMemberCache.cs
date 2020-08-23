@@ -25,7 +25,7 @@ namespace Public_Bot
             if (LevelUsers.Any(x => x.MemberID == UserId))
                 return true;
             else
-                return LevelUser.Exists(UserId, GuildId);
+                return LevelUser.Exists(GuildId, UserId);
         }
 
         public LevelUser GetLevelUser(ulong UserId)
@@ -36,9 +36,9 @@ namespace Public_Bot
                 return LevelUsers.First(x => x.MemberID == UserId);
             else
             {
-                if (LevelUser.Exists(UserId, GuildId))
+                if (LevelUser.Exists(GuildId, UserId))
                 {
-                    var lu = LevelUser.Fetch(UserId, GuildId);
+                    var lu = LevelUser.Fetch(GuildId, UserId);
                     LevelUsers.Add(lu);
                     return lu;
                 }

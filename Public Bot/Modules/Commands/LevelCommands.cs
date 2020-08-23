@@ -52,7 +52,7 @@ namespace Public_Bot.Modules.Commands
         }
         public class RankBuilder
         {
-            public static System.Drawing.Image MakeRank(string username, string avtr, int level, int curXP, int nxtXP, System.Drawing.Color embc, int Rank, System.Drawing.Color bgc, string bkurl = null)
+            public static System.Drawing.Image MakeRank(string username, string avtr, int level, int curXP, int nxtXP, System.Drawing.Color embc, long Rank, System.Drawing.Color bgc, string bkurl = null)
             {
                 WebClient wc = new WebClient();
                 byte[] bytes = wc.DownloadData(avtr);
@@ -247,10 +247,10 @@ namespace Public_Bot.Modules.Commands
                 return;
             }
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
+            var gob = GuildCache.GetGuild(Context.Guild.Id);
             if (gl.CurrentUsers.LevelUserExists(user.Id))
             {
-                var cu = gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList();
-                var userlvl = cu.Find(x => x.MemberID == user.Id);
+                var userlvl = gob.Leaderboard.CurrentUsers.GetLevelUser(user.Id);
                 var u = Context.Guild.GetUser(userlvl.MemberID);
                 var av = u.GetAvatarUrl();
                 if (av == null)
@@ -261,7 +261,7 @@ namespace Public_Bot.Modules.Commands
                     (int)userlvl.CurrentXP,
                     (int)userlvl.NextLevelXP,
                     userlvl.ColorFromHex(userlvl.BarColor),
-                    gl.CurrentUsers.OrderBy(x => x.CurrentLevel * -1).ToList().IndexOf(userlvl) + 1,
+                    userlvl.GetRank(),
                     userlvl.ColorFromHex(userlvl.BackgroundColor),
                     userlvl.BackgroundUrl);
 
