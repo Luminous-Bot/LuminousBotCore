@@ -26,7 +26,7 @@ namespace Public_Bot
         [GraphQLProp]
         [GraphQLSVar]
         public double NextLevelXP { get; set; } = 30;
-        public double TotalXP { get; set; }
+        //public double TotalXP { get; set; }
         [GraphQLProp]
         public string BarColor { get; set; } = "00ff00";
         [GraphQLProp]
@@ -80,7 +80,7 @@ namespace Public_Bot
             var guild = GuildCache.GetGuild(this.GuildID);
             if (!guild.GuildMembers.GuildMemberExists(this.MemberID))
                 guild.GuildMembers.CreateGuildMember(this.MemberID);
-            TotalXP = CalculateTotalXP();
+            //TotalXP = CalculateTotalXP();
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public static LevelUser Fetch(ulong GuildId, ulong UserId)

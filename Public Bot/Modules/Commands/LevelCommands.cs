@@ -950,7 +950,7 @@ namespace Public_Bot.Modules.Commands
                 gnrl.Add("XP Multiplier:", ls.LevelMultiplier.ToString());
                 gnrl.Add("XP/Message:", ls.XpPerMessage.ToString());
                 gnrl.Add("XP/Minute in VC:", ls.XpPerVCMinute.ToString());
-                gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
+                //gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
                 gnrl.Add("Max Level:", ls.MaxLevel.ToString());
                 gnrl.Add("Levelup Channel:", ch.Name);
                 gnrl.Add("Default XP:", ls.DefaultBaseLevelXp.ToString());
@@ -985,7 +985,7 @@ namespace Public_Bot.Modules.Commands
                             new EmbedFieldBuilder()
                             {
                                 Name = "Here's how to change your settings:",
-                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <levelsettings>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
+                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <channel>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
                             }
                         },
                     Color = Color.Green
@@ -1017,7 +1017,7 @@ namespace Public_Bot.Modules.Commands
                     gnrl.Add("XP Multiplier:", ls.LevelMultiplier.ToString());
                     gnrl.Add("XP/Message:", ls.XpPerMessage.ToString());
                     gnrl.Add("XP/Minute in VC:", ls.XpPerVCMinute.ToString());
-                    gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
+                    //gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
                     gnrl.Add("Max Level:", ls.MaxLevel.ToString());
                     gnrl.Add("Levelup Channel:", ch.Name);
                     gnrl.Add("Default XP:", ls.DefaultBaseLevelXp.ToString());
@@ -1052,7 +1052,7 @@ namespace Public_Bot.Modules.Commands
                             new EmbedFieldBuilder()
                             {
                                 Name = "Here's how to change your settings:",
-                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <levelsettings>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
+                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <channel>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
                             }
                         },
                         Color = Color.Green
@@ -1203,46 +1203,46 @@ namespace Public_Bot.Modules.Commands
                         }
                     }
                     break;
-                case "streamxp":
-                    {
-                        if(args.Length == 1)
-                        {
-                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                            {
-                                Title = "XP per Streaming Minute",
-                                Description = $"Users who are streaming in a vc will get {ls.XpPerVCStream} xp every minute.",
-                                Color = Blurple
-                            }.WithCurrentTimestamp().Build());
-                            return;
-                        }
-                        if(args.Length == 2)
-                        {
-                            if (uint.TryParse(args[1], out var res))
-                            {
-                                gl.Settings.XpPerVCStream = res;
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "XP per Streaming Minute",
-                                    Description = $"Users will now get {ls.XpPerVCMinute} xp every minute of streaming!",
-                                    Color = Color.Green
-                                }.WithCurrentTimestamp().Build());
-                                gl.Save();
-                                return;
-                            }
-                            else
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Invalid Value",
-                                    Description = $"Please provide a __positive whole__ number!",
-                                    Color = Color.Red
-                                }.WithCurrentTimestamp().Build());
-                                gl.Save();
-                                return;
-                            }
-                        }
-                    }
-                    break;
+                //case "streamxp":
+                //    {
+                //        if(args.Length == 1)
+                //        {
+                //            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                //            {
+                //                Title = "XP per Streaming Minute",
+                //                Description = $"Users who are streaming in a vc will get {ls.XpPerVCStream} xp every minute.",
+                //                Color = Blurple
+                //            }.WithCurrentTimestamp().Build());
+                //            return;
+                //        }
+                //        if(args.Length == 2)
+                //        {
+                //            if (uint.TryParse(args[1], out var res))
+                //            {
+                //                gl.Settings.XpPerVCStream = res;
+                //                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                //                {
+                //                    Title = "XP per Streaming Minute",
+                //                    Description = $"Users will now get {ls.XpPerVCMinute} xp every minute of streaming!",
+                //                    Color = Color.Green
+                //                }.WithCurrentTimestamp().Build());
+                //                gl.Save();
+                //                return;
+                //            }
+                //            else
+                //            {
+                //                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                //                {
+                //                    Title = "Invalid Value",
+                //                    Description = $"Please provide a __positive whole__ number!",
+                //                    Color = Color.Red
+                //                }.WithCurrentTimestamp().Build());
+                //                gl.Save();
+                //                return;
+                //            }
+                //        }
+                //    }
+                //    break;
                 case "defaultxp":
                     if (args.Length == 1)
                     {

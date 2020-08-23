@@ -31,6 +31,8 @@ namespace Public_Bot
                 if (File.Exists(fp))
                 {
                     var gs = JsonConvert.DeserializeObject<GuildSettings>(File.ReadAllText(fp));
+                    if (gs == null)
+                        Logger.Write($"GS Null: {GuildID}", Logger.Severity.Critical);
                     FixGs(gs);
                     LoadedGuildSettings.Add(gs);
                     return gs;
@@ -46,12 +48,15 @@ namespace Public_Bot
         }
         public static GuildSettings FixGs(GuildSettings gs)
         {
-            if (gs.WelcomeCard.BackgroundUrl != null)
-                if (gs.WelcomeCard.BackgroundUrl == "https://image.freepik.com/free-vector/luminous-stadium-light-effect_23-2148366134.jpg")
-                {
-                    gs.WelcomeCard.BackgroundUrl = null;
-                    SaveGuildSettings(gs);
-                }
+            if (gs == null)
+                return null;
+            if(gs.WelcomeCard != null)
+                if (gs.WelcomeCard.BackgroundUrl != null)
+                    if (gs.WelcomeCard.BackgroundUrl == "https://image.freepik.com/free-vector/luminous-stadium-light-effect_23-2148366134.jpg")
+                    {
+                        gs.WelcomeCard.BackgroundUrl = null;
+                        SaveGuildSettings(gs);
+                    }
             return gs;
         }
         public static void SaveGuildSettings(GuildSettings gs)

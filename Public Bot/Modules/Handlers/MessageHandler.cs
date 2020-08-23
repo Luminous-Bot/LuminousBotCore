@@ -53,6 +53,8 @@ namespace Public_Bot.Modules.Handlers
             var guild = channel.Guild;
             var gs = GuildSettings.Get(guild.Id);
 
+            if (gs == null)
+                return;
             if (!UserCache.UserExists(arg.Author.Id))
                 UserCache.CreateUser(arg.Author.Id);
 

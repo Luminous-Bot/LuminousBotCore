@@ -207,7 +207,7 @@ namespace Public_Bot.Modules.Handlers
                                 if (gl.CurrentUsers.LevelUserExists(user.Id))
                                 {
                                     var usr = gl.CurrentUsers.GetLevelUser(user.Id);
-                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
+                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCMinute /*XpPerVCStream */ : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
@@ -220,7 +220,7 @@ namespace Public_Bot.Modules.Handlers
                                 else
                                 {
                                     var usr = new LevelUser(user);
-                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
+                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCMinute /*XpPerVCStream */ : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
                                     gl.CurrentUsers.AddLevelUser(usr);
