@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Public_Bot
 {
@@ -18,7 +19,7 @@ namespace Public_Bot
         public static Color BackgroundColor = Color.FromArgb(47, 49, 54);
         public static Pen WhitePen = new Pen(new SolidBrush(Color.White), 4);
         static Font TitleFont = new Font("Bahnschrift", 26);
-        public static string BuildImage(string oldpfp, string newpfp)
+        public static async Task<string> BuildImage(string oldpfp, string newpfp)
         {
             PfpGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             PfpGraphics.Clear(BackgroundColor);
@@ -48,7 +49,7 @@ namespace Public_Bot
 
             //get image from hapsy
             PfpImage.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}pfp.jpg", ImageFormat.Jpeg);
-            return PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}pfp.jpg").GetAwaiter().GetResult();
+            return await PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}pfp.jpg");
         }
     }
 }

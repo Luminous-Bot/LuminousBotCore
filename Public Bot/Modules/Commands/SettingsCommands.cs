@@ -1065,7 +1065,7 @@ namespace Public_Bot.Modules.Commands
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "What do you want to do?",
-                        Description = $"Please use the format `{GuildSettings.Prefix}modules <enable/disable/list> <modulename>",
+                        Description = $"Please use the format `{GuildSettings.Prefix}modules <enable/disable/list> <modulename>`",
                         Color = Color.Orange
                     }.WithCurrentTimestamp().Build());
                     return;

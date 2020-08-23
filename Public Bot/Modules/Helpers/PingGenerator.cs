@@ -150,7 +150,7 @@ namespace Public_Bot
             var request = new RestRequest(Method.POST);
             request.AddHeader("Authorization", "4e06ce55-9373-4ef9-b66f-aec02687f6a3");
             request.AddFile("file", fPath);
-            IRestResponse response = client.Execute(request);
+            IRestResponse response = await client.ExecuteAsync(request);
             //Console.WriteLine(response.Content);
             var json = JsonConvert.DeserializeObject<dynamic>(response.Content);
             return json.files[0].url;
