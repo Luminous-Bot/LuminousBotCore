@@ -1178,7 +1178,7 @@ namespace Public_Bot.Modules.Commands
                 }
                 if (args[0].ToLower() == "disable")
                 {
-                    if("👨🏼‍💻 General 👨🏼‍💻".Contains(args[1]))
+                    if (setting.Key == "👨🏼‍💻 General 👨🏼‍💻")
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
@@ -1188,7 +1188,7 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    if ("⚙️ Settings ⚙️".Contains(args[1]))
+                    if (setting.Key == "⚙️ Settings ⚙️")
                     {
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
