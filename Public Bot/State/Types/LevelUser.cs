@@ -56,9 +56,11 @@ namespace Public_Bot
         }
         public double CalculateTotalXP()
         {
+            if (CurrentLevel == 0)
+                return 0;
             var g = GuildCache.GetGuild(GuildID);
             double res = g.Leaderboard.Settings.DefaultBaseLevelXp;
-            for (int i = 0; i != CurrentLevel; i++)
+            for (int i = 1; i != CurrentLevel; i++)
             {
                 res += g.Leaderboard.Settings.DefaultBaseLevelXp * (i * g.Leaderboard.Settings.LevelMultiplier);
             }

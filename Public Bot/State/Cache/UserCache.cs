@@ -44,14 +44,14 @@ namespace Public_Bot
         }
         public static bool UserExists(ulong UserId)
         {
-            if (Users.Any(x => x.Id == UserId))
+            if (Users.Any(x => x != null && x.Id == UserId))
                 return true;
             else
                 return User.UserExists(UserId);
         }
         public static User GetUser(ulong UserId)
         {
-            if (Users.Any(x => x.Id == UserId))
+            if (Users.Any(x => x != null && x.Id == UserId))
                 return Users.First(x => x.Id == UserId);
             else if (User.UserExists(UserId))
             {
