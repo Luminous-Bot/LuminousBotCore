@@ -174,12 +174,8 @@ namespace Public_Bot.Modules.Handlers
                 _bucket.Clear();
                 if (lbuck.Count == 0)
                     return null;
-                var b = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
-                lbuck.ForEach(x => b.Add(x.LevelUser,
-                                        ("guildId", $"\\\"{x.GuildId}\\\""),
-                                        ("userId", $"\\\"{x.UserId}\\\""),
-                                        ("level", x.LevelUser.CurrentLevel),
-                                        ("xp", x.LevelUser.CurrentXP)));
+                var b = new VaredMutationBucket<LevelUser>("createOrUpdateLevelMember", true, "data", "CreateLevelMemberInput!");
+                lbuck.ForEach(x => b.Add(x.LevelUser));
                return b.Build();
             }
         }
@@ -207,9 +203,10 @@ namespace Public_Bot.Modules.Handlers
                                 if (gl.CurrentUsers.LevelUserExists(user.Id))
                                 {
                                     var usr = gl.CurrentUsers.GetLevelUser(user.Id);
-                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCMinute /*XpPerVCStream */ : gl.Settings.XpPerVCMinute);
+                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
+                                    usr.TotalXP = usr.CalculateTotalXP();
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
                                     _bucket.Add(usr,
                                         ("guildId", $"\\\"{usr.GuildID}\\\""),
@@ -220,9 +217,10 @@ namespace Public_Bot.Modules.Handlers
                                 else
                                 {
                                     var usr = new LevelUser(user);
-                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCMinute /*XpPerVCStream */ : gl.Settings.XpPerVCMinute);
+                                    usr.CurrentXP = usr.CurrentXP + (Streaming ? gl.Settings.XpPerVCStream : gl.Settings.XpPerVCMinute);
                                     if (usr.CurrentXP >= usr.NextLevelXP)
                                         LevelUpUser(usr);
+                                    usr.TotalXP = usr.CalculateTotalXP();
                                     gl.CurrentUsers.AddLevelUser(usr);
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
                                     usr.Save();
@@ -347,7 +345,7 @@ namespace Public_Bot.Modules.Handlers
                             usr.Username = sm.Author.ToString();
 
                         usr.CurrentXP = usr.CurrentXP + gl.Settings.XpPerMessage;
-
+                        usr.TotalXP = usr.CalculateTotalXP();
                         if (usr.CurrentXP >= usr.NextLevelXP)
                             LevelUpUser(usr);
 

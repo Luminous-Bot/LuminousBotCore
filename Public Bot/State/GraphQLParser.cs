@@ -50,6 +50,66 @@ namespace Public_Bot
             return query;
         }
     }
+    public class VaredMutationBucket<T>
+    {
+        public List<string> Mutations { get; set; } = new List<string>();
+        private List<string> Vars { get; set; } = new List<string>();
+        private string mV = "";
+
+        private string opname { get; set; }
+        private bool hasVars { get; set; }
+        private string varType { get; set; }
+        private string varName { get; set; }
+        public void Add(T obj, params (string, object)[] t)
+        {
+            string parms = "";
+            foreach (var p in t)
+                parms += $"{p.Item1}: {p.Item2.ToString()} ";
+            if (hasVars)
+            {
+                List<string> vars = new List<string>();
+                var typeVars = typeof(T).GetProperties().Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(GraphQLSVar) || y.AttributeType == typeof(GraphQLSObj)));
+                foreach (var tv in typeVars)
+                {
+                    string name = tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName)) ? ((GraphQLName)tv.GetCustomAttribute(typeof(GraphQLName))).Name : tv.Name;
+                    if (tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
+                    {
+                        var tvT = tv.PropertyType;
+                        var l = GraphQLParser.RecurseMutateVars(tvT, tv.GetValue(obj));
+                        vars.AddRange(l);
+                    }
+                    else
+                    {
+                        string val = "";
+                        if (tv.PropertyType.Name.Contains("List"))
+                            val = JsonConvert.SerializeObject(tv.GetValue(obj));
+                        else
+                            val = GraphQLParser.Parser.ContainsKey(tv.PropertyType) ? GraphQLParser.Parser[tv.PropertyType](tv.GetValue(obj)) : tv.GetValue(obj).ToString();
+                        vars.Add($"\"{name}\": {val}");
+                    }
+                }
+                mV += $"$_{Mutations.Count}: {varType} ";
+                Vars.Add($"\"_{Mutations.Count}\": {{ {string.Join(", ", vars)} }}");
+            }
+            Mutations.Add($"_{Mutations.Count}: {opname}({(hasVars ? $"{varName}: $_{Mutations.Count} " : "")}{parms}) {GraphQLParser.genProps(typeof(T))}");
+        }
+        public VaredMutationBucket(string opname, bool hasvars, string varName = "", string varType = "")
+        {
+            this.opname = opname;
+            this.hasVars = hasvars;
+            this.varType = varType;
+            this.varName = varName;
+        }
+        public string Build()
+        {
+
+            string query = $"{{\"operationName\": \"{opname}\"," +
+                           $"\"variables\": {{ {(hasVars ? $"{string.Join(", ", Vars)}" : "")} }}, " +
+                           $"\"query\": \"mutation {opname}{(this.hasVars ? $"({mV})" : "")} {{ {string.Join(" ", Mutations)} }}\" }}";
+
+            return query;
+        }
+    }
     
     public class GraphQLParser
     {
@@ -61,7 +121,8 @@ namespace Public_Bot
             {typeof(DateTime), (object val) => { var dt = (DateTime)val; return $"\"{dt.ToString("o")}\""; } },
             {typeof(string), (object val) => $"\"{val}\"" },
             {typeof(bool), (object val) => { bool vl = (bool)val; return vl ? "true" : "false"; } },
-            {typeof(Action), (object val) => $"\"{val.ToString()}\"" }
+            {typeof(Action), (object val) => $"\"{val.ToString()}\"" },
+            {typeof(int), (object val) => $"{val}" }
         };
         public class gqlBase
         {
@@ -173,10 +234,14 @@ namespace Public_Bot
             Logger.Write($"Making Query for method {method}", Logger.Severity.State);
             string parms = "";
             foreach (var p in Params)
-                parms += $"{p.Item1}: \"{p.Item2.ToString()}\" ";
+            {
+                var t = p.Item2.GetType();
+                parms += $"{p.Item1}: {(Parser.ContainsKey(t) ? Parser[t](p.Item2) : $"\"{p.Item2}\"")} "; 
+            }
             string query = $"{{ {method}{(Params.Length > 0 ? $"({parms})" : " ")} {{ ";
             var classType = typeof(T);
-
+            if (classType.Name.StartsWith("List"))
+                classType = classType.GenericTypeArguments.First();
             var attall = classType.GetProperties().Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLName) || x.AttributeType == typeof(GraphQLProp) || x.AttributeType == typeof(GraphQLObj))).ToList();
 
             var attprops = attall.Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLProp))).ToList();

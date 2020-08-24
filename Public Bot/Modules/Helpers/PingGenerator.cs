@@ -145,6 +145,11 @@ namespace Public_Bot
         }
         public static async Task<string> GetImageLink(string fPath)
         {
+            if(!File.Exists(fPath))
+            {
+                Logger.Write($"File didnt exist: {fPath}", Logger.Severity.Warn);
+                return null;
+            }    
             var client = new RestClient("https://upload.hapsy.net/upload");
             client.Timeout = -1;
             var request = new RestRequest(Method.POST);

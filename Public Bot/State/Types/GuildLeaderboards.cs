@@ -35,7 +35,7 @@ namespace Public_Bot
         public static GuildLeaderboards Fetch(ulong id)
             => StateService.Query<GuildLeaderboards>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboard", ("GuildID", id)));
         public List<LevelUser> GetTop(int count)
-            => StateService.Query<List<LevelUser>>(GraphQLParser.GenerateGQLQuery<List<LevelUser>>("topLevelMembers", ("Count", count), ("GuildID", $"\\\"{this.GuildID}\\\"")));
+            => StateService.Query<List<LevelUser>>(GraphQLParser.GenerateGQLQuery<List<LevelUser>>("topLevelMembers", ("Count", count), ("GuildID", $"{this.GuildID}")));
         public GuildLeaderboards() 
         {
             CurrentUsers = new LevelMemberCache(this);

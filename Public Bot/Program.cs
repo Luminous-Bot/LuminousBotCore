@@ -35,13 +35,6 @@ namespace Public_Bot
         CommandHandler _handler;
         public async Task Startup()
         {
-            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
-            {
-                // make sure we close our db conenction
-
-                if (StateService.Opened)
-                    StateService.c.Close();
-            };
             try
             {
                 Logger.Write("Starting to load config..", Logger.Severity.Log);

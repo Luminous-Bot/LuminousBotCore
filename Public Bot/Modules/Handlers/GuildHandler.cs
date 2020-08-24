@@ -73,30 +73,11 @@ namespace Public_Bot
             var guild = GetGuild(arg.Guild.Id);
             if (guild == null)
                 return;
-            if (StateService.Exists<User>(GraphQLParser.GenerateGQLQuery<User>("user", ("id", arg.Id))))
-            {
-                //check if guildmember exists
-                if (!StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", arg.Id), ("GuildID", arg.Guild.Id))))
-                {
-                    var gm = new GuildMember(arg);
-                    // (!gm.IsInServer)
-                    guild.GuildMembers.AddGuildMember(gm);
-                }
-                else
-                {
-                    var gm = GuildMember.Fetch(arg.Id, arg.Guild.Id);
-                    gm = await gm.UpdateIsInServer(true);
-                    guild.GuildMembers.AddGuildMember(gm);
-                }
-            }
-            else
-            {
-                //create user
-                var user = new User(arg);
-                //create guildmember
-                var gm = new GuildMember(arg) { User = user};
-                guild.GuildMembers.AddGuildMember(gm);
-            }
+
+            var g = GuildCache.GetGuild(arg.Guild.Id);
+            if (g == null)
+                return;
+            g.GuildMembers.CreateGuildMember(arg.Id);
         }
 
         private async Task AddGuild(SocketGuild arg)

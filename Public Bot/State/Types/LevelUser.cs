@@ -26,7 +26,8 @@ namespace Public_Bot
         [GraphQLProp]
         [GraphQLSVar]
         public double NextLevelXP { get; set; } = 30;
-        //public double TotalXP { get; set; }
+        [GraphQLProp, GraphQLSVar]
+        public double TotalXP { get; set; } = 0;
         [GraphQLProp]
         public string BarColor { get; set; } = "00ff00";
         [GraphQLProp]
@@ -50,27 +51,19 @@ namespace Public_Bot
         }
         public long GetRank()
         {
-            string q = 
-                $"SELECT COUNT(\"GuildID\") " +
-                $"FROM \"levelMembers\"" +
-                $"WHERE \"GuildID\" = '{GuildID}'" +
-                $"AND \"CurrentLevel\" > " +
-                "(" +
-                    $"SELECT \"CurrentLevel\"" +
-                    $"FROM \"levelMembers\"" +
-                    $"WHERE \"GuildID\" = '{GuildID}'" +
-                    $"AND \"MemberID\" = '{MemberID}'" +
-                ")";
-            return (long)StateService.ExecuteScalar(q);
+            var rank = StateService.Query<long>($"{{\"operationName\":null,\"variables\":{{}},\"query\":\"{{ levelMemberRank(GuildID: \\\"{this.GuildID}\\\", UserID: \\\"{this.MemberID}\\\") }} \"}}");
+            return rank;
         }
-        private double CalculateTotalXP()
+        public double CalculateTotalXP()
         {
             var g = GuildCache.GetGuild(GuildID);
             double res = g.Leaderboard.Settings.DefaultBaseLevelXp;
             for (int i = 0; i != CurrentLevel; i++)
-                res *= g.Leaderboard.Settings.LevelMultiplier;
+            {
+                res += g.Leaderboard.Settings.DefaultBaseLevelXp * (i * g.Leaderboard.Settings.LevelMultiplier);
+            }
+            res += CurrentXP;
             return (int)res;
-
         }
         public LevelUser Save()
         {
@@ -80,7 +73,7 @@ namespace Public_Bot
             var guild = GuildCache.GetGuild(this.GuildID);
             if (!guild.GuildMembers.GuildMemberExists(this.MemberID))
                 guild.GuildMembers.CreateGuildMember(this.MemberID);
-            //TotalXP = CalculateTotalXP();
+            TotalXP = CalculateTotalXP();
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public static LevelUser Fetch(ulong GuildId, ulong UserId)

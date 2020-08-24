@@ -378,7 +378,7 @@ namespace Public_Bot.Modules.Handlers
                             if (old == null)
                                 old = before.GetDefaultAvatarUrl();
                             var _new = after.GetAvatarUrl(ImageFormat.Jpeg, 256);
-                            url = ProfileChangeHelper.BuildImage(old, _new);
+                            url = await ProfileChangeHelper.BuildImage(old, _new);
                         }
 
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
