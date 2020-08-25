@@ -9,7 +9,7 @@ namespace Public_Bot
     public class LevelMemberCache
     {
         private GuildLeaderboards GuildLeaderboards { get; set; }
-        private ConcurrentBag<LevelUser> LevelUsers = new ConcurrentBag<LevelUser>();
+        private DoubleIDEntityCache<LevelUser> LevelUsers = new DoubleIDEntityCache<LevelUser>();
         public LevelMemberCache(GuildLeaderboards guildLeaderboards)
         {
             this.GuildLeaderboards = guildLeaderboards;
@@ -22,7 +22,7 @@ namespace Public_Bot
             => LevelUserExists(UserId, GuildLeaderboards.GuildID);
         public bool LevelUserExists(ulong UserId, ulong GuildId)
         {
-            if (LevelUsers.Any(x => x.MemberID == UserId))
+            if (LevelUsers.Any(x => x.Id == UserId && x.GuildID == GuildId))
                 return true;
             else
                 return LevelUser.Exists(GuildId, UserId);
@@ -32,8 +32,8 @@ namespace Public_Bot
             => GetLevelUser(UserId, GuildLeaderboards.GuildID);
         public LevelUser GetLevelUser(ulong UserId, ulong GuildId)
         {
-            if (LevelUsers.Any(x => x.MemberID == UserId))
-                return LevelUsers.First(x => x.MemberID == UserId);
+            if (LevelUsers.Any(x => x.Id == UserId && x.GuildID == GuildId))
+                return LevelUsers[UserId, GuildId];
             else
             {
                 if (LevelUser.Exists(GuildId, UserId))

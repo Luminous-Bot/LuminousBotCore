@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using Newtonsoft.Json;
 using Public_Bot.State.Types;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Public_Bot
 {
-    public class GuildMember
+    public class GuildMember : IDoubleEntityID
     {
         [GraphQLProp, GraphQLSVar]
         public ulong GuildID { get; set; }
-        [GraphQLProp, GraphQLSVar]
-        public ulong UserID { get; set; }
+        [GraphQLProp, GraphQLSVar, GraphQLName("UserID"), JsonProperty("UserID")]
+        public ulong Id { get; set; }
         public string Username
             => User.Username;
         [GraphQLProp]
@@ -27,7 +28,7 @@ namespace Public_Bot
                 ("DateLeft", isInServer ? null : DateTime.UtcNow.ToString("o")),
                 ("IsInServer", isInServer), 
                 ("GuildID", this.GuildID),
-                ("UserID", this.UserID));
+                ("UserID", this.Id));
             return await StateService.MutateAsync<GuildMember>(q);
         }
 
@@ -43,11 +44,11 @@ namespace Public_Bot
         public GuildMember(SocketGuildUser user)
         {
             this.GuildID = user.Guild.Id;
-            this.UserID = user.Id;
+            this.Id = user.Id;
             if (!UserCache.UserExists(user.Id))
                 UserCache.CreateUser(user);
             var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"), true);
-            this.User = UserCache.GetUser(this.UserID);
+            this.User = UserCache.GetUser(this.Id);
 
             //add to cache 
             GuildCache.AddGuildMember(this);
@@ -55,11 +56,11 @@ namespace Public_Bot
         public GuildMember(ulong UserId, ulong GuildId)
         {
             this.GuildID = GuildId;
-            this.UserID = UserId;
+            this.Id = UserId;
             if (!UserCache.UserExists(UserId))
                 UserCache.CreateUser(UserId);
             var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"), true);
-            this.User = UserCache.GetUser(this.UserID);
+            this.User = UserCache.GetUser(this.Id);
 
             //add to cache 
             GuildCache.AddGuildMember(this);

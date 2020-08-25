@@ -152,7 +152,7 @@ namespace Public_Bot.Modules.Handlers
             public void Add(LevelUser u)
             {
                 var gid = u.GuildID;
-                var uid = u.MemberID;
+                var uid = u.Id;
                 if (_bucket.Any(x => x.GuildId == gid && x.UserId == uid))
                     _bucket[_bucket.IndexOf(_bucket.Find(x => x.GuildId == gid && x.UserId == uid))] = new XPBucketItem()
                     {
@@ -257,7 +257,7 @@ namespace Public_Bot.Modules.Handlers
                             {
                                 try
                                 {
-                                    var usr = client.GetGuild(gs.GuildID).GetUser(user.MemberID);
+                                    var usr = client.GetGuild(gs.GuildID).GetUser(user.Id);
                                     if (!usr.Roles.Any(x => x.Id == rid.Role))
                                     {
                                         await usr.AddRoleAsync(client.GetGuild(user.GuildID).GetRole(rid.Role));
@@ -274,10 +274,10 @@ namespace Public_Bot.Modules.Handlers
                     {
                         try
                         {
-                            await chan.SendMessageAsync(user.MentionOnLevelup == true ? $"<@{user.MemberID}>" : "", false, new EmbedBuilder()
+                            await chan.SendMessageAsync(user.MentionOnLevelup == true ? $"<@{user.Id}>" : "", false, new EmbedBuilder()
                             {
                                 Title = $"You Reached Level {user.CurrentLevel}!",
-                                Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.MemberID).Username}, only {gu.Settings.MaxLevel - user.CurrentLevel} more levels to go!",
+                                Description = GotRole ? $"Wowzers, you got the role {string.Join(", ", roles)}. Gg!" : $"Good job {client.GetUser(user.Id).Username}, only {gu.Settings.MaxLevel - user.CurrentLevel} more levels to go!",
                                 Fields = new List<EmbedFieldBuilder>()
                                 {
                                     new EmbedFieldBuilder()
@@ -286,7 +286,7 @@ namespace Public_Bot.Modules.Handlers
                                         Value = facts[new Random().Next(0, 99)],
                                     }
                                 },
-                                ThumbnailUrl = client.GetUser(user.MemberID).GetAvatarUrl(),
+                                ThumbnailUrl = client.GetUser(user.Id).GetAvatarUrl(),
                                 Color = user.DiscordColorFromHex(user.BarColor)
                             }.WithCurrentTimestamp().Build());
                         }
@@ -351,7 +351,7 @@ namespace Public_Bot.Modules.Handlers
                             {
                                 try
                                 {
-                                    var user = client.GetGuild(gs.GuildID).GetUser(usr.MemberID);
+                                    var user = client.GetGuild(gs.GuildID).GetUser(usr.Id);
                                     if (!user.Roles.Any(x => x.Id == rid.Role))
                                     {
                                         await user.AddRoleAsync(client.GetGuild(usr.GuildID).GetRole(rid.Role));

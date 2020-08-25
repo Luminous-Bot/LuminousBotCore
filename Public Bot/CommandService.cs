@@ -740,13 +740,22 @@ namespace Public_Bot
                 return u;
             }
             else
+            {
                 if (Context.Guild.Users.Any(x => x.Username.StartsWith(user)))
-                    return Context.Guild.Users.First(x => x.Username.Contains(user));
+                {
+                    return Context.Guild.Users.First(x => x.Username.StartsWith(user));
+                }
+                else if (Context.Guild.Users.Any(x => x.ToString().StartsWith(user)))
+                {
+                    return Context.Guild.Users.First(x => x.ToString().StartsWith(user));
+                }
+                else if (Context.Guild.Users.Any(x => x.Nickname != null && x.Nickname.StartsWith(user)))
+                {
+                    return Context.Guild.Users.First(x => x.Nickname != null && x.Nickname.StartsWith(user));
+                }
                 else
-                    if (Context.Guild.Users.Any(x => x.Nickname != null && x.Nickname.StartsWith(user)))
-                        return Context.Guild.Users.First(x => x.Nickname != null && x.Nickname.StartsWith(user));
-                    else
-                        return null;
+                    return null;
+            }
         }
         public SocketRole GetRole(string role)
         {

@@ -39,7 +39,7 @@ namespace Public_Bot.Modules.Commands
             int space = levelmembers.Select(x => x.Username).Max(x => x.Length);
             foreach (var item in levelmembers)
             {
-                lm.Add($"#{rnk} - {(item.Username == "" ? Context.Guild.GetUser(item.MemberID).ToString().PadRight(space) : item.Username.PadRight(space))} Level: {item.CurrentLevel} XP: {(uint)item.CurrentXP}/{(uint)item.NextLevelXP}");
+                lm.Add($"#{rnk} - {(item.Username == "" ? Context.Guild.GetUser(item.Id).ToString().PadRight(space) : item.Username.PadRight(space))} Level: {item.CurrentLevel} XP: {(uint)item.CurrentXP}/{(uint)item.NextLevelXP}");
                 rnk++;
             }
             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -252,7 +252,7 @@ namespace Public_Bot.Modules.Commands
             if (gl.CurrentUsers.LevelUserExists(user.Id))
             {
                 var userlvl = gob.Leaderboard.CurrentUsers.GetLevelUser(user.Id);
-                var u = Context.Guild.GetUser(userlvl.MemberID);
+                var u = Context.Guild.GetUser(userlvl.Id);
                 var av = u.GetAvatarUrl();
                 if (av == null)
                     av = u.GetDefaultAvatarUrl();

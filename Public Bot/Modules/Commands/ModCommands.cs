@@ -598,7 +598,7 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                             {
                                 Title = $"Cleared {usrlogs.Username}'s Logs!",
-                                Description = $"Cleared all of <@{usrlogs.UserID}>'s infractions!",
+                                Description = $"Cleared all of <@{usrlogs.Id}>'s infractions!",
                                 Color = Color.Green,
                                 Timestamp = DateTime.Now
                             }.Build());
@@ -625,13 +625,13 @@ namespace Public_Bot.Modules.Commands
                                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                                     {
                                         Title = $"Cleared {usrlogs.Username}'s Logs!",
-                                        Description = $"Cleared all of <@{usrlogs.UserID}>'s infractions!",
+                                        Description = $"Cleared all of <@{usrlogs.Id}>'s infractions!",
                                         Color = Color.Green,
                                         Timestamp = DateTime.Now
                                     }.Build());
                                     return;
                                 }
-                                var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.Infractions, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
+                                var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.Infractions, 0, usrlogs.Id, Context.Guild.Id, Context.User.Id);
                                 var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
                                 var msg = await Context.Channel.SendMessageAsync($"Removed log number {args[1]}", false, emb.Build());
                                 pg.MessageID = msg.Id;
@@ -694,13 +694,13 @@ namespace Public_Bot.Modules.Commands
                             await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                             {
                                 Title = $"Cleared {usrlogs.Username}'s Logs!",
-                                Description = $"Cleared all of <@{usrlogs.UserID}>'s infractions!",
+                                Description = $"Cleared all of <@{usrlogs.Id}>'s infractions!",
                                 Color = Color.Green,
                                 Timestamp = DateTime.Now
                             }.Build());
                             return;
                         }
-                        var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.Infractions, 0, usrlogs.UserID, Context.Guild.Id, Context.User.Id);
+                        var pg = ModlogsPageHandler.BuildHelpPage(usrlogs.Infractions, 0, usrlogs.Id, Context.Guild.Id, Context.User.Id);
                         var emb = ModlogsPageHandler.BuildHelpPageEmbed(pg, 1);
                         var msg = await Context.Channel.SendMessageAsync($"Removed log numbers {string.Join(", ", args.Skip(1))}", false, emb.Build());
                         pg.MessageID = msg.Id;

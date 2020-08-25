@@ -8,7 +8,7 @@ namespace Public_Bot
 {
     public class GuildCache
     {
-        private static ConcurrentBag<Guild> Guilds = new ConcurrentBag<Guild>();
+        private static SingleIDEntityCache<Guild> Guilds = new SingleIDEntityCache<Guild>();
 
         /// <summary>
         /// Adds a guild member to the cache
@@ -42,7 +42,7 @@ namespace Public_Bot
         public static Guild GetGuild(ulong Id)
         {
             if (Guilds.Any(x => x.Id == Id))
-                return Guilds.First(x => x.Id == Id);
+                return Guilds[Id];
             else
             {
                 var g = Guild.Fetch(Id);

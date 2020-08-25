@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Public_Bot
 {
-    public class User
+    public class User : IEntityID
     {
         [GraphQLSVar, GraphQLProp]
         public ulong Id { get; set; }

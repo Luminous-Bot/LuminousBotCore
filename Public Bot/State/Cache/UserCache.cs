@@ -16,7 +16,7 @@ namespace Public_Bot
         {
             client = c;
         }
-        private static ConcurrentBag<User> Users = new ConcurrentBag<User>();
+        private static SingleIDEntityCache<User> Users = new SingleIDEntityCache<User>();
 
         /// <summary>
         /// Creates a User
@@ -49,10 +49,21 @@ namespace Public_Bot
             else
                 return User.UserExists(UserId);
         }
+        /// <summary>
+        /// Updates a user in the cache only
+        /// </summary>
+        /// <param name="u">The user to update</param>
+        public static void UpdateUser(User u)
+        {
+            if(Users.Any(x => x.Id == u.Id))
+            {
+                Users.Replace(u);
+            }
+        }
         public static User GetUser(ulong UserId)
         {
             if (Users.Any(x => x != null && x.Id == UserId))
-                return Users.First(x => x.Id == UserId);
+                return Users[UserId];
             else if (User.UserExists(UserId))
             {
                 var u = User.Fetch(UserId);

@@ -7,7 +7,7 @@ using static Public_Bot.StateService;
 
 namespace Public_Bot
 {
-    public class Guild
+    public class Guild : IEntityID
     {
         [GraphQLProp]
         public ulong Id { get; set; }

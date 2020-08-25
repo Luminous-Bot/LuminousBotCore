@@ -15,7 +15,7 @@ namespace Public_Bot
         {
             CurrentGuild = guild;
         }
-        private ConcurrentBag<GuildMember> GuildMembers = new ConcurrentBag<GuildMember>();
+        private DoubleIDEntityCache<GuildMember> GuildMembers = new DoubleIDEntityCache<GuildMember>();
 
         /// <summary>
         /// Adds a guildmember to the cache
@@ -60,7 +60,7 @@ namespace Public_Bot
         /// <returns>If a guild member exists</returns>
         public bool GuildMemberExists(ulong UserID, ulong GuildId)
         {
-            if (GuildMembers.Any(x => x.UserID == UserID && x.GuildID == GuildId))
+            if (GuildMembers.Any(x => x.Id == UserID && x.GuildID == GuildId))
                 return true;
             else return GuildMember.Exists(UserID, GuildId);
         }
@@ -79,8 +79,8 @@ namespace Public_Bot
         /// <returns>The fetched guild member</returns>
         public GuildMember GetGuildMember(ulong UserID, ulong GuildId)
         {
-            if (GuildMembers.Any(x => x.UserID == UserID && x.GuildID == GuildId))
-                return GuildMembers.First(x => x.UserID == UserID && x.GuildID == GuildId);
+            if (GuildMembers.Any(x => x.Id == UserID && x.GuildID == GuildId))
+                return GuildMembers[UserID, GuildId];
             else
             {
                 if (GuildMember.Exists(UserID, GuildId))

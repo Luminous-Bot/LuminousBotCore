@@ -7,14 +7,13 @@ using System.Text;
 
 namespace Public_Bot
 {
-    public class LevelUser
+    public class LevelUser : IDoubleEntityID
     {
         [GraphQLSVar]
         [GraphQLProp]
         public ulong GuildID { get; set; }
-        [GraphQLProp]
-        [GraphQLSVar]
-        public ulong MemberID { get; set; }
+        [GraphQLProp, GraphQLSVar, GraphQLName("MemberID"), JsonProperty("MemberID")]
+        public ulong Id { get; set; }  
         [GraphQLProp]
         public string Username { get; set; }
         [GraphQLProp]
@@ -51,7 +50,7 @@ namespace Public_Bot
         }
         public long GetRank()
         {
-            var rank = StateService.Query<long>($"{{\"operationName\":null,\"variables\":{{}},\"query\":\"{{ levelMemberRank(GuildID: \\\"{this.GuildID}\\\", UserID: \\\"{this.MemberID}\\\") }} \"}}");
+            var rank = StateService.Query<long>($"{{\"operationName\":null,\"variables\":{{}},\"query\":\"{{ levelMemberRank(GuildID: \\\"{this.GuildID}\\\", UserID: \\\"{this.Id}\\\") }} \"}}");
             return rank;
         }
         public double CalculateTotalXP()
@@ -69,12 +68,12 @@ namespace Public_Bot
         }
         public LevelUser Save()
         {
-            if (!UserCache.UserExists(this.MemberID))
-                UserCache.CreateUser(this.MemberID);
+            if (!UserCache.UserExists(this.Id))
+                UserCache.CreateUser(this.Id);
 
             var guild = GuildCache.GetGuild(this.GuildID);
-            if (!guild.GuildMembers.GuildMemberExists(this.MemberID))
-                guild.GuildMembers.CreateGuildMember(this.MemberID);
+            if (!guild.GuildMembers.GuildMemberExists(this.Id))
+                guild.GuildMembers.CreateGuildMember(this.Id);
             TotalXP = CalculateTotalXP();
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
@@ -85,7 +84,7 @@ namespace Public_Bot
         public LevelUser() { }
         public LevelUser(SocketGuildUser user)
         {
-            MemberID = user.Id;
+            Id = user.Id;
             Username = GraphQLParser.CleanUserContent(user.ToString());
             GuildID = user.Guild.Id;
             Save();
