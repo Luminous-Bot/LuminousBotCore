@@ -1014,15 +1014,7 @@ namespace Public_Bot.Modules.Commands
             GuildSettings.SaveGuildSettings();
             return;
         }
-        [DiscordCommand("modules",
-            commandHelp = "`(PREFIX)modules <enable/disable/list> <modulename>`",
-            description = "Enables or disables a module",
-            RequiredPermission = true
-            )]
-        public async Task Modules(params string[] args)
-        {
-            await Module(args);
-        }
+        [Alt("modules")]
         [DiscordCommand("module",
             commandHelp = "`(PREFIX)module <enable/disable/list> <modulename>`",
             description = "Enables or disables a module",

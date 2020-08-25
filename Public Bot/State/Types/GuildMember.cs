@@ -61,9 +61,6 @@ namespace Public_Bot
                 UserCache.CreateUser(UserId);
             var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"), true);
             this.User = UserCache.GetUser(this.Id);
-
-            //add to cache 
-            GuildCache.AddGuildMember(this);
         }
     }
 }

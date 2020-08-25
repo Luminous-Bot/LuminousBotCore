@@ -379,7 +379,11 @@ namespace Public_Bot.Modules.Handlers
                                 old = before.GetDefaultAvatarUrl();
                             var _new = after.GetAvatarUrl(ImageFormat.Auto, 256);
                             Console.WriteLine($"OLD: {old} NEW {_new}");
-                            url = await ProfileChangeHelper.BuildImage(old, _new);
+                            try
+                            {
+                                url = await ProfileChangeHelper.BuildImage(old, _new);
+                            }
+                            catch { }
                         }
 
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()

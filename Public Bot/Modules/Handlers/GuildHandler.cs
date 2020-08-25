@@ -77,7 +77,8 @@ namespace Public_Bot
             var g = GuildCache.GetGuild(arg.Guild.Id);
             if (g == null)
                 return;
-            g.GuildMembers.CreateGuildMember(arg.Id);
+            if(!g.GuildMembers.GuildMemberExists(arg.Id))
+                g.GuildMembers.CreateGuildMember(arg.Id);
         }
 
         private async Task AddGuild(SocketGuild arg)

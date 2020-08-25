@@ -21,7 +21,7 @@ namespace Public_Bot
         static Font TitleFont = new Font("Bahnschrift", 26);
         public static async Task<string> BuildImage(string oldpfp, string newpfp)
         {
-            await Task.Delay(10000);
+            //await Task.Delay(10000);
             PfpGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             PfpGraphics.Clear(BackgroundColor);
             // Download both images:
