@@ -23,7 +23,7 @@ namespace Public_Bot
         
         public static GuildSettings GetGuildSettings(ulong GuildID)
         {
-            if (LoadedGuildSettings.Any(x => x.GuildID == GuildID))
+            if (LoadedGuildSettings.ToArray().Any(x => x.GuildID == GuildID))
                 return LoadedGuildSettings.Find(x => x.GuildID == GuildID);
             else
             {

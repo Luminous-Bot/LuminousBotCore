@@ -42,7 +42,10 @@ namespace Public_Bot
             if(res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
             {
                 if(Try < 5)
+                {
+                    await Task.Delay(500);
                     return await QueryAsync<T>(q, HighPriority, Try + 1);
+                }
             }
             if (res.IsSuccessStatusCode)
             {
@@ -74,7 +77,10 @@ namespace Public_Bot
             if (res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
             {
                 if (Try < 5)
-                    return await MutateAsync<T>(q, HighPriority, Try + 1);
+                {
+                    await Task.Delay(500);
+                    return await MutateAsync<T>(q, HighPriority, Try + 1); 
+                }
             }
             if (res.IsSuccessStatusCode)
             {
@@ -111,6 +117,14 @@ namespace Public_Bot
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             string cont = await res.Content.ReadAsStringAsync();
             var rtn = JsonConvert.DeserializeObject<GqlError>(cont);
+            if (res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
+            {
+                if (Try < 5)
+                {
+                    await Task.Delay(500);
+                    await ExecuteNoReturnAsync<T>(q, HighPriority, Try + 1);
+                }
+            }
             if (res.IsSuccessStatusCode && rtn.errors == null)
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
