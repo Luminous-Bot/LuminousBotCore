@@ -24,7 +24,7 @@ namespace Public_Bot.Modules.Handlers
                 if (UserCache.UserExists(arg2.Id))
                 {
                     var newuser = await StateService.MutateAsync<User>(GraphQLParser.GenerateGQLMutation<User>("addUserNewUsername", false, null, "", "",
-                        ("username", arg2.ToString()),
+                        ("username", GraphQLParser.CleanUserContent(arg2.ToString())),
                         ("id", arg2.Id)
                     ));
                     UserCache.UpdateUser(newuser);
