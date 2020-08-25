@@ -726,6 +726,7 @@ namespace Public_Bot.Modules.Commands
             public async Task purge(uint amount)
             {
                 var messages = await Context.Channel.GetMessagesAsync((int)amount + 1).FlattenAsync();
+                messages = messages.Where(x => (DateTime.UtcNow - x.CreatedAt.UtcDateTime).TotalDays < 14);
                 await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
                 const int delay = 2000;
                 var m = await Context.Channel.SendMessageAsync($"Purge completed!");
@@ -816,6 +817,7 @@ namespace Public_Bot.Modules.Commands
                     return;
                 }
                 var messages = tmp.Where(x => x.Author.Id == user.Id).Take((int)ammount);
+                messages = messages.Where(x => (DateTime.UtcNow - x.CreatedAt.UtcDateTime).TotalDays < 14);
                 await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
                 const int delay = 2000;
                 var m = await Context.Channel.SendMessageAsync($"Purge completed!");
