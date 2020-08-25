@@ -46,7 +46,7 @@ namespace Public_Bot
             this.UserID = user.Id;
             if (!UserCache.UserExists(user.Id))
                 UserCache.CreateUser(user);
-            var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
+            var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"), true);
             this.User = UserCache.GetUser(this.UserID);
 
             //add to cache 
@@ -58,7 +58,7 @@ namespace Public_Bot
             this.UserID = UserId;
             if (!UserCache.UserExists(UserId))
                 UserCache.CreateUser(UserId);
-            var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"));
+            var mt = StateService.Mutate<GuildMember>(GraphQLParser.GenerateGQLMutation<GuildMember>("createGuildMember", true, this, "data", "CreateGuildMemberInput!"), true);
             this.User = UserCache.GetUser(this.UserID);
 
             //add to cache 
