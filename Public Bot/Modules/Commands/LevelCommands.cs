@@ -229,6 +229,7 @@ namespace Public_Bot.Modules.Commands
 
             }
         }
+        [GuildPermissions(GuildPermission.AttachFiles)]
         [Alt("r")]
         [DiscordCommand("rank", description = "Shows your current rank!", commandHelp = "Usage - `(PREFIX)rank`, `(PREFIX)rank <user>`")]
         public async Task rank(params string[] args)
@@ -998,7 +999,6 @@ namespace Public_Bot.Modules.Commands
             {
                 case "list":
                     var ch = Context.Guild.GetTextChannel(ls.LevelUpChan);
-
                     List<string> bc = new List<string>();
                     foreach (var chan in ls.BlacklistedChannels)
                     {

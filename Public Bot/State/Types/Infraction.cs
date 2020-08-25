@@ -43,7 +43,7 @@ namespace Public_Bot
                 {
                     var gm = GuildHandler.client.GetGuild(GuildID).GetUser(this.MemberID);
                     if (gm != null)
-                        member = new GuildMember(gm);
+                        member = guild.GuildMembers.CreateGuildMember(MemberId);
                     else
                         throw new Exception("User is not in guild or list!");
                 }

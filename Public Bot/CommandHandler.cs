@@ -56,7 +56,7 @@ namespace Public_Bot
                     Description = $"Failed to {type} {method}! Server sent: {StatusCode}!",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
-                File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
+                File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"----------< Start Stack >----------\n\n{Environment.StackTrace}\n\n----------< End Stack >----------\n\n----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
                 await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", "");
             }
             catch(Exception x)

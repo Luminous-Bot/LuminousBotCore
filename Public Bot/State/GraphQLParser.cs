@@ -52,6 +52,8 @@ namespace Public_Bot
     }
     public class VaredMutationBucket<T>
     {
+        public int Count
+            => Mutations.Count;
         public List<string> Mutations { get; set; } = new List<string>();
         private List<string> Vars { get; set; } = new List<string>();
         private string mV = "";

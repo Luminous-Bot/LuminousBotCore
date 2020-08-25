@@ -181,7 +181,7 @@ namespace Public_Bot.Modules.Handlers
         }
         private void GiveVCPoints(object sender, ElapsedEventArgs e)
         {
-            var _bucket = new MutationBucket<LevelUser>("setLevelMemberXpLevel");
+            var _bucket = new VaredMutationBucket<LevelUser>("createOrUpdateLevelMember", true, "data", "CreateLevelMemberInput!");
             foreach (var guild in client.Guilds)
             {
                 if (GuildCache.GuildExists(guild.Id))
@@ -208,11 +208,7 @@ namespace Public_Bot.Modules.Handlers
                                         LevelUpUser(usr);
                                     usr.TotalXP = usr.CalculateTotalXP();
                                     Logger.Write($"{user} - L:{usr.CurrentLevel} XP:{usr.CurrentXP}");
-                                    _bucket.Add(usr,
-                                        ("guildId", $"\\\"{usr.GuildID}\\\""),
-                                        ("userId", $"\\\"{usr.MemberID}\\\""),
-                                        ("level", usr.CurrentLevel),
-                                        ("xp", usr.CurrentXP));
+                                    _bucket.Add(usr);
                                 }
                                 else
                                 {

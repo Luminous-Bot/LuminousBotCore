@@ -374,10 +374,10 @@ namespace Public_Bot.Modules.Handlers
                                 Name = "Avatar Changed",
                                 Value = $"> **Old Avatar:**\n> [Link]({before.GetAvatarUrl()})\n> **New Avatar**\n> [Link]({after.GetAvatarUrl()})"
                             });
-                            var old = before.GetAvatarUrl(ImageFormat.Png, 256);
+                            var old = before.GetAvatarUrl(ImageFormat.Auto, 256);
                             if (old == null)
                                 old = before.GetDefaultAvatarUrl();
-                            var _new = after.GetAvatarUrl(ImageFormat.Png, 256);
+                            var _new = after.GetAvatarUrl(ImageFormat.Auto, 256);
                             Console.WriteLine($"OLD: {old} NEW {_new}");
                             url = await ProfileChangeHelper.BuildImage(old, _new);
                         }
