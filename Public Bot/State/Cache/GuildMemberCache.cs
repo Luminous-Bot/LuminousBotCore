@@ -17,6 +17,7 @@ namespace Public_Bot
         }
         private DoubleIDEntityCache<GuildMember> GuildMembers = new DoubleIDEntityCache<GuildMember>();
 
+        public int Count { get => GuildMembers.Count; }
         /// <summary>
         /// Adds a guildmember to the cache
         /// </summary>

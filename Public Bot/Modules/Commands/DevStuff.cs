@@ -1,4 +1,5 @@
-﻿using Discord.WebSocket;
+﻿using Discord;
+using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,27 @@ namespace Public_Bot.Modules.Commands
                         var guild = client.Guilds.First(x => x.Name == cont[1]);
                         var inv = await guild.DefaultChannel.CreateInviteAsync(60, null, false, false);
                         await arg.Channel.SendMessageAsync(inv.Url);
+                    }
+                    break;
+                case "cachestatus":
+                    {
+                        var chan = arg.Channel as SocketTextChannel;
+                        var guild = GuildCache.GetGuild(chan.Guild.Id);
+                        await arg.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                        {
+                            Author = new EmbedAuthorBuilder() 
+                            { 
+                                IconUrl = chan.Guild.IconUrl,
+                                Name = chan.Guild.Name
+                            },
+                            Title = "Cache's",
+                            Description = "```\n" +
+                            $"Users Cache:   {UserCache.Count}\n" +
+                            $"Guild Cache:   {GuildCache.Count}\n" +
+                            $"Guild Members: {guild.GuildMembers.Count}" +
+                            $"Level Members: {guild.Leaderboard.CurrentUsers.Count}```",
+                            Color = Color.Gold
+                        }.WithCurrentTimestamp().Build());
                     }
                     break;
             }

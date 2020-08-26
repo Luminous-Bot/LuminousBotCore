@@ -18,6 +18,7 @@ namespace Public_Bot
         }
         private static SingleIDEntityCache<User> Users = new SingleIDEntityCache<User>();
 
+        public static int Count { get => Users.Count; }
         /// <summary>
         /// Creates a User
         /// </summary>
@@ -55,7 +56,7 @@ namespace Public_Bot
         /// <param name="u">The user to update</param>
         public static void UpdateUser(User u)
         {
-            if(Users.Any(x => x.Id == u.Id))
+            if(Users.Any(x => x != null && x.Id == u.Id))
             {
                 Users.Replace(u);
             }

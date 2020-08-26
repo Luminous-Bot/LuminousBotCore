@@ -956,6 +956,7 @@ namespace Public_Bot.Modules.Commands
             //        }
             //    }.WithCurrentTimestamp().Build());
             //}
+            [GuildPermissions(GuildPermission.ManageChannels)]
             [DiscordCommand("slowmode", RequiredPermission = true, commandHelp = "Usage: `(PREFIX)slowmode #general 10`, `(PREFIX)slowmode #general 1m`")]
             public async Task slowmode(params string[] args)
             {
@@ -1051,6 +1052,7 @@ namespace Public_Bot.Modules.Commands
                         var chan = (SocketTextChannel)Context.Channel;
                         if (chan.SlowModeInterval > 0)
                         {
+                            await chan.ModifyAsync(x => x.SlowModeInterval = 0);
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",

@@ -14,7 +14,7 @@ namespace Public_Bot
         {
             this.GuildLeaderboards = guildLeaderboards;
         }
-
+        public int Count { get => LevelUsers.Count; }
         public void AddLevelUser(LevelUser u)
             => LevelUsers.Add(u);
 
