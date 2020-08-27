@@ -1019,7 +1019,7 @@ namespace Public_Bot.Modules.Commands
                     gnrl.Add("XP/Minute in VC:", ls.XpPerVCMinute.ToString());
                     gnrl.Add("Xp/Minute of Streaming:", ls.XpPerVCStream.ToString());
                     gnrl.Add("Max Level:", ls.MaxLevel.ToString());
-                    gnrl.Add("Levelup Channel:", ch.Name);
+                    gnrl.Add("Levelup Channel:", ch == null ? "none" : "#" +ch.Name);
                     gnrl.Add("Default XP:", ls.DefaultBaseLevelXp.ToString());
                     int leng = gnrl.Keys.Max(x => x.Length);
                     List<string> final = new List<string>();

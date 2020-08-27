@@ -60,11 +60,11 @@ namespace Public_Bot.Modules.Commands
                                 IconUrl = chan.Guild.IconUrl,
                                 Name = chan.Guild.Name
                             },
-                            Title = "Cache's",
+                            Title = "Caches",
                             Description = "```\n" +
                             $"Users Cache:   {UserCache.Count}\n" +
                             $"Guild Cache:   {GuildCache.Count}\n" +
-                            $"Guild Members: {guild.GuildMembers.Count}" +
+                            $"Guild Members: {guild.GuildMembers.Count}\n" +
                             $"Level Members: {guild.Leaderboard.CurrentUsers.Count}```",
                             Color = Color.Gold
                         }.WithCurrentTimestamp().Build());
