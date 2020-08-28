@@ -806,7 +806,7 @@ namespace Public_Bot.Modules.Handlers
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Channel Deleted ⚡",
-                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "💻 Text channel " : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊 Voice Channel " : "")}{gcn.Name} was deleted!!!",
+                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "💻 Text channel " : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊 Voice Channel " : "")}`{gcn.Name}` was deleted!!!",
                             Color = Color.Red,
                             Footer = new EmbedFooterBuilder
                             {
@@ -832,7 +832,7 @@ namespace Public_Bot.Modules.Handlers
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Channel Created ⚡",
-                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "💻 Text channel " : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊 Voice Channel " : "")}{gcn.Name} was created!!!",
+                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "💻 Text channel " : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊 Voice Channel " : "")}`{gcn.Name}` was created!!!",
                             Color = Color.Blue,
                             Footer = new EmbedFooterBuilder
                             {
