@@ -670,21 +670,85 @@ namespace Public_Bot.Modules.Handlers
                 }
             }
         }
-
         private async Task Client_GuildUpdated(SocketGuild arg1, SocketGuild arg2)
         {
-            
             var gs = GuildSettings.Get(arg2.Id);
             if (gs.LogChannel != 0 && gs.Logging)
             {
+                string url = "";
+                string text = "Guild got updated!\n(We were unable to find what was, though)";
+                string Id = "";
                 var logchan = arg2.GetTextChannel(gs.LogChannel);
+                if (!arg1.Emotes.All(x => arg2.Emotes.Contains(x)))
+                {
+                    if (arg1.Emotes.Count > arg2.Emotes.Count)
+                    {
+                        var removedEmote = arg1.Emotes.First(x => !arg2.Emotes.Contains(x));
+                        string animated = "stationary";
+                        if (removedEmote.Animated)
+                        {
+                            animated = "animated";
+                        }
+                        text = $"The {animated} emote {removedEmote.Name} was removed";
+                        url = removedEmote.Url;
+                        Id = $"Emote ID: {removedEmote.Id}";
+
+                    } else if (arg2.Emotes.Count < arg1.Emotes.Count)
+                    {
+                        var addedEmote = arg2.Emotes.First(x => !arg1.Emotes.Contains(x));
+                        string animated = "stationary";
+                        if (addedEmote.Animated)
+                        {
+                            animated = "animated";
+                        }
+                        text = $"The {animated} emote `:{addedEmote.Name}:` was added";
+                        url = addedEmote.Url;
+                        Id = $"Emote ID: {addedEmote.Id}";
+                    }
+                    else
+                    {
+                        var newEmote = arg2.Emotes.First(x => !arg1.Emotes.Any(y => y.Name == x.Name));
+                        var oldEmoteName = arg1.Emotes.First(x => x.Url == newEmote.Url).Name;
+                        text = $"The emote `:{oldEmoteName}:` was renamed to `:{newEmote.Name}:`";
+                        url = newEmote.Url;
+                        Id = $"Emote ID: {newEmote.Id}";
+                    }
+                }
+                if (arg1.IconId != arg2.IconId)
+                {
+                    var old = arg1.IconUrl;
+                    var _new = arg2.IconUrl;
+                    text = $"The Icon of the guild was Updated\nPrevious icon: [link]({old})\nNew icon: [link]({_new})";
+                    Console.WriteLine($"OLD: {old} NEW {_new}");
+                    try
+                    {
+                        url = await ProfileChangeHelper.BuildImage(old, _new, false);
+                    }
+                    catch (Exception e){
+                        Console.WriteLine(e);
+                    }
+                }
+                if (arg1.Name != arg2.Name)
+                {
+                    text = $"The server name has been updated from {arg1.Name} to {arg2.Name}";
+                }
                 if (logchan != null)
                 {
+                    string footerTxt = "";
+                    if (Id == "")
+                    {
+                        footerTxt = $"Guild Id: {arg1.Id}";
+                    } else
+                    {
+                        footerTxt = Id;
+                    }
                     await logchan.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = "⚡ Guild Updated ⚡",
-                        Description = $"{arg2.Name} got updated (More in depth descriptions coming soon)",
-                        Color = Color.Green
+                        Description = text,
+                        Color = Color.Green,
+                        ImageUrl = url,
+                        Footer = new EmbedFooterBuilder { Text = footerTxt }
                     }.WithCurrentTimestamp().Build());
                 }
             }
@@ -730,7 +794,7 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_ChannelDestroyed(SocketChannel arg)
         {
-            if (arg.GetType() == typeof(SocketGuildChannel))
+            if (arg as SocketGuildChannel != null)
             {
                 var gcn = arg as SocketGuildChannel;
                 var gs = GuildSettings.Get(gcn.Guild.Id);
@@ -742,8 +806,12 @@ namespace Public_Bot.Modules.Handlers
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Channel Deleted ⚡",
-                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "⌨️" : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊" : "")}{gcn.Name}",
-                            Color = Color.Red
+                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "💻 Text channel " : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊 Voice Channel " : "")}{gcn.Name} was deleted!!!",
+                            Color = Color.Red,
+                            Footer = new EmbedFooterBuilder
+                            {
+                                Text = $"Channel Id: {gcn.Id}"
+                            }
                         }.WithCurrentTimestamp().Build());
                     }
                 }
@@ -752,7 +820,7 @@ namespace Public_Bot.Modules.Handlers
 
         private async Task Client_ChannelCreated(SocketChannel arg)
         {
-            if(arg.GetType() == typeof(SocketGuildChannel))
+            if(arg as SocketGuildChannel != null)
             {
                 var gcn = arg as SocketGuildChannel;
                 var gs = GuildSettings.Get(gcn.Guild.Id);
@@ -761,11 +829,15 @@ namespace Public_Bot.Modules.Handlers
                     var logchan = gcn.Guild.GetTextChannel(gs.LogChannel);
                     if(logchan != null)
                     {
-                        await logchan.SendMessageAsync("", false, new EmbedBuilder() 
-                        { 
+                        await logchan.SendMessageAsync("", false, new EmbedBuilder()
+                        {
                             Title = "⚡ Channel Created ⚡",
-                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "⌨️" : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊" : "")}{gcn.Name}",
-                            Color = Color.Blue
+                            Description = $"{(gcn.GetType() == typeof(SocketTextChannel) ? "💻 Text channel " : gcn.GetType() == typeof(SocketVoiceChannel) ? "🔊 Voice Channel " : "")}{gcn.Name} was created!!!",
+                            Color = Color.Blue,
+                            Footer = new EmbedFooterBuilder
+                            {
+                                Text = $"Channel Id: {gcn.Id}"
+                            }
                         }.WithCurrentTimestamp().Build());
                     }
                 }
