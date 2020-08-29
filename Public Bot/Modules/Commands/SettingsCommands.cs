@@ -936,11 +936,11 @@ namespace Public_Bot.Modules.Commands
 
                     if (args.Length == 2)
                     {
-                        string hexColor = args[1];
+                        string hexColor = args[1].ToLower();
                         var regex = new Regex(@"(\d|[a-f]){6}");
-                        if (regex.IsMatch(args[1]))
+                        if (regex.IsMatch(hexColor))
                         {
-                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            var hex = regex.Match(hexColor).Groups[0].Value;
                             //set here
                             this.GuildSettings.leaveMessage.EmbedColor = "#"+hex;
                             GuildSettings.SaveGuildSettings();
@@ -1009,7 +1009,6 @@ namespace Public_Bot.Modules.Commands
                         }.WithCurrentTimestamp().Build());
                         return;
                     }
-                    break;
             };
             GuildSettings.SaveGuildSettings();
             return;
