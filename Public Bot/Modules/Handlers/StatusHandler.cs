@@ -50,7 +50,9 @@ namespace Public_Bot.Modules.Handlers
                 $"Beep boop?",
                 $"Bugs being squashed",
                 $"Invading space",
-                $"Claiming prizes"
+                $"Claiming prizes",
+                $"Croissant is good",
+                $"Beep beep lettuce"
             };
         public StatusHandler(DiscordShardedClient c)
         {

@@ -173,7 +173,7 @@ namespace Public_Bot
                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                        {
                            Title = "**Sorry!**",
-                           Description = @"That module is disabled!",
+                           Description = @"That command is disabled!",
                            Color = Color.Red,
                            Timestamp = DateTimeOffset.Now,
                        }.Build());

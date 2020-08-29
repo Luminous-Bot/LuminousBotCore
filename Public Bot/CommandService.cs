@@ -404,6 +404,12 @@ namespace Public_Bot
                     Result = CommandStatus.NotFound,
                     IsSuccess = false
                 };
+            if (commandobj.Any(x => s.DisabledCommands.Contains(x.CommandName)))
+                return new CommandResult()
+                {
+                    Result = CommandStatus.Disabled,
+                    IsSuccess = false
+                };
             if (context.Channel.GetType() == typeof(SocketDMChannel) && !currentSettings.DMCommands)
                 return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidParams };
             List<CommandResult> results = new List<CommandResult>();

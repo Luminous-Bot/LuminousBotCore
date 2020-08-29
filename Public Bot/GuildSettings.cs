@@ -17,6 +17,7 @@ namespace Public_Bot
         public string Prefix { get; set; } = "*";
         public List<ulong> PermissionRoles { get; set; } = new List<ulong>();
         public Dictionary<string, bool> ModulesSettings { get; set; } = new Dictionary<string, bool>();
+        public List<string> DisabledCommands { get; set; } = new List<string>();
         public ulong MutedRoleID { get; set; } = 0;
         public ulong LogChannel { get; set; } = 0;
         public ulong NewMemberRole { get; set; } = 0;

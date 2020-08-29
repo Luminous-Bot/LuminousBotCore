@@ -21,8 +21,9 @@ namespace Public_Bot
         private List<T> _CacheList { get; set; } = new List<T>();
         public T this[ulong Id] 
         { 
-            get => _CacheList.Any(x => x.Id == Id) ? _CacheList.Find(x => x.Id == Id) : null; 
-
+            get => _CacheList.Any(x => x.Id == Id) 
+                ? _CacheList.Find(x => x.Id == Id) 
+                : null; 
             set => AddOrReplace(value); 
         }
 
@@ -113,7 +114,13 @@ namespace Public_Bot
     {
         private Type _type = typeof(T);
         private List<T> _CacheList { get; set; } = new List<T>();
-        public T this[ulong Id, ulong GuildID] { get => _CacheList.Any(x => x.Id == Id && x.GuildID == GuildID) ? _CacheList.Find(x => x.Id == Id && x.GuildID == GuildID) : null; set => AddOrReplace(value); }
+        public T this[ulong Id, ulong GuildID] 
+        { 
+            get => _CacheList.Any(x => x.Id == Id && x.GuildID == GuildID) 
+                ? _CacheList.Find(x => x.Id == Id && x.GuildID == GuildID) 
+                : null; 
+            set => AddOrReplace(value); 
+        }
 
         /// <summary>
         /// Returns the ammount of items in the Cache
