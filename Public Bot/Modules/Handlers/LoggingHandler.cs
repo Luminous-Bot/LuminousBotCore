@@ -34,6 +34,78 @@ namespace Public_Bot.Modules.Handlers
             client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
             client.UserJoined += Client_UserJoined;
             client.UserLeft += Client_UserLeft;
+            client.InviteCreated += Client_InviteCreated;
+            client.InviteDeleted += Client_InviteDeleted;
+        }
+
+        private async Task Client_InviteDeleted(Cacheable<SocketGuildInvite, string> arg1, SocketGuild arg2)
+        {
+            
+            var gs = GuildSettings.Get(arg2.Id);
+            if (gs.LogChannel == 0 || !gs.Logging)
+                return;
+            var logchan = arg2.GetTextChannel(gs.LogChannel);
+            if (logchan == null)
+                return;
+
+            var em = new EmbedBuilder()
+            {
+                Title = "⚡ Invite Deleted ⚡",
+                Color = Color.Red,
+                Description = $"The invite https://discord.com/invite/{arg1.Id} was deleted!",
+                
+            }.WithCurrentTimestamp();
+            if (arg1.HasValue)
+            {
+                var invite = arg1.Value;
+                var channel = invite.Channel.GetType() == typeof(SocketVoiceChannel) ? $"🔊 {invite.Channel.Name}" : $"<#{invite.Channel.Id}>";
+                em.Fields = new List<EmbedFieldBuilder>()
+                {
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Invite",
+                        Value =
+                        $"Expires: {(invite.MaxAge.HasValue ? $"{invite.MaxAge.Value.ToString("h'h 'm'm 's's'")}" : "Never")}\n" +
+                        $"Channel: {channel}\n" +
+                        $"Max Uses: {(invite.MaxUses.HasValue ? $"{invite.MaxUses.Value}" : "Infinite")}\n" +
+                        $"Temporary? {invite.Temporary.CheckOrX()}\n" +
+                        $"Creator: {invite.Inviter.Mention}"
+                    }
+                };
+            }
+            await logchan.SendMessageAsync("", false, em.Build());
+        }
+
+        private async Task Client_InviteCreated(SocketGuildInvite arg)
+        {
+            var invites = await arg.Guild.GetInvitesAsync();
+            var gs = GuildSettings.Get(arg.Guild.Id);
+            if (gs.LogChannel == 0 || !gs.Logging)
+                return;
+            var logchan = arg.Guild.GetTextChannel(gs.LogChannel);
+            if (logchan == null)
+                return;
+
+            var channel = arg.Channel.GetType() == typeof(SocketVoiceChannel) ? $"🔊 {arg.Channel.Name}" : $"<#{arg.Channel.Id}>";
+
+            await logchan.SendMessageAsync("", false, new EmbedBuilder() 
+            {
+                Title = "⚡ Invite Created ⚡",
+                Color = Color.Green,
+                Description = $"{arg.Inviter.Mention} created the invite {arg.Url}",
+                Fields = new List<EmbedFieldBuilder>()
+                {
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Invite",
+                        Value = 
+                        $"Expires: {(arg.MaxAge.HasValue ? $"{(arg.MaxAge.Value.TotalSeconds == 0 ? "Never" : arg.MaxAge.Value.ToString("h'h 'm'm 's's'"))}" : "Never")}\n" +
+                        $"Channel: {channel}\n" +
+                        $"Max Uses: {(arg.MaxUses.HasValue ? $"{(arg.MaxUses.Value == 0 ? "Infinite" : $"{arg.MaxUses.Value}")}" : "Infinite")}\n" +
+                        $"Temporary? {arg.Temporary.CheckOrX()}"
+                    }
+                }
+            }.WithCurrentTimestamp().Build());
         }
 
         private async Task Client_UserLeft(SocketGuildUser arg)
@@ -550,7 +622,7 @@ namespace Public_Bot.Modules.Handlers
                     {
                         List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
                         
-                        if(arg1.HasValue)
+                        if (arg1.HasValue)
                         {
                             var oval = "{no content}";
                             if (arg1.Value.Content != null)
@@ -610,7 +682,7 @@ namespace Public_Bot.Modules.Handlers
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "⚡ Message Edited ⚡",
-                            Description = $"Message edited in {sgc.Mention}, [Jump!]({arg2.GetJumpUrl()})",
+                            Description = $"Message edited in {sgc.Mention}",
                             Fields = fields,
                             Color = Color.Orange,
                             Footer = new EmbedFooterBuilder()

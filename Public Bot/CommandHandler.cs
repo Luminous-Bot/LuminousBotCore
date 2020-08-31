@@ -24,7 +24,7 @@ namespace Public_Bot
         public CommandHandler(CustomCommandService _service, DiscordShardedClient _client, HandlerService handler)
         {
             client = _client;
-
+            
             service = _service;
 
             handlerService = handler;

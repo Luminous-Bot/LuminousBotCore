@@ -5,6 +5,12 @@ VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luminous", "Public Bot\Luminous.csproj", "{C0B3543F-33C1-4717-BF64-1A990A908910}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Core", "..\Discord.Net\src\Discord.Net.Core\Discord.Net.Core.csproj", "{312594F7-E502-4A9D-B9FC-450330D43828}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.WebSocket", "..\Discord.Net\src\Discord.Net.WebSocket\Discord.Net.WebSocket.csproj", "{C805038F-FE63-4B34-BC86-299099D29D7F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Net.Rest", "..\Discord.Net\src\Discord.Net.Rest\Discord.Net.Rest.csproj", "{384D98D3-151D-4FB9-A91A-84E9A2125B88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +21,18 @@ Global
 		{C0B3543F-33C1-4717-BF64-1A990A908910}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0B3543F-33C1-4717-BF64-1A990A908910}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0B3543F-33C1-4717-BF64-1A990A908910}.Release|Any CPU.Build.0 = Release|Any CPU
+		{312594F7-E502-4A9D-B9FC-450330D43828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{312594F7-E502-4A9D-B9FC-450330D43828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{312594F7-E502-4A9D-B9FC-450330D43828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{312594F7-E502-4A9D-B9FC-450330D43828}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C805038F-FE63-4B34-BC86-299099D29D7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C805038F-FE63-4B34-BC86-299099D29D7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C805038F-FE63-4B34-BC86-299099D29D7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C805038F-FE63-4B34-BC86-299099D29D7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{384D98D3-151D-4FB9-A91A-84E9A2125B88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{384D98D3-151D-4FB9-A91A-84E9A2125B88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{384D98D3-151D-4FB9-A91A-84E9A2125B88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{384D98D3-151D-4FB9-A91A-84E9A2125B88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
