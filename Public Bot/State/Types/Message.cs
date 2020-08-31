@@ -36,6 +36,8 @@ namespace Public_Bot
         public string Content { get; set; }
         [GraphQLProp, GraphQLSVar]
         public List<string> Attachments { get; set; } = new List<string>();
+        [GraphQLProp]
+        public bool IsPinned { get; set; } = false;
         public Message() { }
         public Message(SocketMessage msg, SocketTextChannel chan)
         {

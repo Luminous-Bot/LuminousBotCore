@@ -618,79 +618,184 @@ namespace Public_Bot.Modules.Handlers
                     var logchan = sgc.Guild.GetTextChannel(gs.LogChannel);
                     if (arg3.Id == logchan.Id)
                         return;
-                    if (logchan != null)
+                    if (logchan == null)
+                        return;
+
+                    if (MessageHelper.MessageExists(arg1.Id))
                     {
-                        List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
-                        
-                        if (arg1.HasValue)
+                        var msg = await MessageHelper.GetMessageAsync(arg1.Id);
+                        if(msg.Content != arg2.Content)
                         {
-                            var oval = "{no content}";
-                            if (arg1.Value.Content != null)
-                                if (arg1.Value.Content != "")
-                                    oval = arg1.Value.Content;
-                            fields.Add(new EmbedFieldBuilder()
+                            await logchan.SendMessageAsync("", false, new EmbedBuilder
                             {
-                                Name = "Old Message:",
-                                Value = oval,
-                                IsInline = true,
-
-                            });
-                        }
-                        else
-                        {
-                            if (MessageHelper.MessageExists(arg1.Id))
-                            {
-                                var msg = await MessageHelper.GetMessageAsync(arg1.Id);
-                                var oval = "{no content}";
-                                if (msg.Content != null)
-                                    if (msg.Content != "")
-                                        oval = msg.Content;
-                                fields.Add(new EmbedFieldBuilder()
+                                Title = "⚡ Message Edited ⚡",
+                                Description = $"Message Edited in <#{arg2.Channel.Id}>",
+                                Fields = new List<EmbedFieldBuilder>()
                                 {
-                                    Name = "Old Message:",
-                                    Value = oval,
-                                    IsInline = true,
-                                });
-                            }
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Author:",
+                                        Value = arg2.Author.Mention
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Content:",
+                                        Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
+                                    }
+                                },
+                                Color = Color.Orange,
+                                Footer = new EmbedFooterBuilder
+                                {
+                                    Text = $"Message Id: {arg2.Id}"
+                                }
+                            }.WithCurrentTimestamp().Build());
+                            return;
                         }
-                        var val = "{no content}";
-                        if (arg2.Content != null)
-                            if (arg2.Content != "")
-                                val = arg2.Content;
-                        fields.Add(new EmbedFieldBuilder()
+                        else if(arg2.IsPinned != msg.IsPinned)
                         {
-                            Name = "New Message:",
-                            Value = val,
-                            IsInline = true,
-
-                        });
-
-                        if(fields.Count == 2)
-                        {
-                            if (fields[0].Name == "{no content}" && fields[1].Name == "{no content}")
-                                return;
-                            if (fields[0].Value == fields[1].Value)
-                                return;
-                        }
-
-                        fields.Add(new EmbedFieldBuilder()
-                        {
-                            Name = "Author:",
-                            Value = arg2.Author.Mention,
-                            //IsInline = true,
-                        });
-                        await logchan.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "⚡ Message Edited ⚡",
-                            Description = $"Message edited in {sgc.Mention}",
-                            Fields = fields,
-                            Color = Color.Orange,
-                            Footer = new EmbedFooterBuilder()
+                            if (arg2.IsPinned)
                             {
-                                Text = $"Message ID: {arg2.Id}"
+                                await logchan.SendMessageAsync("", false, new EmbedBuilder
+                                {
+                                    Title = "📌 Message Pinned 📌",
+                                    Description = $"Message Pinned in <#{arg2.Channel.Id}>",
+                                    Fields = new List<EmbedFieldBuilder>()
+                                {
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Author:",
+                                        Value = arg2.Author.Mention
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Content:",
+                                        Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
+                                    }
+                                },
+                                    Color = Color.Green,
+                                    Footer = new EmbedFooterBuilder
+                                    {
+                                        Text = $"Message Id: {arg2.Id}"
+                                    }
+                                }.WithCurrentTimestamp().Build());
+                                return;
                             }
-                            
-                        }.WithCurrentTimestamp().Build());
+                            else
+                            {
+                                await logchan.SendMessageAsync("", false, new EmbedBuilder
+                                {
+                                    Title = "📌 Message Unpinned 📌",
+                                    Description = $"Message Unpinned in <#{arg2.Channel.Id}>",
+                                    Fields = new List<EmbedFieldBuilder>()
+                                {
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Author:",
+                                        Value = arg2.Author.Mention
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Content:",
+                                        Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
+                                    }
+                                },
+                                    Color = Color.Red,
+                                    Footer = new EmbedFooterBuilder
+                                    {
+                                        Text = $"Message Id: {arg2.Id}"
+                                    }
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                        }
+                    }
+                    else if(arg1.HasValue)
+                    {
+                        var msg = arg1.Value;
+                        if (msg.Content != arg2.Content)
+                        {
+                            await logchan.SendMessageAsync("", false, new EmbedBuilder
+                            {
+                                Title = "⚡ Message Edited ⚡",
+                                Description = $"Message Edited in <#{arg2.Channel.Id}>",
+                                Fields = new List<EmbedFieldBuilder>()
+                                {
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Author:",
+                                        Value = arg2.Author.Mention
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Content:",
+                                        Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
+                                    }
+                                },
+                                Color = Color.Orange,
+                                Footer = new EmbedFooterBuilder
+                                {
+                                    Text = $"Message Id: {arg2.Id}"
+                                }
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else if (arg2.IsPinned != msg.IsPinned)
+                        {
+                            if (arg2.IsPinned)
+                            {
+                                await logchan.SendMessageAsync("", false, new EmbedBuilder
+                                {
+                                    Title = "📌 Message Pinned 📌",
+                                    Description = $"Message Pinned in <#{arg2.Channel.Id}>",
+                                    Fields = new List<EmbedFieldBuilder>()
+                                {
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Author:",
+                                        Value = arg2.Author.Mention
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Content:",
+                                        Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
+                                    }
+                                },
+                                    Color = Color.Green,
+                                    Footer = new EmbedFooterBuilder
+                                    {
+                                        Text = $"Message Id: {arg2.Id}"
+                                    }
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            else
+                            {
+                                await logchan.SendMessageAsync("", false, new EmbedBuilder
+                                {
+                                    Title = "📌 Message Unpinned 📌",
+                                    Description = $"Message Unpinned in <#{arg2.Channel.Id}>",
+                                    Fields = new List<EmbedFieldBuilder>()
+                                {
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Author:",
+                                        Value = arg2.Author.Mention
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "Content:",
+                                        Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
+                                    }
+                                },
+                                    Color = Color.Red,
+                                    Footer = new EmbedFooterBuilder
+                                    {
+                                        Text = $"Message Id: {arg2.Id}"
+                                    }
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                        }
                     }
                 }
             }

@@ -188,9 +188,9 @@ namespace Public_Bot
                 float XPos = 80 + PaddingOffset + (BoxWidth * i);
                 float YPos = _b - Height;
                 LeaderboardGraphics.FillRectangle(new SolidBrush(color),
-                    XPos,        // X
-                    YPos,       //  Y
-                    BoxWidth,  //   Width
+                    XPos,         // X
+                    YPos,        //  Y
+                    BoxWidth,   //   Width
                     Height - 2 //    Height
                 );
                 LeaderboardGraphics.DrawString(

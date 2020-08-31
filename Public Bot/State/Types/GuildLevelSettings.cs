@@ -11,7 +11,7 @@ namespace Public_Bot
         [GraphQLObj, GraphQLSObj]
         public List<RankRole> RankRoles { get; set; } = new List<RankRole>();
         [GraphQLProp, GraphQLSVar]
-        public double LevelMultiplier { get; set; } = 1.10409;
+        public double LevelMultiplier { get; set; } = 1.12;
         [GraphQLProp, GraphQLSVar]
         public uint MaxLevel { get; set; } = 100;
         [GraphQLProp, GraphQLSVar]

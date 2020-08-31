@@ -15,12 +15,13 @@ namespace Public_Bot.Modules.Handlers
         public MessageHandler(DiscordShardedClient c)
         {
             client = c;
+            client.MessageUpdated += UpdateMessage;
 #if DEBUG
             Logger.Write("Message Loggin DISABLED OWO", Logger.Severity.State);
 #else
             Logger.Write("Message logging enabled", Logger.Severity.State);
             client.MessageReceived += AddMessage;
-            client.MessageUpdated += UpdateMessage;
+            
             client.MessageDeleted += DeleteMessage;
 #endif
         }
@@ -36,7 +37,25 @@ namespace Public_Bot.Modules.Handlers
             if (arg2.Author.IsBot || arg2.Author.IsWebhook)
                 return;
             if (MessageHelper.MessageExists(arg2.Id))
-                new MessageRevision(arg2);
+            {
+                var msg = MessageHelper.GetMessage(arg2.Id);
+                if(msg.IsPinned != arg2.IsPinned)
+                {
+                    await StateService.MutateAsync<Message>(
+                        GraphQLParser.GenerateGQLMutation<Message>(
+                            "updateMessagePinned", 
+                            false,
+                            null, 
+                            "", 
+                            "", 
+                            ("MessageID", arg2.Id), 
+                            ("IsPinned", arg2.IsPinned)
+                        )
+                   );
+                }
+                else if(msg.Content != arg2.Content)
+                    new MessageRevision(arg2);
+            }
         }
 
         private async Task AddMessage(SocketMessage arg)

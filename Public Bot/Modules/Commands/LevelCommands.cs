@@ -74,44 +74,14 @@ namespace Public_Bot.Modules.Commands
                         break;
                 };
                 string msg = emote + $" <@{user.Id}>\n> Level {(int)user.CurrentLevel}\n> XP {(long)user.CurrentXP}/{(long)user.NextLevelXP}\n\n";
-                if (i == 0)
-                    First = msg;
-                else if (i == 1)
-                    Second = msg;
-                else if (i == 2)
-                    Third = msg;
-                else
-                    f.Add(new EmbedFieldBuilder() 
-                    {
-                        IsInline = true,
-                        Name = "__\n__",
-                        Value = msg
-                    });
-            }
-            var fields = new List<EmbedFieldBuilder>
-            {
-                new EmbedFieldBuilder()
+                f.Add(new EmbedFieldBuilder()
                 {
-                     Name = "__\n__\n__\n__",
-                     Value = Second,
-                     IsInline = true
-                },
-                new EmbedFieldBuilder()
-                {
+                    IsInline = true,
                     Name = "__\n__",
-                    Value = First,
-                    IsInline = true
-                },
-                new EmbedFieldBuilder()
-                {
-                    Name = "__\n__\n__\n__",
-                    Value = Third,
-                    IsInline = true
-                }
+                    Value = msg
+                });
 
-            };
-            fields.AddRange(f);
-
+            }
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
@@ -120,7 +90,7 @@ namespace Public_Bot.Modules.Commands
                     IconUrl = Context.Guild.IconUrl
                 },
                 Color = Blurple,
-                Fields = fields,
+                Fields = f,
                 ImageUrl = await LeaderboardImageHelper.GetLeaderboardImageURL(levelmembers, gl.Settings)
             }.WithCurrentTimestamp();
             await Context.Channel.SendMessageAsync("", false, embed.Build());
@@ -1061,7 +1031,7 @@ namespace Public_Bot.Modules.Commands
                             new EmbedFieldBuilder()
                             {
                                 Name = "Here's how to change your settings:",
-                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <channel>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
+                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings xpmultiplier \n{GuildSettings.Prefix}levelsettings xpmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <channel>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
                             }
                         },
                     Color = Color.Green
@@ -1127,7 +1097,7 @@ namespace Public_Bot.Modules.Commands
                             new EmbedFieldBuilder()
                             {
                                 Name = "Here's how to change your settings:",
-                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings levelmultiplier \n{GuildSettings.Prefix}levelsettings levelmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <channel>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
+                                Value = $"```\n{GuildSettings.Prefix}levelsettings list\n{GuildSettings.Prefix}levelsettings maxlevel\n{GuildSettings.Prefix}levelsettings maxlevel <max_level>\n{GuildSettings.Prefix}levelsettings messagexp \n{GuildSettings.Prefix}levelsettings messagexp <msg_xp>\n{GuildSettings.Prefix}levelsettings voicexp\n{GuildSettings.Prefix}levelsettings voicexp <voice_xp>\n{GuildSettings.Prefix}levelsettings defaultxp \n{GuildSettings.Prefix}levelsettings defaultxp <default_xp>\n{GuildSettings.Prefix}levelsettings xpmultiplier \n{GuildSettings.Prefix}levelsettings xpmultiplier <new_value>\n{GuildSettings.Prefix}levelsettings blacklist\n{GuildSettings.Prefix}levelsettings blacklist add <channel>\n{GuildSettings.Prefix}levelsettings blacklist remove <channel>\n{GuildSettings.Prefix}levelsettings ranks\n{GuildSettings.Prefix}levelsettings ranks add <@role> <level>\n{GuildSettings.Prefix}levelsettings ranks remove <@role>\n{GuildSettings.Prefix}levelsettings refresh <@role>```"
                             }
                         },
                         Color = Color.Green

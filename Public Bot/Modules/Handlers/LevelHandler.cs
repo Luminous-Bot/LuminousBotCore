@@ -407,7 +407,9 @@ namespace Public_Bot.Modules.Handlers
         public static int CalcXP(uint level, double xpMult, uint baseXp)
         {
             double res = baseXp;
-            for (int i = 0; i != level; i++)
+            if (level == 0)
+                return (int)res;
+            for (int i = 1; i != level; i++)
                 res *= xpMult;
             return (int)res;
         }
