@@ -28,27 +28,102 @@ namespace Public_Bot.Modules.Commands
         public async Task Leaderboard()
         {
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
-            List<string> rl = new List<string>();
-            //foreach (var chan in gl.Settings.RankRoles.OrderBy(x => x.Key * -1))
-            //{
-            //    rl.Add($"Level {chan.Key}: <@&{chan.Value}>");
-            //}
-            List<string> lm = new List<string>();
-            int rnk = 1;
-            var levelmembers = gl.GetTop(15);
-            int space = levelmembers.Select(x => x.Username).Max(x => x.Length);
-            foreach (var item in levelmembers)
+          
+            var levelmembers = gl.GetTop(9);
+
+            string Ranks = "";
+            List<EmbedFieldBuilder> f = new List<EmbedFieldBuilder>();
+            string First  = "";
+            string Second = "";
+            string Third  = "";
+            for (int i = 0; i != levelmembers.Count; i++)
             {
-                lm.Add($"#{rnk} - {(item.Username == "" ? Context.Guild.GetUser(item.Id).ToString().PadRight(space) : item.Username.PadRight(space))} Level: {item.CurrentLevel} XP: {(uint)item.CurrentXP}/{(uint)item.NextLevelXP}");
-                rnk++;
+                var user = levelmembers[i];
+                var emote = "";
+                switch (i)
+                {
+                    case 0:
+                        emote = ":first_place:";
+                        break;
+                    case 1:
+                        emote = ":second_place:";
+                        break;
+                    case 2:
+                        emote = ":third_place:";
+                        break;
+                    case 3:
+                        emote = ":four:";
+                        break;
+                    case 4:
+                        emote = ":five:";
+                        break;
+                    case 5:
+                        emote = ":six:";
+                        break;
+                    case 6:
+                        emote = ":seven:";
+                        break;
+                    case 7:
+                        emote = ":eight:";
+                        break;
+                    case 8:
+                        emote = ":nine:";
+                        break;
+                    case 9:
+                        emote = ":keycap_ten:";
+                        break;
+                };
+                string msg = emote + $" <@{user.Id}>\n> Level {(int)user.CurrentLevel}\n> XP {(long)user.CurrentXP}/{(long)user.NextLevelXP}\n\n";
+                if (i == 0)
+                    First = msg;
+                else if (i == 1)
+                    Second = msg;
+                else if (i == 2)
+                    Third = msg;
+                else
+                    f.Add(new EmbedFieldBuilder() 
+                    {
+                        IsInline = true,
+                        Name = "__\n__",
+                        Value = msg
+                    });
             }
-            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+            var fields = new List<EmbedFieldBuilder>
             {
-                Title = $"{Context.Guild.Name}",
-                Description = $"```{string.Join('\n', lm)}```" + (rl.Count > 0 ? $"\n\nAchievable roles:\n{string.Join('\n', rl)}" : ""),
-                Color = Color.Green,
-                ThumbnailUrl = Context.Guild.IconUrl
-            }.WithCurrentTimestamp().Build());
+                new EmbedFieldBuilder()
+                {
+                     Name = "__\n__\n__\n__",
+                     Value = Second,
+                     IsInline = true
+                },
+                new EmbedFieldBuilder()
+                {
+                    Name = "__\n__",
+                    Value = First,
+                    IsInline = true
+                },
+                new EmbedFieldBuilder()
+                {
+                    Name = "__\n__\n__\n__",
+                    Value = Third,
+                    IsInline = true
+                }
+
+            };
+            fields.AddRange(f);
+
+            var embed = new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
+                {
+                    Name = Context.Guild.Name,
+                    IconUrl = Context.Guild.IconUrl
+                },
+                Color = Blurple,
+                Fields = fields,
+                ImageUrl = await LeaderboardImageHelper.GetLeaderboardImageURL(levelmembers, gl.Settings)
+            }.WithCurrentTimestamp();
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
         public class RankBuilder
         {

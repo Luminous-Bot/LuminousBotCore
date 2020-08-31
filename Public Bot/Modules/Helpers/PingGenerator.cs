@@ -107,7 +107,7 @@ namespace Public_Bot
             bool odd = true;
             for (float i = 1; i != yMax + 1; i++)
             {
-               if (i % chtr2 == 0)
+                if (i % chtr2 == 0)
                 {
                     if (!odd)
                     {
