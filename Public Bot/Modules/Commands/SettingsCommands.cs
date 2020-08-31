@@ -308,6 +308,8 @@ namespace Public_Bot.Modules.Commands
                     var f = fields.Find(x => x.Name == command.ModuleName);
                     string res = "";
                     bool enabled = !GuildSettings.DisabledCommands.Contains(command.CommandName);
+                    if (!GuildSettings.ModulesSettings[command.ModuleName])
+                        enabled = false;
                     res = $"{(enabled ? "✅" : "❌")} {command.CommandName}";
                     f.Value += $"\n{res}";
                 }
@@ -318,6 +320,8 @@ namespace Public_Bot.Modules.Commands
                     field.Name = command.ModuleName;
                     string res = "";
                     bool enabled = !GuildSettings.DisabledCommands.Contains(command.CommandName);
+                    if (!GuildSettings.ModulesSettings[command.ModuleName])
+                        enabled = false;
                     res = $"{(enabled ? "✅" : "❌")} {command.CommandName}";
                     field.Value = $"```\n{res}";
                     fields.Add(field);
