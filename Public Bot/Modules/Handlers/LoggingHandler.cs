@@ -653,6 +653,14 @@ namespace Public_Bot.Modules.Handlers
                                 Name = "Message:",
                                 Value = msg.Content == null ? "{no content}" : msg.Content == "" ? "{no content}" : msg.Content
                             });
+                            if (msg.Attachments.Any())
+                            {
+                                fields.Add(new EmbedFieldBuilder()
+                                {
+                                    Name = "Attachments:",
+                                    Value = string.Join("\n", msg.Attachments)
+                                });
+                            }
                         }
 
                         await logchan.SendMessageAsync("", false, new EmbedBuilder()

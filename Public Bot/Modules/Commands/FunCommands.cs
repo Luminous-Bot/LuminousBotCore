@@ -255,7 +255,7 @@ namespace Public_Bot.Modules.Commands
 
                     if (chancheck)
                     {
-                        coin.WithImageUrl("https://cdn.hapsy.net/ee8f064c-e010-4699-8ccd-f68a30823da7");
+                        coin.WithImageUrl("https://images-ext-2.discordapp.net/external/yotLGOWZxrYwnzEO-RnVKt_E0l7p-vDCiVuOEcJpsP8/https/cdn.hapsy.net/e16ef7e1-3252-4cc7-b3f4-e8a717628634?width=1133&height=1133");
                         break;
                     }
 
@@ -265,7 +265,7 @@ namespace Public_Bot.Modules.Commands
                     coin.WithDescription("Tails!");
                     if (chancheck)
                     {
-                        coin.WithImageUrl("https://cdn.hapsy.net/99420dee-1c24-41cd-a7af-b13c7a6f9528");
+                        coin.WithImageUrl("https://images-ext-1.discordapp.net/external/AtQjFLJNpW2o8EqdSK0sVpKGhWIE0DG9IqQ3cB1msKM/https/cdn.hapsy.net/66e73970-8bb8-4ae9-b2c3-b71c60ce19d5?width=1133&height=1133");
                         break;
                     }
                     coin.WithImageUrl("https://realflipacoin.net/media/assets/coin-mid-1.png?a");
