@@ -73,15 +73,22 @@ namespace Public_Bot.Modules.Commands
                         emote = ":keycap_ten:";
                         break;
                 };
-                string msg = emote + $" <@{user.Id}>\n> Level {(int)user.CurrentLevel}\n> XP {(long)user.CurrentXP}/{(long)user.NextLevelXP}\n\n";
+                string msg = $"> Level {(int)user.CurrentLevel}\n> XP {(long)user.CurrentXP}/{(long)user.NextLevelXP}\n\n";
                 f.Add(new EmbedFieldBuilder()
                 {
                     IsInline = true,
-                    Name = "__\n__",
+                    Name = emote + $" {user.Username}",
                     Value = msg
                 });
 
             }
+            string url = null;
+            try
+            {
+                url = await LeaderboardImageHelper.GetLeaderboardImageURL(levelmembers, gl.Settings);
+            }
+            catch { }
+
             var embed = new EmbedBuilder()
             {
                 Author = new EmbedAuthorBuilder()
@@ -91,7 +98,7 @@ namespace Public_Bot.Modules.Commands
                 },
                 Color = Blurple,
                 Fields = f,
-                ImageUrl = await LeaderboardImageHelper.GetLeaderboardImageURL(levelmembers, gl.Settings)
+                ImageUrl = url
             }.WithCurrentTimestamp();
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }

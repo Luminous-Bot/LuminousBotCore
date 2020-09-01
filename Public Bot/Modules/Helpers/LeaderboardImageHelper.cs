@@ -40,7 +40,7 @@ namespace Public_Bot
             LeaderboardGraphics.DrawLine(WhitePen, 80, 5, 80, _b); // Y
             LeaderboardGraphics.DrawLine(WhitePen, 78, _b, _w, _b); // X
 
-            // Draw "Levels" on the side
+            // Draw "Level" on the side
             LeaderboardGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             LeaderboardGraphics.TranslateTransform(30, LeaderboardImage.Height / 2);
             LeaderboardGraphics.RotateTransform(-90);
