@@ -1,9 +1,11 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using Public_Bot.Modules.Handlers;
 using Public_Bot.State.Types;
+using RestSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -130,7 +132,45 @@ namespace Public_Bot
                             Description = $"{client.CurrentUser.Username} is missing these permissions:\n{resp.ResultMessage}This command will not work until you give {client.CurrentUser.Username} these permissions!"
                         }.WithCurrentTimestamp().Build());
                    }
-                   else if(resp.Result == CommandStatus.Error){
+                   else if(resp.Result == CommandStatus.Error)
+                   {
+
+                        if(resp.Exception.InnerException != null && resp.Exception.InnerException.GetType() == typeof(Discord.Net.HttpException))
+                        {
+                            var e = resp.Exception.InnerException as HttpException;
+                            
+                            if(e.DiscordCode == 50013)
+                            {
+                                // no permissions, tell the user
+                                try
+                                {
+                                    await context.User.SendMessageAsync("", false, new EmbedBuilder()
+                                    {
+                                        Title = "Hey! We're missing permissions!",
+                                        Color = Color.Red,
+                                        Description = $"The bot doesn't have permission to send messages in <#{context.Channel.Id}> on {context.Guild}!",
+                                        Fields = new List<EmbedFieldBuilder>()
+                                        {
+                                            new EmbedFieldBuilder()
+                                            {
+                                                Name = "If you're an Admin",
+                                                Value = $"Please check {client.CurrentUser.Username}'s permission in `#{context.Channel.Name}` to make sure the bot can **Send Messages** in said channel. If the bot still has this issue please join the [Support Server](https://discord.com/invite/w8EcwBy) and ask around for help.",
+                                                IsInline = true
+                                            },
+                                            new EmbedFieldBuilder()
+                                            {
+                                                Name = "If you're a Member",
+                                                Value = $"Contact an Mod/Admin/Owner in {context.Guild.Name} and tell them that the bot doesn't have permission to send messages in `#{context.Channel}`. Thanks.",
+                                                IsInline = true
+                                            }
+                                        }
+                                    }.WithCurrentTimestamp().Build());
+                                }
+                                catch { }
+                                return;
+                            }
+                        }
+
                         var c = client.GetGuild(724798166804725780).GetTextChannel(740141617566056489);
                         if (c == null)
                             return;

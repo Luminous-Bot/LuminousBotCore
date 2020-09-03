@@ -20,7 +20,10 @@ namespace Public_Bot
         }
         public static List<GuildSettings> LoadedGuildSettings { get; set; } = new List<GuildSettings>();
         public static string GuildSettingsFolder = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}GuildSettings";
-        
+
+        public static bool GuildSettingsExists(ulong GuildId)
+            => File.Exists(GuildSettingsFolder + $"{Path.DirectorySeparatorChar}{GuildId}.gs");
+
         public static GuildSettings GetGuildSettings(ulong GuildID)
         {
             if (LoadedGuildSettings.ToArray().Any(x => x.GuildID == GuildID))

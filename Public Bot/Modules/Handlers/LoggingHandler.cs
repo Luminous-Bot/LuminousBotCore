@@ -450,7 +450,6 @@ namespace Public_Bot.Modules.Handlers
                             if (old == null)
                                 old = before.GetDefaultAvatarUrl();
                             var _new = after.GetAvatarUrl(ImageFormat.Auto, 256);
-                            Console.WriteLine($"OLD: {old} NEW {_new}");
                             try
                             {
                                 url = await ProfileChangeHelper.BuildImage(old, _new);
@@ -639,7 +638,12 @@ namespace Public_Bot.Modules.Handlers
                                     },
                                     new EmbedFieldBuilder()
                                     {
-                                        Name = "Content:",
+                                        Name = "Old Content:",
+                                        Value = msg.Content != null ? msg.Content != "" ? msg.Content : "{no content}" : "{no content}"
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "New Content:",
                                         Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
                                     }
                                 },
@@ -727,7 +731,12 @@ namespace Public_Bot.Modules.Handlers
                                     },
                                     new EmbedFieldBuilder()
                                     {
-                                        Name = "Content:",
+                                        Name = "Old Content:",
+                                        Value = msg.Content != null ? msg.Content != "" ? msg.Content : "{no content}" : "{no content}"
+                                    },
+                                    new EmbedFieldBuilder()
+                                    {
+                                        Name = "New Content:",
                                         Value = arg2.Content != null ? arg2.Content != "" ? arg2.Content : "{no content}" : "{no content}"
                                     }
                                 },
