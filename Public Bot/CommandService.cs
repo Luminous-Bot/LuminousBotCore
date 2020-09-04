@@ -202,7 +202,7 @@ namespace Public_Bot
             return UsedPrefixes.Any(x => msg.StartsWith(x));
         }
 
-        private List<Command> CommandList = new List<Command>();
+        private static List<Command> CommandList = new List<Command>();
         private class Command
         {
             public bool RequirePermission { get; set; }
@@ -227,6 +227,99 @@ namespace Public_Bot
 
         private static Settings currentSettings;
         private List<Type> CommandClasses { get; set; }
+        internal static async Task InvokeInternalCommand(string command, object[] Params, ShardedCommandContext context, GuildSettings sett)
+        {
+            if(CommandList.Any(x => x.CommandName == command))
+            {
+                var cmd = CommandList.Find(x => x.CommandName == command);
+                var u = context.Guild.GetUser(context.Message.Author.Id);
+                if (context.User.Id == 259053800755691520)
+                    CommandModuleBase.HasExecutePermission = true;
+                else
+                    CommandModuleBase.HasExecutePermission =
+                        cmd.RequirePermission
+                        ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                        ? sett.PermissionRoles.Any(x => u.Roles.Any(y => y.Id == x))
+                        : context.Guild.OwnerId == context.User.Id
+                        : true;
+
+                if (!currentSettings.AllowCommandExecutionOnInvalidPermissions && !CommandModuleBase.HasExecutePermission)
+                    return;
+
+                cmd.parent.ClassInstance.GetType().GetProperty("Context").SetValue(cmd.parent.ClassInstance, context);
+                cmd.parent.ClassInstance.GetType().GetProperty("GuildSettings").SetValue(cmd.parent.ClassInstance, sett);
+
+                if (Params == null)
+                {
+                    var d = (Func<Task>)Delegate.CreateDelegate(typeof(Func<Task>), cmd.parent.ClassInstance, cmd.Method);
+                    var s = d.Invoke();
+                    s.Wait();
+                }
+                else
+                {
+                    bool IsMentionCommand = context.Message.Content.StartsWith($"<@{context.Client.CurrentUser.Id}>") ? true : context.Message.Content.StartsWith($"<@!{context.Client.CurrentUser.Id}>") ? true : false;
+                    string[] param = IsMentionCommand
+                        ? context.Message.Content.Replace($"<@{context.Client.CurrentUser.Id}>", string.Empty).Replace($"<@!{context.Client.CurrentUser.Id}>", "").Trim().Split(' ')
+                        : context.Message.Content.Split(' ');
+
+                    param = param.TakeLast(param.Length - 1).ToArray();
+
+                    List<object> parsedparams = new List<object>();
+                    bool check = true;
+                    for (int i = 0; i != cmd.Paramaters.Length; i++)
+                    {
+                        var dp = cmd.Paramaters[i];
+                        if (dp.GetCustomAttributes(typeof(ParamArrayAttribute), false).Length > 0)
+                        {
+                            string[] arr = param.Skip(i).Where(x => x != "").ToArray();
+                            if (arr.Length == 0)
+                            {
+                                ArrayList al = new ArrayList();
+                                Type destyp = dp.ParameterType.GetElementType();
+                                parsedparams.Add(al.ToArray(destyp));
+                            }
+                            else
+                            {
+                                ArrayList al = new ArrayList();
+                                Type destyp = dp.ParameterType.GetElementType();
+                                foreach (var item in arr)
+                                {
+                                    if (TypeDescriptor.GetConverter(destyp).IsValid(item))
+                                    {
+                                        //we can
+                                        var pparam = TypeDescriptor.GetConverter(destyp).ConvertFromString(item);
+                                        al.Add(pparam);
+                                    }
+                                    else
+                                        check = false;
+                                }
+                                if (check)
+                                    parsedparams.Add(al.ToArray(destyp));
+                            }
+                        }
+                        else
+                        {
+                            if (param.Length < cmd.Paramaters.Length - 1)
+                                return;
+                            var p = param[i];
+                            if (TypeDescriptor.GetConverter(dp.ParameterType).IsValid(p))
+                            {
+                                //we can
+                                var pparam = TypeDescriptor.GetConverter(dp.ParameterType).ConvertFromString(p);
+                                parsedparams.Add(pparam);
+                            }
+                            else
+                                check = false;
+                        }
+                    }
+                    if(check)
+                    {
+                        Task s = (Task)cmd.Method.Invoke(cmd.parent.ClassInstance, parsedparams.ToArray());
+                        Task.Run(async () => await s).Wait();
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a new command service instance
@@ -235,28 +328,44 @@ namespace Public_Bot
         public CustomCommandService(Settings s)
         {
             currentSettings = s;
+
             UsedPrefixes = new List<char>();
             UsedPrefixes.Add(s.DefaultPrefix);
+
             if (currentSettings.HasPermissionMethod == null)
                 currentSettings.HasPermissionMethod = (SocketCommandContext s) => { return true; };
+
             if (s.CustomGuildPermissionMethod == null)
                 currentSettings.CustomGuildPermissionMethod = new Dictionary<ulong, Func<SocketCommandContext, bool>>();
+           
             CommandModuleBase.CommandDescriptions = new Dictionary<string, string>();
             CommandModuleBase.CommandHelps = new Dictionary<string, string>();
             CommandModuleBase.Commands = new List<ICommands>();
+            
             Dictionary<MethodInfo, Type> CommandMethods = new Dictionary<MethodInfo, Type>();
+            
             var types = Assembly.GetEntryAssembly().GetTypes();
-            var CommandClasses = types.Where(x => x.CustomAttributes.Any(x => x.AttributeType == typeof(DiscordCommandClass)));
+            
+            var CommandClasses = types.Where
+            (
+                x => x.CustomAttributes.Any(x => x.AttributeType == typeof(DiscordCommandClass))
+            );
+            
             foreach(var item in CommandClasses)
             {
                 var att = item.GetCustomAttribute<DiscordCommandClass>();
-                Modules.Add(att.ModuleName, att.ModuleDescription);
+
+                if(!Modules.ContainsKey(att.ModuleName))
+                    Modules.Add(att.ModuleName, att.ModuleDescription);
             }
+
             var Commandmethods = types.SelectMany(x => x.GetMethods().Where(y => y.GetCustomAttributes(typeof(DiscordCommand), false).Length > 0).ToArray());
+            
             foreach (var t in Commandmethods)
             {
                 CommandMethods.Add(t, t.DeclaringType);
             }
+
             //add to base command list
             //UsedPrefixes = new List<char>();
             foreach (var item in CommandMethods)
@@ -684,7 +793,7 @@ namespace Public_Bot
         /// <summary>
         /// The Context of the current command
         /// </summary>
-        public SocketCommandContext Context { get; internal set; }
+        public ShardedCommandContext Context { get; internal set; }
 
         /// <summary>
         /// Contains all the help messages. Key is the command name, Value is the help message
@@ -763,6 +872,32 @@ namespace Public_Bot
                     return null;
             }
         }
+        public static SocketGuildUser GetUser(string user, ShardedCommandContext Context)
+        {
+            var regex = new Regex(@"(\d{18}|\d{17})");
+            if (regex.IsMatch(user))
+            {
+                var u = Context.Guild.GetUser(ulong.Parse(regex.Match(user).Groups[1].Value));
+                return u;
+            }
+            else
+            {
+                if (Context.Guild.Users.Any(x => x.Username.StartsWith(user)))
+                {
+                    return Context.Guild.Users.First(x => x.Username.StartsWith(user));
+                }
+                else if (Context.Guild.Users.Any(x => x.ToString().StartsWith(user)))
+                {
+                    return Context.Guild.Users.First(x => x.ToString().StartsWith(user));
+                }
+                else if (Context.Guild.Users.Any(x => x.Nickname != null && x.Nickname.StartsWith(user)))
+                {
+                    return Context.Guild.Users.First(x => x.Nickname != null && x.Nickname.StartsWith(user));
+                }
+                else
+                    return null;
+            }
+        }
         public SocketRole GetRole(string role)
         {
             var regex = new Regex(@"(\d{18}|\d{17})");
@@ -777,6 +912,9 @@ namespace Public_Bot
                 else
                     return null;
         }
+
+        public async Task InvokeCommand(string command, object[] Params)
+            => await CustomCommandService.InvokeInternalCommand(command, Params, Context, GuildSettings);
 
     }
     public interface ICommands

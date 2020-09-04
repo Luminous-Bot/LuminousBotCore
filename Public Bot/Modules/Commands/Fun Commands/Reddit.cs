@@ -1,4 +1,4 @@
-﻿using Discord;
+using Discord;
 using Discord.WebSocket;
 using System;
 using System.IO;
@@ -12,18 +12,11 @@ using System.Net;
 using System.Linq;
 using Discord.Commands;
 using WikiDotNet;
-
-namespace Public_Bot.Modules.Commands
+namespace Public_Bot.Modules.Commands.Fun_Commands
 {
-
     [DiscordCommandClass("🤽🏼 Fun 🤽🏼", "Commands to use to spice up your server.")]
-    public class FunCommands : CommandModuleBase
+    public class Reddit : CommandModuleBase
     {
-        // Variables to use later on
-        static string[] puns = File.ReadAllLines($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}puns.txt");
-        int rot = 0;
-        private readonly Random _random = new Random();
-        [Alt("meme")]
         [DiscordCommand("reddit", commandHelp = "Usage: `(PREFIX)reddit \n(PREFIX)reddit subs \n(PREFIX)reddit subs add <r/sub> \n(PREFIX)reddit subs remove <r/sub>`", description = "Grabs a random post from reddit")]
         public async Task meme(params string[] args)
         {
@@ -236,189 +229,5 @@ namespace Public_Bot.Modules.Commands
                 }
             }
         }
-
-        [DiscordCommand("coinflip", commandHelp = "`(PREFIX)coinflip`", description = "Flips a coin")]
-
-        public async Task CoinFlip()
-        {
-            bool chancheck = Context.Guild.GetTextChannel(Context.Channel.Id).IsNsfw;
-            var value = _random.Next(0, 2);
-            EmbedBuilder coin = new EmbedBuilder()
-                .WithColor(Blurple)
-                .WithTitle("Coin Flip!");
-
-            switch (value)
-            {
-                case 1:
-
-                    coin.WithDescription("Heads!");
-
-                    if (chancheck)
-                    {
-                        coin.WithImageUrl("https://images-ext-2.discordapp.net/external/yotLGOWZxrYwnzEO-RnVKt_E0l7p-vDCiVuOEcJpsP8/https/cdn.hapsy.net/e16ef7e1-3252-4cc7-b3f4-e8a717628634?width=1133&height=1133");
-                        break;
-                    }
-
-                    coin.WithImageUrl("https://realflipacoin.net/media/assets/coin-mid-0.png?a");
-                    break;
-                case 0:
-                    coin.WithDescription("Tails!");
-                    if (chancheck)
-                    {
-                        coin.WithImageUrl("https://images-ext-1.discordapp.net/external/AtQjFLJNpW2o8EqdSK0sVpKGhWIE0DG9IqQ3cB1msKM/https/cdn.hapsy.net/66e73970-8bb8-4ae9-b2c3-b71c60ce19d5?width=1133&height=1133");
-                        break;
-                    }
-                    coin.WithImageUrl("https://realflipacoin.net/media/assets/coin-mid-1.png?a");
-                    break;
-            }
-
-            await Context.Channel.SendMessageAsync("", false, coin.Build());
-        }
-
-        [DiscordCommand("8ball", commandHelp = "`(PREFIX)8ball`", description = "Ask the all knowing 8-ball")]
-
-        public async Task eightball(params string[] args)
-        {
-
-            var sb = new StringBuilder();
-
-            var embed = new EmbedBuilder();
-
-            var replies = new List<string>();
-
-            //Possible Replies
-            replies.Add("Yes");
-            replies.Add("No");
-            replies.Add("Lol idk");
-            replies.Add("69% Chance");
-
-            embed.WithColor(Blurple);
-            embed.WithTitle("8-Ball");
-
-            sb.AppendLine($"{Context.User.Username}");
-            sb.AppendLine();
-
-            if (args == null)
-            {
-                sb.AppendLine("Sorry, can't answer air");
-            }
-            else
-            {
-                var ans = replies[new Random().Next(replies.Count - 1)];
-
-                sb.AppendLine($"Your question is **{string.Join(' ', args)}**");
-                sb.AppendLine();
-                sb.AppendLine($"The answer is **{ans}**");
-            }
-
-            embed.Description = sb.ToString();
-
-            await Context.Channel.SendMessageAsync("", false, embed.Build());
-
-        }
-
-        [DiscordCommand("pun", commandHelp = "(PREFIX)pun", description = "Sends a random pun from our collection!")]
-
-        public async Task Pun()
-        {
-            try
-            {
-                Random rand = new Random();
-                int index = rand.Next(puns.Length);
-
-                EmbedBuilder b = new EmbedBuilder()
-                    .WithTitle($"{puns[index]}")
-                    .WithColor(Blurple);
-
-                await Context.Channel.SendMessageAsync("", false, b.Build());
-            } catch
-            {
-                EmbedBuilder e = new EmbedBuilder()
-                {
-                    Title = "puns.txt doesn't exist, please contact quin#3017"
-                };
-                await Context.Channel.SendMessageAsync("", false, e.Build());
-            }
-        }
-
-        [DiscordCommand("wiki", commandHelp = "(PREFIX)wiki <search>", description = "Searches wikipedia!")]
-
-        public async Task SearchWikipedia(params string[] arg1)
-        {
-            if(arg1.Length == 0)
-            {
-                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder() 
-                {
-                    Title = "No Arguments",
-                    Description = $"What wiki do you want to search for? Please provide some arguments: `{GuildSettings.Prefix}wiki <wiki>`",
-                    Color = Color.Orange
-                }.Build());
-                return;
-            }
-
-            var args = String.Join(' ', arg1);
-
-            EmbedBuilder b = new EmbedBuilder()
-                .WithFooter("Not what you wanted? Try searching without spaces.")
-                .WithColor(Blurple);
-            
-
-            StringBuilder sb = new StringBuilder();
-
-            WikiSearchResponse response = WikiSearcher.Search(args, new WikiSearchSettings
-            {
-                ResultLimit = 1
-            });
-
-            if (response.Query.SearchResults == null)
-            {
-                b.WithDescription("No results could be found :(");
-                await Context.Message.Channel.SendMessageAsync("", false, b.Build());
-                return;
-            }
-            //Extra protection I guess
-            if (response.Query.SearchResults.Length == 0)
-            {
-                b.WithDescription("No results could be found :(");
-                await Context.Message.Channel.SendMessageAsync("", false, b.Build());
-                return;
-            }
-            foreach (WikiSearchResult result in response.Query.SearchResults)
-            {
-                string link =
-                    $"{result.Preview}...\n\n";
-
-                string title = $"{result.Title}";
-
-                b.WithTitle(title);
-
-                //There is a character limit of 2048, so lets make sure we don't hit that
-                if (sb.Length >= 2048) continue;
-
-                if (sb.Length + link.Length >= 2048) continue;
-
-                sb.Append(link);
-
-                b.WithUrl(result.ConstantUrl("en"));
-
-            }
-
-            b.WithDescription(sb.ToString());
-            b.WithCurrentTimestamp();
-
-            await Context.Channel.SendMessageAsync("", false, b.Build());
-        }
-
-        //[DiscordCommand("hangman", commandHelp = "(PREFIX)hangman", description = "Starts a game of hangman")]
-
-        //public async Task HangmanAsync(SocketMessage arg)
-        //{
-        //    await Context.Message.Author.SendMessageAsync("Please respond with the word or phrase you want to use for hangman!");
-        //    await Context.Message.Channel.SendMessageAsync("Sent you a dm <3");
-
-
-
-        //}
-
     }
 }

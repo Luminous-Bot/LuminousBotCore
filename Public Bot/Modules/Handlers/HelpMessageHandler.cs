@@ -126,7 +126,7 @@ namespace Public_Bot.Modules.Handlers
             {
                 Title = $"**Help**",
                 Color = Color.Green,
-                Description = "Here are the commands!",
+                Description = "Here are the commands! You can join our [Discord](https://discord.com/invite/w8EcwBy) server for more information and help",
                 Fields = new List<EmbedFieldBuilder>(),
                 //Footer = new EmbedFooterBuilder()
                 //{

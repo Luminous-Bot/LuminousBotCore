@@ -18,24 +18,24 @@ namespace Public_Bot.Modules.Handlers
         {
             client = c;
             //subscribe
-            client.ChannelCreated += Client_ChannelCreated;
-            client.ChannelDestroyed += Client_ChannelDestroyed;
-            client.ChannelUpdated += Client_ChannelUpdated;
-            client.GuildUpdated += Client_GuildUpdated;
-            client.MessageDeleted += Client_MessageDeleted;
-            client.MessageUpdated += Client_MessageUpdated;
-            client.RoleCreated += Client_RoleCreated;
-            client.RoleDeleted += Client_RoleDeleted;
-            client.RoleUpdated += Client_RoleUpdated;
-            client.UserUnbanned += Client_UserUnbanned;
-            client.UserUpdated += Client_UserUpdated;
-            client.GuildMemberUpdated += Client_GuildMemberUpdated;
+            client.ChannelCreated        += Client_ChannelCreated;
+            client.ChannelDestroyed      += Client_ChannelDestroyed;
+            client.ChannelUpdated        += Client_ChannelUpdated;
+            client.GuildUpdated          += Client_GuildUpdated;
+            client.MessageDeleted        += Client_MessageDeleted;
+            client.MessageUpdated        += Client_MessageUpdated;
+            client.RoleCreated           += Client_RoleCreated;
+            client.RoleDeleted           += Client_RoleDeleted;
+            client.RoleUpdated           += Client_RoleUpdated;
+            client.UserUnbanned          += Client_UserUnbanned;
+            client.UserUpdated           += Client_UserUpdated;
+            client.GuildMemberUpdated    += Client_GuildMemberUpdated;
             client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
-            client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
-            client.UserJoined += Client_UserJoined;
-            client.UserLeft += Client_UserLeft;
-            client.InviteCreated += Client_InviteCreated;
-            client.InviteDeleted += Client_InviteDeleted;
+            client.MessagesBulkDeleted   += Client_MessagesBulkDeleted;
+            client.UserJoined            += Client_UserJoined;
+            client.UserLeft              += Client_UserLeft;
+            client.InviteCreated         += Client_InviteCreated;
+            client.InviteDeleted         += Client_InviteDeleted;
         }
 
         private async Task Client_InviteDeleted(Cacheable<SocketGuildInvite, string> arg1, SocketGuild arg2)

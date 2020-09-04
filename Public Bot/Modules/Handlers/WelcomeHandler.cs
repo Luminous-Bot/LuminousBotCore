@@ -1,5 +1,6 @@
 ﻿using Discord.WebSocket;
 using Public_Bot.Modules.Commands;
+using Public_Bot.Modules.Commands.General_Commands;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,7 +10,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using static Public_Bot.Modules.Commands.GeneralCommands;
+using static Public_Bot.Modules.Commands.Level_Commands.Rank;
 
 namespace Public_Bot.Modules.Handlers
 {
@@ -61,14 +62,14 @@ namespace Public_Bot.Modules.Handlers
 
             //background
             if (welc.BackgroundUrl == null)
-                WelcomeGraphics.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(40, 40, 40)), LevelCommands.RankBuilder.RoundedRect(new Rectangle(0, 0, 960, 540), 30));
+                WelcomeGraphics.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(40, 40, 40)), RankBuilder.RoundedRect(new Rectangle(0, 0, 960, 540), 30));
             else
             {
                 byte[] bytes = wc.DownloadData(welc.BackgroundUrl);
                 MemoryStream ms = new MemoryStream(bytes);
                 System.Drawing.Image bannr = System.Drawing.Image.FromStream(ms);
                 WelcomeGraphics.DrawImage(GuildStatBuilder.RoundCorners(bannr, 30), new PointF(0, 0));
-                WelcomeGraphics.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(200, 40, 40, 40)), LevelCommands.RankBuilder.RoundedRect(new Rectangle(30, 30, 900, 480), 30));
+                WelcomeGraphics.FillPath(new SolidBrush(System.Drawing.Color.FromArgb(200, 40, 40, 40)), RankBuilder.RoundedRect(new Rectangle(30, 30, 900, 480), 30));
 
             }
             //server logo
@@ -77,9 +78,9 @@ namespace Public_Bot.Modules.Handlers
                 byte[] bytes2 = wc.DownloadData(guild.IconUrl);
                 MemoryStream ms2 = new MemoryStream(bytes2);
                 var img = System.Drawing.Image.FromStream(ms2);
-                var Icon = LevelCommands.RankBuilder.ResizeImage(img, 150, 150);
+                var Icon = RankBuilder.ResizeImage(img, 150, 150);
                 img.Dispose();
-                WelcomeGraphics.DrawImage(LevelCommands.RankBuilder.ClipToCircle(Icon, new PointF(Icon.Width / 2, Icon.Height / 2), Icon.Width / 2, System.Drawing.Color.Transparent), new PointF(WelcomeImage.Width / 2 - Icon.Width / 2, 120));
+                WelcomeGraphics.DrawImage(RankBuilder.ClipToCircle(Icon, new PointF(Icon.Width / 2, Icon.Height / 2), Icon.Width / 2, System.Drawing.Color.Transparent), new PointF(WelcomeImage.Width / 2 - Icon.Width / 2, 120));
             }
             //text
             StringFormat stringFormat = new StringFormat();
