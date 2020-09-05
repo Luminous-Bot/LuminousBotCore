@@ -28,7 +28,16 @@ namespace Public_Bot
             int i = 0;
 
             foreach (var guild in Guilds.ToList())
+            {
+                if (guild == null)
+                    continue;
+                if (guild.Leaderboard == null)
+                    continue;
+                if (guild.Leaderboard.CurrentUsers == null)
+                    continue;
+
                 i += guild.Leaderboard.CurrentUsers.Count;
+            }
 
             return i;
         }

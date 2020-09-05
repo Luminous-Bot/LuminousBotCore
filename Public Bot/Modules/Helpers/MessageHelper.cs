@@ -12,7 +12,7 @@ namespace Public_Bot.Modules.Helpers
     {
         public static bool MessageExists(ulong messageId)
         {
-            var re = StateService.Query<bool>("{\"operationName\":null,\"variables\":{},\"query\":\"{ messageExists(MessageID: \\\"" + messageId + "\\\") }\"}");
+            var re = StateService.Query<bool>("{\"operationName\":null,\"variables\":{},\"query\":\"{ messageExists(MessageID: \\\"" + messageId + "\\\") }\"}", true);
             return re;
         }
 
