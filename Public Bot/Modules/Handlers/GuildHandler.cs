@@ -83,8 +83,15 @@ namespace Public_Bot
 
         private async Task AddGuild(SocketGuild arg)
         {
-            var g = new Guild(arg);
-            GuildCache.AddGuild(g);
+            Guild g;
+
+            if (Guild.Exists(arg.Id))
+                g = Guild.Fetch(arg.Id);
+            else
+                g = new Guild(arg);
+
+            if(!GuildCache.CacheContains(arg.Id))
+                GuildCache.AddGuild(g);
         }
 
         public static Guild GetGuild(ulong id)

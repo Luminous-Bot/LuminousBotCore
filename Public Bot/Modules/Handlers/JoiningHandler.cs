@@ -87,15 +87,25 @@ namespace Public_Bot.Modules.Handlers
                 }
             }.Build();
 
-            foreach (var txtchan in arg.TextChannels.Where(x => x.HasChatPermission))
+            var chan = await arg.GetLowestTextChannelAsync();
+            try
+            {
+                await chan.SendMessageAsync("", false, embed);
+                return;
+            }
+            catch { }
+
+            var chans = arg.TextChannels.Where(x => x.HasChatPermission).OrderBy(x => x.Position);
+            foreach (var txtchan in chans)
             {
                 try
                 {
-                    await arg.DefaultChannel.SendMessageAsync("", false, embed);
+                    await txtchan.SendMessageAsync("", false, embed);
                     return;
                 }
                 catch {}
             }
+
             await arg.Owner.SendMessageAsync("", false, embed);
         }
     }

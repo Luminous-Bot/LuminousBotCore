@@ -10,6 +10,8 @@ namespace Public_Bot
     {
         private static SingleIDEntityCache<Guild> Guilds = new SingleIDEntityCache<Guild>();
 
+        public static bool CacheContains(ulong GuildId)
+            => Guilds.Any(x => x.Id == GuildId);
         public static int Count { get => Guilds.Count; }
         /// <summary>
         /// Adds a guild member to the cache
