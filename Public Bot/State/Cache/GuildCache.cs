@@ -10,6 +10,28 @@ namespace Public_Bot
     {
         private static SingleIDEntityCache<Guild> Guilds = new SingleIDEntityCache<Guild>();
 
+        public static int TotalGuildMembers
+            => _TotalGuildMembers();
+        public static int TotalLevelMembers
+           => _TotalLevelMembers();
+        private static int _TotalGuildMembers()
+        {
+            int i = 0;
+
+            foreach (var guild in Guilds.ToList())
+                i += guild.GuildMembers.Count;
+
+            return i;
+        }
+        private static int _TotalLevelMembers()
+        {
+            int i = 0;
+
+            foreach (var guild in Guilds.ToList())
+                i += guild.Leaderboard.CurrentUsers.Count;
+
+            return i;
+        }
         public static bool CacheContains(ulong GuildId)
             => Guilds.Any(x => x.Id == GuildId);
         public static int Count { get => Guilds.Count; }

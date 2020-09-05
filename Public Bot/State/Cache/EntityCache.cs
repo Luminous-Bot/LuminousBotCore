@@ -27,6 +27,11 @@ namespace Public_Bot
             set => AddOrReplace(value); 
         }
 
+        public List<T> ToList()
+        {
+            return _CacheList;
+        }
+
         /// <summary>
         /// Returns the ammount of items in the Cache
         /// </summary>

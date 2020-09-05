@@ -55,19 +55,40 @@ namespace Public_Bot.Modules.Commands
                         var guild = GuildCache.GetGuild(chan.Guild.Id);
                         await arg.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
                         {
-                            Author = new EmbedAuthorBuilder() 
-                            { 
+                            Author = new EmbedAuthorBuilder()
+                            {
                                 IconUrl = chan.Guild.IconUrl,
                                 Name = chan.Guild.Name
                             },
                             Title = "Caches",
-                            Description = "```\n" +
-                            $"Users Cache:   {UserCache.Count}\n" +
-                            $"Guild Cache:   {GuildCache.Count}\n" +
-                            $"Guild Members: {guild.GuildMembers.Count}\n" +
-                            $"Level Members: {guild.Leaderboard.CurrentUsers.Count}```",
+                            Description = "Cache makes me go *yes*",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Static Caches:",
+                                    Value = "```cs\n" +
+                                    $"Users Cache:         {UserCache.Count}\n" +
+                                    $"Guild Cache:         {GuildCache.Count}\n" +
+                                    $"```"
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = $"{chan.Guild.Name}'s Caches:",
+                                    Value = "```cs\n" +
+                                    $"Guild Members:       {guild.GuildMembers.Count}\n" +
+                                    $"Level Members:       {guild.Leaderboard.CurrentUsers.Count}```",
+                                },
+                                new EmbedFieldBuilder()
+                                {
+                                    Name = "Global Counts:",
+                                    Value = "```cs\n" +
+                                    $"Total Guild Members: {GuildCache.TotalGuildMembers}\n" +
+                                    $"Total Level Members: {GuildCache.TotalLevelMembers}\n```"
+                                }
+                            },
                             Color = Color.Gold
-                        }.WithCurrentTimestamp().Build());
+                        }.WithCurrentTimestamp().Build()) ;
                     }
                     break;
             }
