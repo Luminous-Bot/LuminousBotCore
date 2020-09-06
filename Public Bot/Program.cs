@@ -10,8 +10,10 @@ namespace Public_Bot
 {
     class Program
     {
+        public static DateTime StartTime;
         static void Main(string[] args)
         {
+            StartTime = DateTime.UtcNow;
             while (true)
             {
                 try

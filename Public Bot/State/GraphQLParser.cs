@@ -40,7 +40,7 @@ namespace Public_Bot
         public MutationBucket(string opname)
         {
             this.opname = opname;
-        }
+        }   
         public string Build()
         {
             string query = $"{{\"operationName\": \"{opname}\"," +

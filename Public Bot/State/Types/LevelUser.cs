@@ -45,7 +45,7 @@ namespace Public_Bot
         public Discord.Color DiscordColorFromHex(string hex)
         {
             var c = System.Drawing.ColorTranslator.FromHtml($"#{hex}");
-            var fin = new Discord.Color(c.R, c.G, c.B);
+            var fin = new Discord.Color(c.R, c.G, c.B == 0 ? 0 : c.B - 1);
             return fin;
         }
         public long GetRank()

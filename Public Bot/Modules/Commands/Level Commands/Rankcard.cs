@@ -123,9 +123,9 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                     {
                         string hexColor = args[1];
                         var regex = new Regex(@"(\d|[a-f]){6}");
-                        if (regex.IsMatch(args[1]))
+                        if (regex.IsMatch(hexColor))
                         {
-                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            var hex = regex.Match(hexColor).Groups[0].Value;
                             usr.BarColor = hex;
                             usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -198,7 +198,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Rank Card Background Color",
-                            Description = $"The current Rank Cards Background Color is this embeds color ({usr.BarColor})\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
+                            Description = $"The current Rank Cards Background Color is this embeds color ({usr.BackgroundColor})\nTo change the Rank Cards Background Color Run `{GuildSettings.Prefix}rankcard backgroundcolor <R> <G> <B>`",
                             Color = usr.DiscordColorFromHex(usr.BackgroundColor)
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -207,15 +207,15 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                     {
                         string hexColor = args[1];
                         var regex = new Regex(@"(\d|[a-f]){6}");
-                        if (regex.IsMatch(args[1]))
+                        if (regex.IsMatch(hexColor))
                         {
-                            var hex = regex.Match(args[1]).Groups[0].Value;
+                            var hex = regex.Match(hexColor).Groups[0].Value;
                             usr.BackgroundColor = hex;
                             usr.Save();
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
                                 Title = "Success!",
-                                Description = $"Set the Rank Card's Backgound Color to this Embed's Color ({usr.BarColor})",
+                                Description = $"Set the Rank Card's Backgound Color to this Embed's Color ({usr.BackgroundColor})",
                                 Color = usr.DiscordColorFromHex(hex)
                             }.WithCurrentTimestamp().Build());
                             return;
