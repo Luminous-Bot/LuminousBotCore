@@ -21,7 +21,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
             if (startTimeOffset.Days > 0)
                 final += $"{startTimeOffset.Days}d";
             if (startTimeOffset.Hours > 0)
-                final += $" {startTimeOffset.Hours > 0}h";
+                final += $" {startTimeOffset.Hours}h";
             if (startTimeOffset.Minutes > 0)
                 final += $" {startTimeOffset.Minutes}m";
             if (startTimeOffset.Seconds > 0)
