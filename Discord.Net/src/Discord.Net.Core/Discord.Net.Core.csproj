@@ -5,6 +5,7 @@
     <Description>The core components for the Discord.Net library.</Description>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net461;netstandard2.0;netstandard2.1</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;netstandard2.1</TargetFrameworks>
+	<LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|AnyCPU'">
     <DocumentationFile>C:\Users\plynch\source\repos\Discord.Net\src\Discord.Net.Core\Discord.Net.Core.xml</DocumentationFile>

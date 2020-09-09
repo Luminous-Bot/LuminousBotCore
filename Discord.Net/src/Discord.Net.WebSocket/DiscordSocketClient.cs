@@ -580,7 +580,7 @@ namespace Discord.WebSocket
                                                 return;
 
                                             if (BaseConfig.AlwaysDownloadUsers)
-                                                _ = DownloadUsersAsync(Guilds.Where(x => x.IsAvailable && !x.HasAllMembers));
+                                                _ = DownloadUsersAsync(Guilds.Where(y => y.IsAvailable && !y.HasAllMembers));
 
                                             await TimedInvokeAsync(_readyEvent, nameof(Ready)).ConfigureAwait(false);
                                             await _gatewayLogger.InfoAsync("Ready").ConfigureAwait(false);
