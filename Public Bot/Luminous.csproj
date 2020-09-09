@@ -22,16 +22,16 @@
 
   <ItemGroup>
     <Reference Include="Discord.Net.Core">
-      <HintPath>..\..\Discord.Net\src\Discord.Net.Core\bin\Debug\net461\Discord.Net.Core.dll</HintPath>
+      <HintPath>..\Discord.Net\src\Discord.Net.Core\bin\Debug\net461\Discord.Net.Core.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.Rest">
-      <HintPath>..\..\Discord.Net\src\Discord.Net.Rest\bin\Debug\net461\Discord.Net.Rest.dll</HintPath>
+      <HintPath>..\Discord.Net\src\Discord.Net.Rest\bin\Debug\net461\Discord.Net.Rest.dll</HintPath>
     </Reference>
     <Reference Include="Discord.Net.WebSocket">
-      <HintPath>..\..\Discord.Net\src\Discord.Net.WebSocket\bin\Debug\net461\Discord.Net.WebSocket.dll</HintPath>
+      <HintPath>..\Discord.Net\src\Discord.Net.WebSocket\bin\Debug\net461\Discord.Net.WebSocket.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces">
-      <HintPath>..\..\Discord.Net\src\Discord.Net.WebSocket\bin\Debug\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+      <HintPath>..\Discord.Net\src\Discord.Net.WebSocket\bin\Debug\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
   </ItemGroup>
 
