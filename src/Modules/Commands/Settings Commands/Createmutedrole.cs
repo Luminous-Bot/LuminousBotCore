@@ -18,7 +18,7 @@ namespace Public_Bot.Modules.Commands.Settings_Commands
     [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
     public class Createmutedrole : CommandModuleBase
     {
-        [GuildPermissions(GuildPermission.ManageRoles)]
+        [GuildPermissions(GuildPermission.ManageRoles, GuildPermission.ManageChannels)]
         [DiscordCommand("createmutedrole", RequiredPermission = true,
             description = "Creates a role to give to people when running `(PREFIX)mute`\n\n**NOTE**: This command will add permission overwrites to channels, this isn't the most reliable method. Please try to make a role for muted users yourself and use `(PREFIX)setmutedrole <@role>` for that role.",
             commandHelp = "`(PREFIX)createmutedrole`"

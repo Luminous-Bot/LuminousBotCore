@@ -21,6 +21,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
     [DiscordCommandClass("🧪 Levels 🧪", "Add ranks and leaderboards for your server with Levels!")]
     public class Rank : CommandModuleBase
     {
+        [Alt("r")]
         [DiscordCommand("rank", description = "Shows your current rank!", commandHelp = "Usage - `(PREFIX)rank`, `(PREFIX)rank <user>`")]
         public async Task rank(params string[] args)
         {

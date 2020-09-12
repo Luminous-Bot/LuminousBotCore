@@ -18,6 +18,7 @@ namespace Public_Bot.Modules.Commands.Settings_Commands
     [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
     public class Module : CommandModuleBase
     {
+        [Alt("modules")]
         [DiscordCommand("module",
             commandHelp = "`(PREFIX)module <enable/disable/list> <modulename>`",
             description = "Enables or disables a module",

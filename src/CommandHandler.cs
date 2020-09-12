@@ -26,7 +26,7 @@ namespace Public_Bot
         public CommandHandler(CustomCommandService _service, DiscordShardedClient _client, HandlerService handler)
         {
             client = _client;
-            
+
             service = _service;
 
             handlerService = handler;
@@ -42,7 +42,7 @@ namespace Public_Bot
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
 
-        
+
         private static string FormatJson(string json)
         {
             dynamic parsedJson = JsonConvert.DeserializeObject(json);
@@ -61,7 +61,7 @@ namespace Public_Bot
                 File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", $"Tried this request {trys} times\n\n----------< Start Stack >----------\n\n{stack}\n\n----------< End Stack >----------\n\n----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
                 await client.GetGuild(724798166804725780).GetTextChannel(733154982249103431).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}fgql.txt", "");
             }
-            catch(Exception x)
+            catch (Exception x)
             {
                 Console.WriteLine($"----------< Start GraphQLQuery >----------\n\n{q}\n\n----------< End GraphQLQuery >----------\n\n----------< Start Server Response >----------\n\n{resp}\n\n----------< End Server Response >----------");
             }
@@ -70,14 +70,14 @@ namespace Public_Bot
         //private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
         //    => isReady = false;
 
-        
+
         private async Task Ready(DiscordSocketClient arg)
         {
             handlerService.CreateHandlers();
 
             foreach (var guild in arg.Guilds)
             {
-               GuildSettingsHelper.GetGuildSettings(guild.Id);
+                GuildSettingsHelper.GetGuildSettings(guild.Id);
             }
             isReady = true;
         }
@@ -118,31 +118,31 @@ namespace Public_Bot
             }
             if (arg.Content.StartsWith(s.Prefix) || arg.Content.StartsWith($"<@{client.CurrentUser.Id}>") || arg.Content.StartsWith($"<@!{client.CurrentUser.Id}>"))
             {
-                new Thread( async () =>
+                Thread thread = new Thread(async () =>
                 {
-                   var resp = await service.ExecuteAsync(context, s);
-                   Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");
-
-                   if(resp.Result == CommandStatus.MissingGuildPermission)
-                   {
+                    var resp = await service.ExecuteAsync(context, s);
+                    Logger.Write($"Command Result: {resp.Result} - Command: {arg.Content}");
+                    
+                    if (resp.Result == CommandStatus.MissingGuildPermission)
+                    {
                         await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "**Missing Permissions**",
                             Color = Color.Red,
                             Description = $"{client.CurrentUser.Username} is missing these permissions:\n{resp.ResultMessage}This command will not work until you give {client.CurrentUser.Username} these permissions!"
                         }.WithCurrentTimestamp().Build());
-                   }
-                   else if(resp.Result == CommandStatus.Error)
-                   {
-
-                        if(resp.Exception.InnerException != null && resp.Exception.InnerException.GetType() == typeof(Discord.Net.HttpException))
+                    }
+                    else if (resp.Result == CommandStatus.Error)
+                    {
+                    
+                        if (resp.Exception.InnerException != null && resp.Exception.InnerException.GetType() == typeof(Discord.Net.HttpException))
                         {
                             var e = resp.Exception.InnerException as HttpException;
-                            
-                            if(e.DiscordCode == 50013)
+                    
+                            if (e.DiscordCode == 50013)
                             {
-                                // no permissions, tell the user
-                                try
+                                 // no permissions, tell the user
+                                 try
                                 {
                                     await context.User.SendMessageAsync("", false, new EmbedBuilder()
                                     {
@@ -151,18 +151,18 @@ namespace Public_Bot
                                         Description = $"The bot doesn't have permission to send messages in <#{context.Channel.Id}> on {context.Guild}!",
                                         Fields = new List<EmbedFieldBuilder>()
                                         {
-                                            new EmbedFieldBuilder()
-                                            {
-                                                Name = "If you're an Admin",
-                                                Value = $"Please check {client.CurrentUser.Username}'s permission in `#{context.Channel.Name}` to make sure the bot can **Send Messages** in said channel. If the bot still has this issue please join the [Support Server](https://discord.com/invite/w8EcwBy) and ask around for help.",
-                                                IsInline = true
-                                            },
-                                            new EmbedFieldBuilder()
-                                            {
-                                                Name = "If you're a Member",
-                                                Value = $"Contact an Mod/Admin/Owner in {context.Guild.Name} and tell them that the bot doesn't have permission to send messages in `#{context.Channel}`. Thanks.",
-                                                IsInline = true
-                                            }
+                                             new EmbedFieldBuilder()
+                                             {
+                                                 Name = "If you're an Admin",
+                                                 Value = $"Please check {client.CurrentUser.Username}'s permission in `#{context.Channel.Name}` to make sure the bot can **Send Messages** in said channel. If the bot still has this issue please join the [Support Server](https://discord.com/invite/w8EcwBy) and ask around for help.",
+                                                 IsInline = true
+                                             },
+                                             new EmbedFieldBuilder()
+                                             {
+                                                 Name = "If you're a Member",
+                                                 Value = $"Contact an Mod/Admin/Owner in {context.Guild.Name} and tell them that the bot doesn't have permission to send messages in `#{context.Channel}`. Thanks.",
+                                                 IsInline = true
+                                             }
                                         }
                                     }.WithCurrentTimestamp().Build());
                                 }
@@ -170,105 +170,116 @@ namespace Public_Bot
                                 return;
                             }
                         }
-
+                    
                         var c = client.GetGuild(724798166804725780).GetTextChannel(740141617566056489);
                         if (c == null)
                             return;
                         File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", $"----< Start Exception >----\n\n{resp.Exception.ToString()}\n\n----< End Exception >----");
-                        await c.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", "", false, new EmbedBuilder() 
+                        await c.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", "", false, new EmbedBuilder()
                         {
                             Title = "Command Exception!",
                             Color = Color.Red,
                             Fields = new List<EmbedFieldBuilder>()
                             {
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Command",
-                                    Value = msg.Content
-                                },
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Author",
-                                    Value = msg.Author.ToString(),
-                                },
-                                new EmbedFieldBuilder()
-                                {
-                                    Name = "Guild",
-                                    Value = context.Guild.Name
-                                }
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Command",
+                                     Value = msg.Content
+                                 },
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Author",
+                                     Value = msg.Author.ToString(),
+                                 },
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Guild",
+                                     Value = context.Guild.Name
+                                 }
                             }
                         }.Build());
                     }
-                   else if (resp.Result == CommandStatus.InvalidPermissions)
-                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                       {
-                           Title = "**You do not have permission**",
-                           Description = @"Looks like you don't have permission for this command.",
-                           Color = Color.Red,
-                           Timestamp = DateTimeOffset.Now,
-                       }.Build());
-
-                   else if (resp.Result == CommandStatus.Disabled)
-                   {
-                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                       {
-                           Title = "**Sorry!**",
-                           Description = @"That command is disabled!",
-                           Color = Color.Red,
-                           Timestamp = DateTimeOffset.Now,
-                       }.Build());
-                   }
-
-                   else if (resp.Result == CommandStatus.NotEnoughParams)
-                   {
-                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                       {
-                           Title = "**You didn't provide enough parameters!**",
-                           Description = @$"Here's how to use the command",
-                           Fields = new List<EmbedFieldBuilder>()
-                           {
-                               new EmbedFieldBuilder()
-                               {
-                                   Name = "Your input:",
-                                   Value = msg.Content,
-                                   IsInline = true
-                               },
-                               new EmbedFieldBuilder()
-                               {
-                                   Name = "Expected input:",
-                                   Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
-                               }
-                           },
-                           Color = Color.Red,
-                           Timestamp = DateTimeOffset.Now,
-                       }.Build());
-                   }
-
-                   else if (resp.Result == CommandStatus.InvalidParams)
-                   {
-                       await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                       {
-                           Title = "**The parameters you provided were invalid!**",
-                           Description = @$"Here's how to use the command",
-                           Fields = new List<EmbedFieldBuilder>()
-                           {
-                               new EmbedFieldBuilder()
-                               {
-                                   Name = "Your input:",
-                                   Value = msg.Content,
-                                   IsInline = true
-                               },
-                               new EmbedFieldBuilder()
-                               {
-                                   Name = "Expected input:",
-                                   Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
-                               }
-                           },
-                           Color = Color.Red,
-                           Timestamp = DateTimeOffset.Now,
-                       }.Build());
-                   }
-                }).Start();
+                    else if (resp.Result == CommandStatus.ChannelBlacklisted)
+                    {
+                        try
+                        {
+                            await context.User.SendMessageAsync($"Hey {context.User.Username}, Commands are turned off in <#{context.Channel.Id}> on {context.Guild.Name}. Sorry!");
+                        }
+                        catch { }
+                    }
+                    else if (resp.Result == CommandStatus.InvalidPermissions)
+                    {
+                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**You do not have permission**",
+                            Description = @"Looks like you don't have permission for this command.",
+                            Color = Color.Red,
+                            Timestamp = DateTimeOffset.Now,
+                        }.Build());
+                    }
+                    
+                    else if (resp.Result == CommandStatus.Disabled)
+                    {
+                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**Sorry!**",
+                            Description = @"That command is disabled!",
+                            Color = Color.Red,
+                            Timestamp = DateTimeOffset.Now,
+                        }.Build());
+                    }
+                    
+                    else if (resp.Result == CommandStatus.NotEnoughParams)
+                    {
+                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**You didn't provide enough parameters!**",
+                            Description = @$"Here's how to use the command",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Your input:",
+                                     Value = msg.Content,
+                                     IsInline = true
+                                 },
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Expected input:",
+                                     Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
+                                 }
+                            },
+                            Color = Color.Red,
+                            Timestamp = DateTimeOffset.Now,
+                        }.Build());
+                    }
+                    
+                    else if (resp.Result == CommandStatus.InvalidParams)
+                    {
+                        await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        {
+                            Title = "**The parameters you provided were invalid!**",
+                            Description = @$"Here's how to use the command",
+                            Fields = new List<EmbedFieldBuilder>()
+                            {
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Your input:",
+                                     Value = msg.Content,
+                                     IsInline = true
+                                 },
+                                 new EmbedFieldBuilder()
+                                 {
+                                     Name = "Expected input:",
+                                     Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
+                                 }
+                            },
+                            Color = Color.Red,
+                            Timestamp = DateTimeOffset.Now,
+                        }.Build());
+                    }
+                });
+                thread.Start();
             }
         }
     }

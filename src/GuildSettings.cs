@@ -26,6 +26,7 @@ namespace Public_Bot
         public WelcomeCard WelcomeCard { get; set; }
         public LeaveMessage leaveMessage { get; set; }
         public AutoMod AutoModeration { get; set; } = new AutoMod();
+        public List<ulong> BlacklistedChannels { get; set; } = new List<ulong>();
         public GuildSettings() { }
 
         public void SaveGuildSettings()

@@ -160,32 +160,52 @@ namespace Public_Bot
         /// The command executed successfully
         /// </summary>
         Success,
+
         /// <summary>
         /// There was an error with the execution, look at the exception in <see cref="CommandResult.Exception"/>
         /// </summary>
         Error,
+
         /// <summary>
         /// Could not find a command, if this is a mistake check if you have the <see cref="DiscordCommand"/> attribute attached to the command
         /// </summary>
         NotFound,
+
         /// <summary>
         /// The command was found but there was not enough parameters passed for the command to execute correctly
         /// </summary>
         NotEnoughParams,
+
         /// <summary>
         /// The parameters were there but they were unable to be parsed to the correct type
         /// </summary>
         InvalidParams,
+
         /// <summary>
         /// If the user has incorrect permissions to execute the command
         /// </summary>
         InvalidPermissions,
+
+        /// <summary>
+        /// The command is disabled
+        /// </summary>
         Disabled,
+
         /// <summary>
         /// Somthing happend that shouldn't have, i dont know what to say here other than :/
         /// </summary>
         Unknown,
-        MissingGuildPermission
+
+        /// <summary>
+        /// Missing permission for said command
+        /// </summary>
+        MissingGuildPermission,
+
+        /// <summary>
+        /// The channel the command was used in is blacklisted from commands
+        /// </summary>
+        ChannelBlacklisted
+
             
     }
     /// <summary>
@@ -492,6 +512,15 @@ namespace Public_Bot
         /// <returns>The <see cref="ICommandResult"/> containing what the status of the execution is </returns>
         public async Task<ICommandResult> ExecuteAsync(SocketCommandContext context, GuildSettings s)
         {
+            if(s.BlacklistedChannels.Contains(context.Channel.Id))
+            {
+                return new CommandResult()
+                {
+                    IsSuccess = false,
+                    Result = CommandStatus.ChannelBlacklisted
+                };
+            }
+
             bool IsMentionCommand = context.Message.Content.StartsWith($"<@{context.Client.CurrentUser.Id}>") ? true : context.Message.Content.StartsWith($"<@!{context.Client.CurrentUser.Id}>") ? true : false;
             string[] param = IsMentionCommand 
                 ? context.Message.Content.Replace($"<@{context.Client.CurrentUser.Id}>", string.Empty).Replace($"<@!{context.Client.CurrentUser.Id}>", "").Trim().Split(' ') 

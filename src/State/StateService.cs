@@ -116,7 +116,6 @@ namespace Public_Bot
             Logger.Write($"Sending Raw GQL for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             string cont = await res.Content.ReadAsStringAsync();
-            var rtn = JsonConvert.DeserializeObject<GqlError>(cont);
             if (res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
             {
                 if (Try < 5)
@@ -125,6 +124,7 @@ namespace Public_Bot
                     await ExecuteNoReturnAsync<T>(q, HighPriority, Try + 1);
                 }
             }
+            var rtn = JsonConvert.DeserializeObject<GqlError>(cont);
             if (res.IsSuccessStatusCode && rtn.errors == null)
             {
                 Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);

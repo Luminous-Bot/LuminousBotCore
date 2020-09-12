@@ -22,8 +22,52 @@ namespace Public_Bot.Modules.Commands.General_Commands
         {
             if(args.Length == 0)
             {
-                HelpMessageHandler.BuildHelpPages(GuildSettings);
-                var msg = await Context.Channel.SendMessageAsync("", false, HelpMessageHandler.HelpEmbedBuilder(1, HelpMessageHandler.CalcHelpPage(Context.Guild.GetUser(Context.Message.Author.Id), GuildSettings)));
+                List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
+
+                foreach (var command in Commands)
+                {
+                    if (fields.Any(x => x.Name == command.ModuleName || x.Name == $"~~{command.ModuleName}~~"))
+                    {
+                        var f = fields.Find(x => x.Name == command.ModuleName || x.Name == $"~~{command.ModuleName}~~");
+                        f.Value += $"\n{command.CommandName}";
+                    }
+                    else
+                    {
+                        EmbedFieldBuilder field = new EmbedFieldBuilder();
+
+                        field.IsInline = true;
+                        field.Name = GuildSettings.ModulesSettings[command.ModuleName] 
+                                     ? command.ModuleName
+                                     : $"~~{command.ModuleName}~~";
+
+                        field.Value = $"```\n{command.CommandName}";
+
+                        fields.Add(field);
+                    }
+                }
+                foreach (var f in fields)
+                    f.Value += "```";
+                fields = fields.OrderBy(x => x.Value.ToString().Count(x => x == '\n') * -1).ToList();
+
+                var avUrl = Context.User.GetAvatarUrl();
+                if (avUrl == null)
+                    avUrl = Context.User.GetDefaultAvatarUrl();
+
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Author = new EmbedAuthorBuilder()
+                    {
+                        IconUrl = avUrl,
+                        Name = Context.User.Username,
+                    },
+                    Description = "Here are all the commands! Crossed out field names indicates that a server admin has disabled that module.\nYou can join our [Discord](https://discord.com/invite/w8EcwBy) server for more information and help!",
+                    Fields = fields,
+                    Color = Blurple,
+                    Footer = new EmbedFooterBuilder()
+                    {
+                        Text = "https://luminousbot.com"
+                    }
+                }.WithCurrentTimestamp().Build());
             }
             else if(args[0] == "setup")
             {
