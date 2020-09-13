@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Public_Bot.Modules.Commands.Settings_Commands
 {
 
-    [DiscordCommandClass("⚙️ Settings ⚙️", "Change how this bot works in your server!")]
+    [DiscordCommandClass("🎚 Utilities 🎚", "Enable some vital features to improve your overall fuctionality!")]
     public class Logs : CommandModuleBase
     {
         [GuildPermissions(GuildPermission.ViewAuditLog)]

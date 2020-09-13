@@ -60,6 +60,12 @@ namespace Public_Bot
                         gs.WelcomeCard.BackgroundUrl = null;
                         SaveGuildSettings(gs);
                     }
+
+            if(!gs.ModulesSettings.ContainsKey("🎚 Utilities 🎚"))
+            {
+                gs.ModulesSettings.Add("🎚 Utilities 🎚", true);
+                SaveGuildSettings(gs);
+            }
             return gs;
         }
         public static void SaveGuildSettings(GuildSettings gs)

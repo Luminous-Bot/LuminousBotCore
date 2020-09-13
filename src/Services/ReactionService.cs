@@ -23,7 +23,6 @@ namespace Public_Bot.Services
 
         private static async Task HandleReactionAdded(Discord.Cacheable<Discord.IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            
             if (Handlers.ContainsKey(arg1.Id))
             {
                 var task = Handlers[arg1.Id];

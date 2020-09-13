@@ -18,6 +18,8 @@ namespace Public_Bot
         public GuildMemberCache GuildMembers { get; set; }
         [GraphQLObj]
         public GuildLeaderboards Leaderboard { get; set; }
+        [GraphQLObj, GraphQLSObj]
+        public List<ReactionRoleCard> ReactionRoleCards { get; set; }
 
         public static bool Exists(ulong id)
             => StateService.Exists<ExistNullBase>("{\"operationName\":null,\"variables\":{},\"query\":\"{ guild(id: \\\"" + id + "\\\") { Id }}\"}");
