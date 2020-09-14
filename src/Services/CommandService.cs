@@ -78,7 +78,7 @@ namespace Public_Bot
         /// <summary>
         /// If <see langword="true"/> then bots can execute the command, default is <see langword="false"/>
         /// </summary>
-        public bool BotCanExecute { get; set; }
+        public bool BotCanExecute { get; set; } = false
         /// <summary>
         /// Tells the service that this method is a command
         /// </summary>
@@ -940,6 +940,20 @@ namespace Public_Bot
                     return Context.Guild.Roles.First(x => x.Name.StartsWith(role));
                 else
                     return null;
+        }
+        public static SocketRole GetRole(string role, ShardedCommandContext Context)
+        {
+            var regex = new Regex(@"(\d{18}|\d{17})");
+            if (regex.IsMatch(role))
+            {
+                var u = Context.Guild.GetRole(ulong.Parse(regex.Match(role).Groups[1].Value));
+                return u;
+            }
+            else
+                if (Context.Guild.Roles.Any(x => x.Name.StartsWith(role)))
+                return Context.Guild.Roles.First(x => x.Name.StartsWith(role));
+            else
+                return null;
         }
 
         public async Task InvokeCommand(string command, object[] Params)

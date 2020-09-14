@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Public_Bot
 {
+    
     public class DuplicateIdItemException : Exception
     {
         public DuplicateIdItemException() { }
@@ -118,6 +119,7 @@ namespace Public_Bot
     public class DoubleIDEntityCache<T> where T : class, IDoubleEntityID
     {
         private Type _type = typeof(T);
+
         private List<T> _CacheList { get; set; } = new List<T>();
         public T this[ulong Id, ulong GuildID] 
         { 
@@ -145,6 +147,8 @@ namespace Public_Bot
 
             // We passed the check, so lets add it!
             _CacheList.Add(value);
+
+            // Invoke the add event
         }
 
         /// <summary>

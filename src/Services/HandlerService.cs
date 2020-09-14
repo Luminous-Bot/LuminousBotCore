@@ -15,7 +15,7 @@ namespace Public_Bot
     public class HandlerService
     {
         private bool Loaded = false;
-        public static List<Type> CurrentLoadedHandlers = new List<Type>();
+        public static Dictionary<Type, object> CurrentLoadedHandlers = new Dictionary<Type, object>();
         public DiscordShardedClient client { get; set; }
         
         public HandlerService(DiscordShardedClient _client)
@@ -23,6 +23,13 @@ namespace Public_Bot
             this.client = _client;
 
             //CreateHandlers();
+        }
+        public static T GetHandlerInstance<T>() where T : class
+        {
+            if (CurrentLoadedHandlers.ContainsKey(typeof(T)))
+                return CurrentLoadedHandlers[typeof(T)] as T;
+            else
+                return null;
         }
         public void CreateHandlers()
         {
@@ -45,7 +52,7 @@ namespace Public_Bot
                 {
                     var inst = Activator.CreateInstance(handler, new object[] { client });
                     Logger.Write($"Handler {handler.Name} Loaded!");
-                    CurrentLoadedHandlers.Add(inst.GetType());
+                    CurrentLoadedHandlers.Add(inst.GetType(), inst);
                 }
                 Loaded = true;
             }

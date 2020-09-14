@@ -1,146 +1,124 @@
-﻿using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Timers;
-using Discord.Rest;
 using System.Linq;
 using Discord;
+using System.Threading.Tasks;
+using Discord.WebSocket;
 
 namespace Public_Bot.Modules.Handlers
 {
-    class RoleCardHandler
+    [DiscordHandler]
+    public class RolecardHandler
     {
-        public static DiscordShardedClient client;
-        public static List<RoleCard> Rolecards;
-        public RoleCardHandler(DiscordShardedClient c)
+        private DiscordShardedClient _client;
+
+        public RolecardHandler(DiscordShardedClient client)
         {
-            client = c;
+            this._client = client;
+
+            GuildCache.ItemAdded += (object sender, Guild e) 
+                => SafeloadGuild(e);
+        }
+
+        public void SafeloadGuild(Guild g)
+        {
+            if (g.ReactionRoleCards == null)
+                return;
+
+            if (g.ReactionRoleCards.Count == 0)
+                return;
+
+            foreach(var item in g.ReactionRoleCards)
+            {
+                ReactionService.AddReactionHandler(item.MessageID, ReactionCardAddEvent, ReactionCardRemoveEvent);
+            }
+        }
+        public void DeloadGuild(Guild g)
+        {
+            if (g.ReactionRoleCards == null)
+                return;
+
+            if (g.ReactionRoleCards.Count == 0)
+                return;
+
+            foreach (var item in g.ReactionRoleCards)
+            {
+                ReactionService.RemoveReactionHandler(item.MessageID);
+            }
+        }
+
+        private async Task ReactionCardAddEvent(IMessage arg1, SocketTextChannel arg2, SocketReaction arg3)
+        {
+            var g = arg2.Guild;
+            // Return if its a bot
+            var user = g.GetUser(arg3.UserId);
+            if (user.IsBot)
+                return;
+
+            // Get our role card
+            var guild = GuildCache.GetGuild(g.Id);
+            var card = guild.ReactionRoleCards.Find(x => x.MessageID == arg1.Id);
+
+            // Get the emote role pair
+            var rolecardItem = card.Roles.Find(x => x.EmoteID == arg3.Emote.Name);
+
+            if(rolecardItem == null)
+            {
+                // Oh shit, somthings wrong i can feel it
+            }
+
+            // Get the role the give the user it
+            var role = g.GetRole(rolecardItem.RoleID);
+
+            if(role == null)
+            {
+                //remove from card and cry
+            }
+
+            await user.AddRoleAsync(role);
 
             try
             {
-                Rolecards = StateHandler.LoadObject<List<RoleCard>>("rolecards");
-            }
-            catch 
-            {
-                Rolecards = new List<RoleCard>(); 
-            }
-
-            client.ReactionAdded += CheckReactAdd;
-
-            client.ReactionRemoved += CheckReactRemove;
-        }
-        public static void SaveRolecards()
-        {
-            StateHandler.SaveObject<List<RoleCard>>("rolecards", Rolecards);
-        }
-        private async Task CheckReactRemove(Discord.Cacheable<Discord.IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
-        {
-            if (!Rolecards.Any(x => x.ChannelID == arg2.Id))
-                return;
-            var Rolecard = Rolecards.Find(x => x.ChannelID == arg2.Id);
-            var usr = client.GetGuild(Rolecard.ServerID).GetUser(arg3.UserId);
-            var guild = client.GetGuild(Rolecard.ServerID);
-
-            var msg = await guild.GetTextChannel(Rolecard.ChannelID).GetMessageAsync(Rolecard.MessageID);
-            if (arg3.MessageId != msg.Id)
-                return;
-            if (arg3.User.Value.IsBot)
-                return;
-
-            //doesnt contain "a" tag
-            RoleCard.RoleEmoteDesc redVal = null;
-            var sem = arg3.Emote.ToString();
-            redVal = Rolecard.RoleEmojiIDs.Any(x => x.Emote == sem) ? Rolecard.RoleEmojiIDs.First(x => x.Emote == sem) : null;
-
-            if (redVal == null)
-            {
-                await msg.RemoveReactionAsync(arg3.Emote, usr);
-                return;
-            }
-            var role = guild.GetRole(redVal.RoleID);
-            if (!usr.Roles.Contains(role))
-                return;
-            await usr.RemoveRoleAsync(role, new RequestOptions() { AuditLogReason = "Self-Assigned role" });
-            try
-            {
-                await usr.SendMessageAsync("", false, new EmbedBuilder()
-                {
-                    Title = $"**{guild.Name}**",
-                    Description = $"You were removed from the role **\"{role.Name}\"**",
-                    Color = Color.Green
-                }.Build());
+                await user.SendMessageAsync($"{arg3.Emote.Name}: You got the role **{role.Name}** on {g.Name}!");
             }
             catch { }
         }
 
-        private async Task CheckReactAdd(Discord.Cacheable<Discord.IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        private async Task ReactionCardRemoveEvent(IMessage arg1, SocketTextChannel arg2, SocketReaction arg3)
         {
-            if (!Rolecards.Any(x => x.ChannelID == arg2.Id))
-                return;
-            var Rolecard = Rolecards.Find(x => x.ChannelID == arg2.Id);
-            var usr = client.GetGuild(Rolecard.ServerID).GetUser(arg3.UserId);
-            var guild = client.GetGuild(Rolecard.ServerID);
-            var msg = await guild.GetTextChannel(Rolecard.ChannelID).GetMessageAsync(Rolecard.MessageID);
-            if (arg3.MessageId != msg.Id)
-                return;
-            if (usr.IsBot)
+            var g = arg2.Guild;
+            // Return if its a bot
+            var user = g.GetUser(arg3.UserId);
+            if (user.IsBot)
                 return;
 
-            RoleCard.RoleEmoteDesc redVal = null;
+            // Get our role card
+            var guild = GuildCache.GetGuild(g.Id);
+            var card = guild.ReactionRoleCards.Find(x => x.MessageID == arg1.Id);
 
-            redVal = Rolecard.RoleEmojiIDs.Any(x => x.Emote == arg3.Emote.ToString()) ? Rolecard.RoleEmojiIDs.First(x => x.Emote == arg3.Emote.ToString()) : null;
+            // Get the emote role pair
+            var rolecardItem = card.Roles.Find(x => x.EmoteID == arg3.Emote.Name);
 
-            if (redVal == null)
+            if (rolecardItem == null)
             {
-                await msg.RemoveReactionAsync(arg3.Emote, usr);
-                return;
+                // Oh shit, somthings wrong i can feel it
             }
 
-            var role = guild.GetRole(redVal.RoleID);
-            await usr.AddRoleAsync(role, new RequestOptions() { AuditLogReason = "Self-Assigned role" });
+            // Get the role the give the user it
+            var role = g.GetRole(rolecardItem.RoleID);
+
+            if (role == null)
+            {
+                //remove from card and cry
+            }
+
+            await user.RemoveRoleAsync(role);
+
             try
             {
-                await usr.SendMessageAsync("", false, new EmbedBuilder()
-                {
-                    Title = $"**{guild.Name}**",
-                    Description = $"You were assigned the role **\"{role.Name}\"**",
-                    Color = Color.Green
-                }.Build());
+                await user.SendMessageAsync($"{arg3.Emote.Name}: You lost the role **{role.Name}** on {g.Name}!");
             }
             catch { }
-        }
-
-        public async Task ChangeRoles(SocketGuildUser usr, IRole role, RoleAction act)
-        {
-            if (act == RoleAction.Add)
-                await usr.AddRoleAsync(role);
-            if (act == RoleAction.Remove)
-                await usr.RemoveRoleAsync(role);
-
-        }
-        public enum RoleAction
-        {
-            Add,
-            Remove
-        }
-
-        public class RoleCard
-        {
-            public ulong ServerID { get; set; }
-            public List<RoleEmoteDesc> RoleEmojiIDs { get; set; }
-            public ulong MessageID { get; set; }
-            public ulong ChannelID { get; set; }
-            public static RoleCard Get(ulong id)
-                => Rolecards.Any(x => x.ServerID == id) ? Rolecards.First(x => x.ServerID == id) : null;
-            public class RoleEmoteDesc
-            {
-                public ulong RoleID { get; set; }
-                public string Emote { get; set; }
-                public string Description { get; set; }
-            }
         }
     }
 }

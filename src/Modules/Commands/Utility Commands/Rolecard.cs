@@ -15,7 +15,7 @@ namespace Public_Bot.Modules.Commands.Utility_Commands
             // TODO: Change help message if need be
             commandHelp = "`(PREFIX)rolecard`"
         )]
-        // create
+        // create <#channel> <Title?> <Description?> <Color?> [<Emote> <Role> <Description>]
         // add
         // remove
         // delete
@@ -30,10 +30,17 @@ namespace Public_Bot.Modules.Commands.Utility_Commands
             switch (args[0].ToLower())
             {
                 case "create":
-                    break;
+
+                    if(args.Length == 1)
+                    {
+                        // Show params
+                    }
+
+                    return;
 
                 case "delete":
 
+                    return;
 
                 case "add":
                     await AddTo(args);

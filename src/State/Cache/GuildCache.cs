@@ -9,7 +9,7 @@ namespace Public_Bot
     public class GuildCache
     {
         private static SingleIDEntityCache<Guild> Guilds = new SingleIDEntityCache<Guild>();
-
+        public static event EventHandler<Guild> ItemAdded;
         public static int TotalGuildMembers
             => _TotalGuildMembers();
         public static int TotalLevelMembers
@@ -67,7 +67,10 @@ namespace Public_Bot
                 return Guild.Exists(Id);
         }
         public static void AddGuild(Guild g)
-            => Guilds.Add(g);
+        {
+            Guilds.Add(g);
+            ItemAdded?.Invoke(null, g);
+        }
         /// <summary>
         /// Gets a guild
         /// </summary>
@@ -81,6 +84,7 @@ namespace Public_Bot
             {
                 var g = Guild.Fetch(Id);
                 Guilds.Add(g);
+                ItemAdded?.Invoke(null, g);
                 return g;
             }    
         }

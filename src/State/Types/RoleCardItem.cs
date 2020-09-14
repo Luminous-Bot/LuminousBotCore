@@ -9,6 +9,6 @@ namespace Public_Bot
         [GraphQLProp, GraphQLSVar]
         public ulong RoleID { get; set; }
         [GraphQLProp, GraphQLSVar]
-        public ulong EmoteID { get; set; }
+        public string EmoteID { get; set; }
     }
 }

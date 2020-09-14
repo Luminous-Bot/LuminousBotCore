@@ -50,7 +50,7 @@ namespace Public_Bot
                     TotalShards = 1,
                     MessageCacheSize = 100,
                     ExclusiveBulkDelete = true,
-                    AlwaysDownloadUsers = true,                    
+                    AlwaysDownloadUsers = true,
                     //ShardId = 0,
                 });
                 _client.Log += _client_Log;
@@ -59,6 +59,7 @@ namespace Public_Bot
                     DefaultPrefix = '!',
                     AllowCommandExecutionOnInvalidPermissions = false,
                     DMCommands = false,
+                    
                 });
                 handlerService = new HandlerService(_client);
                 await _client.LoginAsync(TokenType.Bot, ConfigLoader.Token);
