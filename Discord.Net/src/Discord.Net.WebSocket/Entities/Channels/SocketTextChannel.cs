@@ -105,6 +105,9 @@ namespace Discord.WebSocket
             return msg;
         }
 
+        public async Task<RestMessage> GetRestMessage(ulong id, RequestOptions options = null)
+            => await ChannelHelper.GetMessageAsync(this, Discord, id, options).ConfigureAwait(false);
+
         /// <summary>
         ///     Gets the last N messages from this message channel.
         /// </summary>

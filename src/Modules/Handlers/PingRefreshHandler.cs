@@ -1,26 +1,61 @@
-using Discord;
-using Discord.WebSocket;
-using Newtonsoft.Json;
-using Public_Bot.Modules.Handlers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
+using Discord;
 using System.Threading.Tasks;
-using Color = Discord.Color;
-namespace Public_Bot.Modules.Commands.General_Commands
+using Discord.WebSocket;
+using Discord.Rest;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System.IO;
+
+namespace Public_Bot.Modules.Handlers
 {
-    [DiscordCommandClass("👨🏼‍💻 General 👨🏼‍💻", "General bot commands for everyone!")]
-    public class Ping : CommandModuleBase
+    [DiscordHandler]
+    public class PingRefreshHandler
     {
-        [DiscordCommand("ping", description = "Gets the bot's ping to Discord", commandHelp = "Usage `(PREFIX)ping`")]
-        public async Task ping()
+        private DiscordShardedClient _client;
+
+        public PingRefreshHandler(DiscordShardedClient client)
         {
-            var msg = await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+            this._client = client;
+
+            this._client.ReactionAdded += CheckRefresh;
+        }
+
+        private async Task CheckRefresh(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        {
+            var chan = (SocketTextChannel)arg2;
+
+            if (chan == null)
+                return;
+
+            if (arg3.Emote.Name != "🔄")
+                return;
+
+            var usr = chan.GetUser(arg3.UserId);
+            if (usr.IsBot)
+                return;
+
+            var msg = (RestUserMessage)await chan.GetRestMessage(arg1.Id);
+
+            if (msg == null)
+                return;
+
+            if (msg.Author.Id != _client.CurrentUser.Id)
+                return;
+
+            if (msg.Embeds.Count == 0)
+                return;
+
+            var embed = msg.Embeds.First();
+
+            if (embed.Title != "Discord Ping and Status")
+                return;
+
+            await msg.RemoveReactionAsync(arg3.Emote, usr);
+
+            await msg.ModifyAsync(x => x.Embed = new EmbedBuilder()
             {
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
@@ -33,6 +68,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
                     Text = "Last Updated: Fetching..."
                 }
             }.Build());
+
             HttpClient c = new HttpClient();
             var resp = await c.GetAsync("https://discord.statuspage.io/metrics-display/ztt4777v23lf/day.json");
             var cont = await resp.Content.ReadAsStringAsync();
@@ -47,7 +83,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
                 Title = "Discord Ping and Status",
                 Color = Color.Green,
                 Description = $"You can view Discord's status page [here](https://status.discord.com/)" +
-                              $"```Gateway:     {this.Context.Client.Latency}ms\n" +
+                              $"```Gateway:     {_client.Latency}ms\n" +
                               $"Api Latest:  {data.Summary.Last}ms\n" +
                               $"Api Average: {data.Summary.Mean}ms```",
                 Timestamp = tm,
@@ -62,8 +98,6 @@ namespace Public_Bot.Modules.Commands.General_Commands
                 },
                 ImageUrl = PingGenerator.GetImageLink($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Ping.jpg").GetAwaiter().GetResult()
             }.Build());
-
-            await msg.AddReactionAsync(new Emoji("🔄"));
         }
     }
 }

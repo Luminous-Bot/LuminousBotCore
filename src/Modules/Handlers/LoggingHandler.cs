@@ -527,7 +527,7 @@ namespace Public_Bot.Modules.Handlers
                 if(!arg1.Permissions.Equals(arg2.Permissions))
                 {
                     body += "__Permission Changed:__\n";
-                    var type = typeof(GuildPermissions);
+                    var type = typeof(Discord.GuildPermissions);
                     var props = type.GetProperties();
                     foreach(var prop in props.Where(x => x.PropertyType == typeof(bool)))
                     {

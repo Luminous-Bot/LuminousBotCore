@@ -15,7 +15,7 @@ namespace Public_Bot.Modules.Commands.Utility_Commands
             // TODO: Change help message if need be
             commandHelp = "`(PREFIX)rolecard`"
         )]
-        // create <#channel> <Title?> <Description?> <Color?> [<Emote> <Role> <Description>]
+        // create <#channel> <messageId> [<Emote> <Role> <Description>]
         // add
         // remove
         // delete
@@ -34,6 +34,11 @@ namespace Public_Bot.Modules.Commands.Utility_Commands
                     if(args.Length == 1)
                     {
                         // Show params
+                    }
+
+                    if(args.Length == 2)
+                    {
+                        // 
                     }
 
                     return;

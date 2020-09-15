@@ -78,7 +78,7 @@ namespace Public_Bot
         /// <summary>
         /// If <see langword="true"/> then bots can execute the command, default is <see langword="false"/>
         /// </summary>
-        public bool BotCanExecute { get; set; } = false
+        public bool BotCanExecute { get; set; } = false;
         /// <summary>
         /// Tells the service that this method is a command
         /// </summary>
@@ -584,7 +584,7 @@ namespace Public_Bot
                                 Result = CommandStatus.MissingGuildPermission,
                                 ResultMessage = $"" +
                                                 $"```\n" +
-                                                $"{string.Join('\n', cmd.perms.Permissions.Where(x => !context.Guild.CurrentUser.GuildPermissions.Has(x))).Select(x => x.ToString())}" +
+                                                $"{string.Join('\n', cmd.perms.Permissions.Where(x => !context.Guild.CurrentUser.GuildPermissions.Has(x)).Select(x => x.ToString()))}" +
                                                 $"```"
                             };
 
