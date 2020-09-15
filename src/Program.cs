@@ -53,7 +53,9 @@ namespace Public_Bot
                     AlwaysDownloadUsers = true,
                     //ShardId = 0,
                 });
+
                 _client.Log += _client_Log;
+
                 _service = new CustomCommandService(new Settings()
                 {
                     DefaultPrefix = '!',
@@ -61,7 +63,11 @@ namespace Public_Bot
                     DMCommands = false,
                     
                 });
+
                 handlerService = new HandlerService(_client);
+
+                ReactionService.Create(_client);
+
                 await _client.LoginAsync(TokenType.Bot, ConfigLoader.Token);
 
                 await _client.StartAsync();

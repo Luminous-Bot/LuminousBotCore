@@ -33,6 +33,12 @@ namespace Public_Bot.Modules.Handlers
                 ReactionService.AddReactionHandler(item.MessageID, ReactionCardAddEvent, ReactionCardRemoveEvent);
             }
         }
+
+        public void AddRankCard(ReactionRoleCard card)
+        {
+            ReactionService.AddReactionHandler(card.MessageID, ReactionCardAddEvent, ReactionCardRemoveEvent);
+        }
+
         public void DeloadGuild(Guild g)
         {
             if (g.ReactionRoleCards == null)
@@ -68,20 +74,23 @@ namespace Public_Bot.Modules.Handlers
             }
 
             // Get the role the give the user it
+            
             var role = g.GetRole(rolecardItem.RoleID);
 
             if(role == null)
             {
                 //remove from card and cry
             }
-
-            await user.AddRoleAsync(role);
-
-            try
+            if (!user.Roles.Contains(role))
             {
-                await user.SendMessageAsync($"{arg3.Emote.Name}: You got the role **{role.Name}** on {g.Name}!");
+                await user.AddRoleAsync(role);
+
+                try
+                {
+                    await user.SendMessageAsync($"{arg3.Emote.Name}: You got the role **{role.Name}** on {g.Name}!");
+                }
+                catch { }
             }
-            catch { }
         }
 
         private async Task ReactionCardRemoveEvent(IMessage arg1, SocketTextChannel arg2, SocketReaction arg3)
@@ -111,14 +120,16 @@ namespace Public_Bot.Modules.Handlers
             {
                 //remove from card and cry
             }
-
-            await user.RemoveRoleAsync(role);
-
-            try
+            if (user.Roles.Contains(role))
             {
-                await user.SendMessageAsync($"{arg3.Emote.Name}: You lost the role **{role.Name}** on {g.Name}!");
+                await user.RemoveRoleAsync(role);
+
+                try
+                {
+                    await user.SendMessageAsync($"{arg3.Emote.Name}: You lost the role **{role.Name}** on {g.Name}!");
+                }
+                catch { }
             }
-            catch { }
         }
     }
 }

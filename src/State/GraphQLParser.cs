@@ -151,6 +151,11 @@ namespace Public_Bot
                     if (tv.CustomAttributes.Any(x => x.AttributeType == typeof(GraphQLSObj)))
                     {
                         var tvT = tv.PropertyType;
+                        if (tvT.Name.Contains("List"))
+                        {
+                            vars.Add($"\"{name}\": {GenerateList(tvT.GenericTypeArguments[0], (IList)tv.GetValue(obj))}");
+                            continue;
+                        }
                         var l = RecurseMutateVars(tvT, tv.GetValue(obj));
                         vars.AddRange(l);
                     }

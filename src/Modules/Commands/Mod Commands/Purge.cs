@@ -23,7 +23,7 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
             {
                 uint ammount = 0;
 
-                if (uint.TryParse(args[1], out var res))
+                if (uint.TryParse(args[0], out var res))
                     ammount = res;
                 else
                 {
@@ -49,7 +49,7 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
                 uint ammount = 0;
 
                 if (uint.TryParse(args[1], out var res))
-                    ammount = res;
+                    ammount = res + 1;
                 else
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
