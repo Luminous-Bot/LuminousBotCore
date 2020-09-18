@@ -75,10 +75,6 @@ namespace Public_Bot
         {
             handlerService.CreateHandlers();
 
-            foreach (var guild in arg.Guilds)
-            {
-                GuildSettingsHelper.GetGuildSettings(guild.Id);
-            }
             isReady = true;
         }
         public static bool IsBotRole(IRole role)

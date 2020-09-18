@@ -34,9 +34,11 @@ namespace Public_Bot.Modules.Commands.General_Commands
                     else
                     {
                         EmbedFieldBuilder field = new EmbedFieldBuilder();
-
+                        bool enbl = true;
+                        if (GuildSettings.ModulesSettings.ContainsKey(command.ModuleName))
+                            enbl = GuildSettings.ModulesSettings[command.ModuleName];
                         field.IsInline = true;
-                        field.Name = GuildSettings.ModulesSettings[command.ModuleName] 
+                        field.Name = enbl
                                      ? command.ModuleName
                                      : $"~~{command.ModuleName}~~";
 

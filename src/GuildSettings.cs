@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using MongoDB.Bson.Serialization.Attributes;
 using Public_Bot.Modules.Auto_Moderation;
 using Public_Bot.Modules.Handlers;
 using Public_Bot.State.Types;
@@ -11,7 +12,8 @@ using static Public_Bot.Modules.Handlers.LevelHandler;
 
 namespace Public_Bot
 {
-    public class GuildSettings
+    [BsonIgnoreExtraElements]
+    public class GuildSettings : IGuildIDEntity
     {
         public ulong GuildID { get; set; }
         public string Prefix { get; set; } = "*";
@@ -25,7 +27,6 @@ namespace Public_Bot
         public HashSet<string> MemeSubreddits = new HashSet<string>() { "https://www.reddit.com/r/dankmemes" };
         public WelcomeCard WelcomeCard { get; set; }
         public LeaveMessage leaveMessage { get; set; }
-        public AutoMod AutoModeration { get; set; } = new AutoMod();
         public List<ulong> BlacklistedChannels { get; set; } = new List<ulong>();
         public GuildSettings() { }
 
@@ -82,7 +83,6 @@ namespace Public_Bot
                 Console.WriteLine("UH OH: THIS IS NULL ");
             WelcomeCard = new WelcomeCard(this, guild);
             leaveMessage = new LeaveMessage(this,guild);
-            GuildSettingsHelper.LoadedGuildSettings.Add(this);
             GuildSettingsHelper.SaveGuildSettings(this);
         }
     }

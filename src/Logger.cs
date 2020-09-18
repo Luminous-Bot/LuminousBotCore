@@ -16,6 +16,7 @@ namespace Public_Bot
             Error,
             Critical,
             DiscordAPI,
+            Mongo,
             State
         }
         public static void Write(object msg, Severity s = Severity.Log, ICommandContext context = null)
@@ -49,6 +50,11 @@ namespace Public_Bot
                     Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.BackgroundColor = ConsoleColor.Black;
                     break;
+                case Severity.Mongo:
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.BackgroundColor = ConsoleColor.DarkGray;
+                    break;
+
             }
             if (s == Severity.Error || s == Severity.Critical)
             {

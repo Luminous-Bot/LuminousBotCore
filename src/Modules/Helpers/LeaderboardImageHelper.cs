@@ -116,6 +116,9 @@ namespace Public_Bot
 
             }
 
+            var e = Levels.OrderBy(x => ((x.CurrentLevel - _minLevel) * PPL) + HeightPadding + (((float)x.CurrentXP / (float)x.NextLevelXP) * PPL));
+            var Ordered = e.Reverse().ToArray();
+
             // Calculate and draw our Name area
             int nameMax = Levels.Max(x => x.Username.Length);
             var BiggestName = Levels.Find(x => x.Username.Length == nameMax).Username;
@@ -142,7 +145,7 @@ namespace Public_Bot
 
             for (int i = 0; i != Levels.Count; i++)
             {
-                var Level = Levels[i];
+                var Level = Ordered[i];
 
                 Color color = Color.FromArgb(114, 137, 218);
                 if (i == 0)
@@ -165,11 +168,11 @@ namespace Public_Bot
 
             }
 
+            
             // Start Drawing!
-            bool Lifted = false;
             for (int i = Levels.Count - 1; i != -1; i--) // <- we draw from right to left
             {
-                var Level = Levels[i];
+                var Level = Ordered[i];
 
                 float Height = (Level.CurrentLevel - _minLevel) * PPL;
                 float XpLevelOffset = ((float)Level.CurrentXP / (float)Level.NextLevelXP) * PPL;

@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,69 +12,60 @@ namespace Public_Bot
     [DiscordHandler]
     public class GuildSettingsHelper
     {
+        //
+#if DEBUG
+        private static MongoClient _client = new MongoClient("mongodb://localhost:27017");
+#else
+        private static MongoClient _client = new MongoClient("mongodb://root:mongodbAdmin1@localhost:27017/?authSource=admin&readPreference=primary");
+#endif
+        private static IMongoDatabase _database = _client.GetDatabase("luminous-guildsettings");
+        private static IMongoCollection<GuildSettings> _collection = _database.GetCollection<GuildSettings>("guildsettings");
+
+        private static FindOptions opt = new FindOptions() { ShowRecordId = false };
         public static DiscordShardedClient client { get; set; }
+        private static SingleGuildIDEntityCache<GuildSettings> _cache
+             = new SingleGuildIDEntityCache<GuildSettings>();
         public GuildSettingsHelper(DiscordShardedClient c)
         {
             client = c;
-            if (!Directory.Exists(GuildSettingsFolder))
-                Directory.CreateDirectory(GuildSettingsFolder);
         }
-        public static List<GuildSettings> LoadedGuildSettings { get; set; } = new List<GuildSettings>();
-        public static string GuildSettingsFolder = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}GuildSettings";
 
         public static bool GuildSettingsExists(ulong GuildId)
-            => File.Exists(GuildSettingsFolder + $"{Path.DirectorySeparatorChar}{GuildId}.gs");
+        {
+            var count = _collection.CountDocuments<GuildSettings>(x => x.GuildID == GuildId);
+            return count > 0;
+        }
 
         public static GuildSettings GetGuildSettings(ulong GuildID)
         {
-            if (LoadedGuildSettings.ToArray().Any(x => x.GuildID == GuildID))
-                return LoadedGuildSettings.Find(x => x.GuildID == GuildID);
-            else
-            {
-                string fp = GuildSettingsFolder + $"{Path.DirectorySeparatorChar}{GuildID}.gs";
-                if (File.Exists(fp))
-                {
-                    var gs = JsonConvert.DeserializeObject<GuildSettings>(File.ReadAllText(fp));
-                    if (gs == null)
-                        Logger.Write($"GS Null: {GuildID}", Logger.Severity.Critical);
-                    FixGs(gs);
-                    LoadedGuildSettings.Add(gs);
-                    return gs;
-                }
-                else
-                {
-                    var gs = new GuildSettings(client.GetGuild(GuildID));
-                    LoadedGuildSettings.Add(gs);
-                    SaveGuildSettings(gs);
-                    return gs;
-                }
-            }
-        }
-        public static GuildSettings FixGs(GuildSettings gs)
-        {
-            if (gs == null)
-                return null;
-            if(gs.WelcomeCard != null)
-                if (gs.WelcomeCard.BackgroundUrl != null)
-                    if (gs.WelcomeCard.BackgroundUrl == "https://image.freepik.com/free-vector/luminous-stadium-light-effect_23-2148366134.jpg")
-                    {
-                        gs.WelcomeCard.BackgroundUrl = null;
-                        SaveGuildSettings(gs);
-                    }
+            if (_cache.Any(x => x.GuildID == GuildID))
+                return _cache[GuildID];
+            
+            var result = _collection.Find<GuildSettings>(x => x.GuildID == GuildID, opt);
 
-            if(!gs.ModulesSettings.ContainsKey("🎚 Utilities 🎚"))
-            {
-                gs.ModulesSettings.Add("🎚 Utilities 🎚", true);
-                SaveGuildSettings(gs);
-            }
-            return gs;
+            if (!result.Any())
+                return null;
+            _cache.Add(result.First());
+            Logger.Write($"Guildsettings {GuildID} Fetched", Logger.Severity.Mongo);
+
+            return result.First();
         }
         public static void SaveGuildSettings(GuildSettings gs)
         {
-            Logger.Write($"Saving {gs.GuildID}'s settings");
-            string json = JsonConvert.SerializeObject(gs);
-            File.WriteAllText(GuildSettingsFolder + $"{Path.DirectorySeparatorChar}{gs.GuildID}.gs", json);
-            Logger.Write($"Saved {gs.GuildID}");
+            var count = _collection.CountDocuments<GuildSettings>(x => x.GuildID == gs.GuildID);
+
+            if (count == 0)
+            {
+                _collection.InsertOne(gs);
+                _cache.AddOrReplace(gs);
+                Logger.Write($"Guildsettings {gs.GuildID} Created", Logger.Severity.Mongo);
+            }
+            else
+            {
+                Logger.Write($"Guildsettings {gs.GuildID} Updated", Logger.Severity.Mongo);
+                _collection.ReplaceOne<GuildSettings>(x => x.GuildID == gs.GuildID, gs);
+                _cache.AddOrReplace(gs);
+            }
         }
     }
 }

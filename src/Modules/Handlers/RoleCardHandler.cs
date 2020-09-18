@@ -16,8 +16,8 @@ namespace Public_Bot.Modules.Handlers
         {
             this._client = client;
 
-            GuildCache.ItemAdded += (object sender, Guild e) 
-                => SafeloadGuild(e);
+            //GuildCache.ItemAdded += (object sender, Guild e) 
+            //    => SafeloadGuild(e);
         }
 
         public void SafeloadGuild(Guild g)
@@ -28,7 +28,7 @@ namespace Public_Bot.Modules.Handlers
             if (g.ReactionRoleCards.Count == 0)
                 return;
 
-            foreach(var item in g.ReactionRoleCards)
+            foreach (var item in g.ReactionRoleCards)
             {
                 ReactionService.AddReactionHandler(item.MessageID, ReactionCardAddEvent, ReactionCardRemoveEvent);
             }

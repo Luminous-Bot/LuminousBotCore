@@ -8,4 +8,8 @@ namespace Public_Bot
     {
         ulong Id { get; }
     }
+    public interface IGuildIDEntity
+    {
+        ulong GuildID { get; }
+    }
 }

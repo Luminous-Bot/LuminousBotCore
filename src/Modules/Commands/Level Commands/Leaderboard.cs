@@ -27,13 +27,9 @@ namespace Public_Bot.Modules.Commands.Level_Commands
         {
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
           
-            var levelmembers = gl.GetTop(9);
-
-            string Ranks = "";
+            var levelmembers = gl.GetTop(9).OrderBy(x => (float)x.CurrentLevel + ((float)x.CurrentXP / (float)x.NextLevelXP)).Reverse().ToList();
+            //foreach(var item in levelmembers)
             List<EmbedFieldBuilder> f = new List<EmbedFieldBuilder>();
-            string First  = "";
-            string Second = "";
-            string Third  = "";
             for (int i = 0; i != levelmembers.Count; i++)
             {
                 var user = levelmembers[i];
@@ -85,7 +81,10 @@ namespace Public_Bot.Modules.Commands.Level_Commands
             {
                 url = await LeaderboardImageHelper.GetLeaderboardImageURL(levelmembers, gl.Settings);
             }
-            catch { }
+            catch(Exception x) 
+            {
+                Console.WriteLine(x);
+            }
 
             var embed = new EmbedBuilder()
             {

@@ -21,9 +21,9 @@ namespace Public_Bot
         {
             _client = c;
 
-            _client.ReactionAdded += HandleReactionAdded;
+            //_client.ReactionAdded += HandleReactionAdded;
 
-            _client.ReactionRemoved += _client_ReactionRemoved;
+            //_client.ReactionRemoved += _client_ReactionRemoved;
         }
 
         private static async Task _client_ReactionRemoved(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
