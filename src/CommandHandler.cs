@@ -262,12 +262,11 @@ namespace Public_Bot
                                  {
                                      Name = "Your input:",
                                      Value = msg.Content,
-                                     IsInline = true
                                  },
                                  new EmbedFieldBuilder()
                                  {
                                      Name = "Expected input:",
-                                     Value = $"{resp.commandUsed.Replace("(PREFIX)", s.Prefix)}"
+                                     Value = $"{CommandModuleBase.CommandHelps.First(x => x.Key == msg.Content.Replace(s.Prefix, "").Replace($"<@{client.CurrentUser.Id}>", "").Replace($"<@!{client.CurrentUser.Id}>", "").Replace(" ", "").ToLower()).Value.Replace("(PREFIX)", s.Prefix)}"
                                  }
                             },
                             Color = Color.Red,

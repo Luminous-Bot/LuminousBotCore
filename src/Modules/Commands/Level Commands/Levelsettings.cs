@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Public_Bot.Modules.Handlers;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -503,7 +504,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                         }
                     }
                     break;
-                case "ranks":
+                case "ranks" or "rank":
                     if (args.Length == 1)
                     {
                         List<string> ranks = new List<string>();
@@ -524,51 +525,102 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                         if (args[1].ToLower() == "remove")
                         {
                             var role = GetRole(args[2]);
-                            if (role == null)
-                            {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "That role is invalid!",
-                                    Description = "Please make sure you spell the role name right, or provided a valid id or mention.",
-                                    Color = Color.Red,
+                            bool isLvl = false;
+                            uint rank = 0;
 
-                                }.WithCurrentTimestamp().Build());
-                            }
-                            if (ls.RankRoles.Any(x => x.Role == role.Id))
+                            if(role == null)
                             {
-                                gl.Settings.RankRoles.Remove(gl.Settings.RankRoles.First(x => x.Role == role.Id));
-                                gl.Save();
-
-                                List<string> ranks = new List<string>();
-                                foreach (var chan in gl.Settings.RankRoles.OrderBy(x => x.Level * -1))
+                                isLvl = true;
+                                if(uint.TryParse(args[2], out var res))
                                 {
-                                    ranks.Add($"Level {chan.Level} - <@&{chan.Role}>");
+                                    rank = res;
                                 }
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                else
                                 {
-                                    Title = "Success!",
-                                    Description = $"Removed {role.Mention}!\n\n{(ranks.Count > 0 ? string.Join('\n', ranks) : $"You dont have any roles setup!")}",
-                                    Color = Color.Green,
+                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                    {
+                                        Title = "Invalid Parameter!",
+                                        Description = $"Please use a rank ex: `{GuildSettings.Prefix}levelsettings ranks remove 4` or a role ex: `{GuildSettings.Prefix}levelsettings ranks remove <@yourRole>`!",
+                                        Color = Color.Red
+                                    }.WithCurrentTimestamp().Build());
+                                    return;
+                                }
+                            }
 
-                                }.WithCurrentTimestamp().Build());
-                                return;
+                            RankRole item;
+                            if (!isLvl)
+                            {
+                                if (ls.RankRoles.Any(x => x.Role == role.Id))
+                                {
+                                    item = ls.RankRoles.Find(x => x.Role == role.Id);
+                                }
+                                else
+                                {
+                                    // Error out
+                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                    {
+                                        Title = "Rank not found!",
+                                        Description = $"There isn't a rank with the role {role.Name}, you can view all your ranks with `{GuildSettings.Prefix}levelsettings ranks`",
+                                        Color = Color.Orange
+                                    }.WithCurrentTimestamp().Build());
+                                    return;
+                                }
                             }
                             else
                             {
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                if(ls.RankRoles.Any(x => x.Level == rank))
                                 {
-                                    Title = "That role isn't added!",
-                                    Description = $"The role {role.Mention} isnt in the Ranked roles list, therefor we can't remove it!",
-                                    Color = Color.Red,
-
-                                }.WithCurrentTimestamp().Build());
-                                return;
+                                    item = ls.RankRoles.Find(x => x.Level == rank);
+                                }
+                                else
+                                {
+                                    // Error out
+                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                    {
+                                        Title = "Rank not found!",
+                                        Description = $"There isn't a rank with the level {rank}, you can view all your ranks with `{GuildSettings.Prefix}levelsettings ranks`",
+                                        Color = Color.Orange
+                                    }.WithCurrentTimestamp().Build());
+                                    return;
+                                }
                             }
+
+                            gl.Settings.RankRoles.Remove(item);
+                            gl.Save();
+
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Removed the role <@&{item.Role}> at rank {item.Level}!",
+                                Color = Color.Green
+                            }.WithCurrentTimestamp().Build());
+                            return;
                         }
                     }
                     if (args.Length == 4)
                     {
+                        // Allow ranks add <@role> <rank> and ranks add <rank> <@role>
                         var role = GetRole(args[2]);
+                        if (role == null)
+                            role = GetRole(args[3]);
+
+                        uint rank = 0;
+                        bool parsed = false;
+
+                        if (uint.TryParse(args[2], out var arg2))
+                        {
+                            rank = arg2;
+                            parsed = true;
+                        }
+                        else
+                        {
+                            if (uint.TryParse(args[3], out var arg3))
+                            {
+                                rank = arg3;
+                                parsed = true;
+                            }
+                        }
+                        
                         if (role == null)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -578,51 +630,10 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                                 Color = Color.Red,
 
                             }.WithCurrentTimestamp().Build());
+                            return;
                         }
-                        if (uint.TryParse(args[3], out var res))
-                        {
-                            if (args[1].ToLower() == "add")
-                            {
-                                if (ls.RankRoles.Any(x => x.Role == role.Id))
-                                {
-                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                    {
-                                        Title = "That role is already added!",
-                                        Description = $"The role {role.Mention} is already added for level {ls.RankRoles.First(x => x.Role == role.Id).Level}!",
-                                        Color = Color.Red,
 
-                                    }.WithCurrentTimestamp().Build());
-                                    return;
-                                }
-                                if (ls.RankRoles.Any(x => x.Level == res))
-                                {
-                                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                    {
-                                        Title = "That Level already has a role!",
-                                        Description = $"The level {res} has the role <@&{ls.RankRoles.Find(x => x.Level == res).Role}> assigned to it! therefor we can't add another role!",
-                                        Color = Color.Red,
-
-                                    }.WithCurrentTimestamp().Build());
-                                    return;
-                                }
-                                gl.Settings.RankRoles.Add(new RankRole() { Level = res, Role = role.Id });
-                                gl.Save();
-                                List<string> ranks = new List<string>();
-                                foreach (var chan in gl.Settings.RankRoles.OrderBy(x => x.Level * -1))
-                                {
-                                    ranks.Add($"Level {chan.Level} - <@&{chan.Role}>");
-                                }
-                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                                {
-                                    Title = "Success!",
-                                    Description = $"Added {role.Mention} to level {res}!\n\n{(ranks.Count > 0 ? string.Join('\n', ranks) + $"\n\nIf you want to add this role to people who have level {res} or higher please run {GuildSettings.Prefix}levelsettings refresh {role.Mention}" : $"You dont have any roles setup!")}",
-                                    Color = Color.Green,
-
-                                }.WithCurrentTimestamp().Build());
-                                return;
-                            }
-                        }
-                        else
+                        if (!parsed)
                         {
                             await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                             {
@@ -630,6 +641,57 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                                 Description = "Please provide a __Positive Whole__ number!",
                                 Color = Color.Red,
                             }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        if (args[1].ToLower() == "add")
+                        {
+                            if (ls.RankRoles.Any(x => x.Role == role.Id))
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "That role is already added!",
+                                    Description = $"The role {role.Mention} is already added for level {ls.RankRoles.First(x => x.Role == role.Id).Level}!",
+                                    Color = Color.Red,
+
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            if (ls.RankRoles.Any(x => x.Level == rank))
+                            {
+                                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                                {
+                                    Title = "That Level already has a role!",
+                                    Description = $"The level {rank} has the role <@&{ls.RankRoles.Find(x => x.Level == rank).Role}> assigned to it! therefor we can't add another role!",
+                                    Color = Color.Red,
+
+                                }.WithCurrentTimestamp().Build());
+                                return;
+                            }
+                            gl.Settings.RankRoles.Add(new RankRole() { Level = rank, Role = role.Id });
+                            gl.Save();
+                            List<string> ranks = new List<string>();
+                            foreach (var chan in gl.Settings.RankRoles.OrderBy(x => x.Level * -1))
+                            {
+                                ranks.Add($"Level {chan.Level} - <@&{chan.Role}>");
+                            }
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Success!",
+                                Description = $"Added {role.Mention} to level {rank}!\n\n{(ranks.Count > 0 ? string.Join('\n', ranks) + $"\n\nIf you want to add this role to people who have level {rank} or higher please run {GuildSettings.Prefix}levelsettings refresh {role.Mention}" : $"You dont have any roles setup!")}",
+                                Color = Color.Green,
+
+                            }.WithCurrentTimestamp().Build());
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                            {
+                                Title = "Unknown Command",
+                                Description = $"I don't know what you mean by \"{args[1]}\"! you can look at all the avaliable commands with `{GuildSettings.Prefix}levelsettings list`",
+                                Color = Color.Red
+                            }.WithCurrentTimestamp().Build());
+                            return;
                         }
                     }
                     break;

@@ -204,7 +204,9 @@ namespace Public_Bot
         /// <summary>
         /// The channel the command was used in is blacklisted from commands
         /// </summary>
-        ChannelBlacklisted
+        ChannelBlacklisted,
+
+        DMCommandsDisabled
 
             
     }
@@ -549,14 +551,14 @@ namespace Public_Bot
                     IsSuccess = false
                 };
             if (context.Channel.GetType() == typeof(SocketDMChannel) && !currentSettings.DMCommands)
-                return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidParams };
+                return new CommandResult() { IsSuccess = false, Result = CommandStatus.DMCommandsDisabled };
             List<CommandResult> results = new List<CommandResult>();
             //1 find if param counts match
             if(commandobj.Any(x => x.Paramaters.Length > 0))
                 if (commandobj.Where(x => x.Paramaters.Length > 0).Any(x => x.Paramaters.Last().GetCustomAttributes(typeof(ParamArrayAttribute), false).Length == 0))
                     commandobj = commandobj.Where(x => x.Paramaters.Length == param.Length);
             if (commandobj.Count() == 0)
-                return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidParams };
+                return new CommandResult() { IsSuccess = false, Result = CommandStatus.InvalidParams,};
             foreach (var cmd in commandobj)
             {
                 var r = await ExecuteCommand(cmd, context, param, s);

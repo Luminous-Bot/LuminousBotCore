@@ -37,9 +37,10 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
                 }
 
                 var tmp = await Context.Channel.GetMessagesAsync((int)ammount).FlattenAsync();
-                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(tmp);
-                const int delay = 2000;
-                var m = await Context.Channel.SendMessageAsync($"Purge completed!");
+                var msgs = tmp.Where(x => (DateTime.UtcNow - x.Timestamp.UtcDateTime).TotalDays < 14);
+                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(msgs);
+                const int delay = 3000;
+                var m = await Context.Channel.SendMessageAsync($"Purge completed!{(tmp.Count() != msgs.Count() ? " (Some messages couldn't be deleted because there older than two weeks!)" : "")}");
                 await Task.Delay(delay);
                 await m.DeleteAsync();
             }

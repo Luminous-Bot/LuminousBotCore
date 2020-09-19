@@ -19,9 +19,9 @@ namespace Public_Bot
         [GraphQLProp, GraphQLSVar]
         public double XpPerMessage { get; set; } = 1;
         [GraphQLProp, GraphQLSVar]
-        public double XpPerVCMinute { get; set; } = 5;
+        public double XpPerVCMinute { get; set; } = 2;
         [GraphQLProp, GraphQLSVar]
-        public double XpPerVCStream { get; set; } = 7;
+        public double XpPerVCStream { get; set; } = 3;
         [GraphQLProp, GraphQLSVar]
         public ulong LevelUpChan { get; set; }
         [GraphQLProp, GraphQLSVar]
