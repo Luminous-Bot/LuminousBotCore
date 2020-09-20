@@ -52,7 +52,8 @@ namespace Public_Bot.Modules.Handlers
                 $"Invading space",
                 $"Claiming prizes",
                 $"Croissant is good",
-                $"Beep beep lettuce"
+                $"Beep beep lettuce",
+                $"Fixing runtime errors"
             };
         public StatusHandler(DiscordShardedClient c)
         {
