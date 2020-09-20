@@ -9,24 +9,20 @@ namespace Public_Bot
 {
     public class LevelUser : IDoubleEntityID
     {
-        [GraphQLSVar]
-        [GraphQLProp]
+        [GraphQLSVar, GraphQLProp]
         public ulong GuildID { get; set; }
         [GraphQLProp, GraphQLSVar, GraphQLName("MemberID"), JsonProperty("MemberID")]
         public ulong Id { get; set; }  
         [GraphQLProp]
         public string Username { get; set; }
-        [GraphQLProp]
-        [GraphQLSVar]
-        public uint CurrentLevel { get; set; } = 0;
-        [GraphQLProp]
-        [GraphQLSVar]
-        public double CurrentXP { get; set; } = 0;
-        [GraphQLProp]
-        [GraphQLSVar]
-        public double NextLevelXP { get; set; } = 30;
         [GraphQLProp, GraphQLSVar]
-        public double TotalXP { get; set; } = 0;
+        public uint CurrentLevel { get; set; } = 0;
+        [GraphQLProp, GraphQLSVar]
+        public double CurrentXP { get; set; } = 0;
+        [GraphQLProp, GraphQLSVar]
+        public double NextLevelXP { get; set; } = 30;
+        [GraphQLSVar]
+        public double PositionValue { get; set; } = 0;
         [GraphQLProp]
         public string BarColor { get; set; } = "00ff00";
         [GraphQLProp]
@@ -76,7 +72,9 @@ namespace Public_Bot
             var guild = GuildCache.GetGuild(this.GuildID);
             if (!guild.GuildMembers.GuildMemberExists(this.Id))
                 guild.GuildMembers.CreateGuildMember(this.Id);
-            TotalXP = CalculateTotalXP();
+
+            PositionValue = CurrentLevel + (CurrentXP / NextLevelXP);
+
             return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public static LevelUser Fetch(ulong GuildId, ulong UserId)
