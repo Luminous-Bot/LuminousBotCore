@@ -19,7 +19,7 @@ namespace Public_Bot.Modules.Handlers
         private async Task Client_UserJoined(SocketGuildUser arg)
         {
             var gs = GuildSettings.Get(arg.Guild.Id);
-            if(gs.NewMemberRole != 0)
+            if(gs.NewMemberRole != 0 && !arg.IsBot)
             {
                 var role = arg.Guild.GetRole(gs.NewMemberRole);
                 if (role != null)

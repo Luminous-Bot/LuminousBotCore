@@ -8,7 +8,7 @@
 	<LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|AnyCPU'">
-    <DocumentationFile>C:\Users\plynch\source\repos\Discord.Net\src\Discord.Net.Core\Discord.Net.Core.xml</DocumentationFile>
+    <DocumentationFile>..\Discord.Net\src\Discord.Net.Core\Discord.Net.Core.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
