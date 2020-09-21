@@ -19,8 +19,12 @@ namespace Public_Bot
                 Directory.CreateDirectory(DataDirectoryPath);
             if (!File.Exists(ConfigPath))
             {
-                File.Create(ConfigPath).Close();
-                throw new Exception("Config didnt exist, we created it and stopped executing");
+                using (var tw = new StreamWriter(ConfigPath, true))
+                {
+                    tw.WriteLine("{\"Token\":\"YOUR_TOKEN_HERE\",\"StateUrl\":\"YOUR_URL_HERE\"}");
+                    tw.Close();
+                }
+                throw new Exception("Config didnt exist, we created it and stopped executing!");
             }
             string configContent = File.ReadAllText(ConfigPath);
             if (configContent == "")
