@@ -10,13 +10,18 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Public_Bot.Modules.Handlers.MuteHandler;
+
 namespace Public_Bot.Modules.Commands.Mod_Commands
 {
     [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficient with this module, you can keep track of user infractions and keep your server in order!")]
     public class Purge : CommandModuleBase
     {
         [GuildPermissions(GuildPermission.ManageMessages)]
-        [DiscordCommand("purge", RequiredPermission = true)]
+        [DiscordCommand("purge", 
+            RequiredPermission = true, 
+            commandHelp = "`(PREFIX)purge <amount>\n(PREFIX)purge <@user> <amount>",
+            description = "Deletes X amount of messages"
+            )]
         public async Task purge(params string[] args)
         {
             if(args.Length == 1)

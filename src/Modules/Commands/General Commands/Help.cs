@@ -17,6 +17,10 @@ namespace Public_Bot.Modules.Commands.General_Commands
     [DiscordCommandClass("👨🏼‍💻 General 👨🏼‍💻", "General bot commands for everyone!")]
     public class Help : CommandModuleBase
     {
+        [DiscordCommand("setup")]
+        public async Task setup()
+            => await help("setup");
+
         [DiscordCommand("help", description = "shows all help messages for all enabled modules", commandHelp = "Usage: `(PREFIX)help`, `(PREFIX)help <command_name>`" )]
         public async Task help(params string[] args)
         {
@@ -24,7 +28,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
             {
                 List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>();
 
-                foreach (var command in Commands)
+                foreach (var command in Commands.Where(x => x.CommandHelpMessage != null))
                 {
                     if (fields.Any(x => x.Name == command.ModuleName || x.Name == $"~~{command.ModuleName}~~"))
                     {

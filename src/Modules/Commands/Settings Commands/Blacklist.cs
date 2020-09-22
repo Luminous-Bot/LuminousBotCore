@@ -34,7 +34,7 @@ namespace Public_Bot.Modules.Commands.Settings_Commands
                 {
                     var chans = Context.Guild.TextChannels.Where(x => GuildSettings.BlacklistedChannels.Contains(x.Id));
 
-                    await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    await Context.Channel.SendMessageAsync(embed: new EmbedBuilder()
                     {
                         Title = "Channel Blacklist",
                         Description = $"Here are the channels that are blacklist from commands:\n" +

@@ -26,8 +26,8 @@ namespace Public_Bot.Modules.Commands.Level_Commands
         public async Task leaderboard()
         {
             var gl = GuildLeaderboards.Get(Context.Guild.Id);
-          
-            var levelmembers = gl.GetTop(9).OrderBy(x => (float)x.CurrentLevel + ((float)x.CurrentXP / (float)x.NextLevelXP)).Reverse().ToList();
+
+            var levelmembers = gl.GetTop(9);
             //foreach(var item in levelmembers)
             List<EmbedFieldBuilder> f = new List<EmbedFieldBuilder>();
             for (int i = 0; i != levelmembers.Count; i++)

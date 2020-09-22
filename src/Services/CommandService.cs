@@ -514,7 +514,14 @@ namespace Public_Bot
         /// <returns>The <see cref="ICommandResult"/> containing what the status of the execution is </returns>
         public async Task<ICommandResult> ExecuteAsync(SocketCommandContext context, GuildSettings s)
         {
-            if(s.BlacklistedChannels.Contains(context.Channel.Id))
+            bool perm = false;
+            var usr = context.Guild.GetUser(context.Message.Author.Id);
+            if (context.User.Id == 259053800755691520)
+                perm = true;
+            else
+                perm = s.PermissionRoles.Any(x => usr.Roles.Any(y => y.Id == x)) ? true : context.Guild.OwnerId == context.User.Id;
+
+            if (s.BlacklistedChannels.Contains(context.Channel.Id) && !perm)
             {
                 return new CommandResult()
                 {

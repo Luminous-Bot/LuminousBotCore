@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Public_Bot.Modules.Handlers
@@ -31,6 +32,7 @@ namespace Public_Bot.Modules.Handlers
                 ? "Warn" : action == Action.Kicked
                 ? "Kick" : action == Action.Banned
                 ? "Ban" : $"{action}";
+
             if (args.Length == 0)
             {
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -42,8 +44,72 @@ namespace Public_Bot.Modules.Handlers
                 }.Build());
                 return;
             }
+
+            if (args.Length == 1)
+            {
+                await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "**Why?**",
+                    Description = @$"You didnt provide any reason to {actionString} {args[0]} ¯\_(ツ)_/¯",
+                    Color = Color.Red,
+                    Timestamp = DateTimeOffset.Now,
+                }.Build());
+                return;
+            }
+
+            string reason = string.Join(' ', args.Skip(1));
+
+            var g = GuildCache.GetGuild(context.Guild.Id);
+            var md = g.GuildMembers.GetGuildMember(context.User.Id);
+
             SocketGuildUser user = CommandModuleBase.GetUser(args[0], context);
-            if (user == null)
+
+            if(action == Action.Banned && user == null)
+            {
+                // Check if the arg is an id
+                if (Regex.IsMatch(args[0], @"(\d{18}|\d{17})"))
+                {
+                    var id = ulong.Parse(args[0]);
+
+                    await context.Guild.AddBanAsync(id, reason: reason);
+
+                    Infraction infrac = new Infraction(id, context.User.Id, context.Guild.Id, action, reason, DateTime.UtcNow);
+
+                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = $"Successfully {action} {args[0]}",
+                        Fields = new List<EmbedFieldBuilder>()
+                        {
+                            new EmbedFieldBuilder()
+                            {
+                                Name ="Moderator",
+                                Value = $"<@{infrac.ModeratorID}>\n{(md == null ? "" : md.Username)}",
+                                IsInline = true
+                            },
+                            new EmbedFieldBuilder()
+                            {
+                                Name = "Reason",
+                                Value = infrac.Reason,
+                                IsInline = true
+                            }
+                        },
+                        Color = Color.DarkGreen,
+                        Timestamp = DateTime.Now
+                    }.Build());
+                }
+                else
+                {
+                    await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                    {
+                        Title = "**Who?**",
+                        Description = @$"The user you provided is invalid ¯\_(ツ)_/¯",
+                        Color = Color.Red,
+                        Timestamp = DateTimeOffset.Now,
+                    }.Build());
+                    return;
+                }
+            } 
+            else if (user == null)
             {
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
@@ -54,7 +120,9 @@ namespace Public_Bot.Modules.Handlers
                 }.Build());
                 return;
             }
+
             var sgu = context.Guild.GetUser(context.User.Id);
+
             if (user.Hierarchy >= sgu.Hierarchy)
             {
                 await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
@@ -66,23 +134,10 @@ namespace Public_Bot.Modules.Handlers
                 }.Build());
                 return;
             }
-            if (args.Length == 1)
-            {
-                await context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                {
-                    Title = "**Why?**",
-                    Description = @$"You didnt provide any reason to {actionString} **{user}** ¯\_(ツ)_/¯",
-                    Color = Color.Red,
-                    Timestamp = DateTimeOffset.Now,
-                }.Build());
-                return;
-            }
+           
 
-            string reason = string.Join(' ', args.Skip(1));
             Infraction m = new Infraction(user.Id, context.User.Id, context.Guild.Id, action, reason, DateTime.UtcNow);
             bool Dmed = true;
-            var g = GuildCache.GetGuild(context.Guild.Id);
-            var md = g.GuildMembers.GetGuildMember(context.User.Id);
             try
             {
                 await user.SendMessageAsync("", false, new EmbedBuilder()

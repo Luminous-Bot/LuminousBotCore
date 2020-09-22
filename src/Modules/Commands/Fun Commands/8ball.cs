@@ -17,44 +17,70 @@ namespace Public_Bot.Modules.Commands.Fun_Commands
     [DiscordCommandClass("🤽🏼 Fun 🤽🏼", "Commands to use to spice up your server.")]
     public class _8ball : CommandModuleBase
     {
+        private static string[] Answers = new string[]
+        {
+            "It is certain.",
+            "It is decidedly so.",
+            "Without a doubt.",
+            "Yes – definitely.",
+            "You may rely on it.",
+            "As I see it, yes.",
+            "Most likely.",
+            "Outlook good.",
+            "Yes.",
+            "Signs point to yes.",
+            "Reply hazy, try again.",
+            "Ask again later.",
+            "Better not tell you now.",
+            "Cannot predict now.",
+            "Concentrate and ask again.",
+            "Don't count on it.",
+            "My reply is no.",
+            "My sources say no.",
+            "Outlook not so good.",
+            "Very doubtful.",
+        };
+
+
         [DiscordCommand("8ball", commandHelp = "`(PREFIX)8ball`", description = "Ask the all knowing 8-ball")]
         public async Task eightball(params string[] args)
         {
-            var sb = new StringBuilder();
-
-            var embed = new EmbedBuilder();
-
-            var replies = new List<string>();
-
-            //Possible Replies
-            replies.Add("Yes");
-            replies.Add("No");
-            replies.Add("Lol idk");
-            replies.Add("69% Chance");
-
-            embed.WithColor(Blurple);
-            embed.WithTitle("8-Ball");
-
-            sb.AppendLine($"{Context.User.Username}");
-            sb.AppendLine();
-
-            if (args == null)
+            if(args.Length == 0)
             {
-                sb.AppendLine("Sorry, can't answer air");
-            }
-            else
-            {
-                var ans = replies[new Random().Next(replies.Count - 1)];
+                // Error
 
-                sb.AppendLine($"Your question is **{string.Join(' ', args)}**");
-                sb.AppendLine();
-                sb.AppendLine($"The answer is **{ans}**");
+                await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                {
+                    Title = "What sorry?",
+                    Description = "The magic 8 ball can't give an answer to nothing..",
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+                return;
             }
 
-            embed.Description = sb.ToString();
+            string question = string.Join(" ", args);
 
-            await Context.Channel.SendMessageAsync("", false, embed.Build());
+            int seed = 0;
 
+            foreach (char c in question)
+                seed += c;
+
+            var indx = new Random(seed).Next(Answers.Length);
+
+            var av = Context.User.GetAvatarUrl();
+            if (av == null)
+                av = Context.User.GetDefaultAvatarUrl();
+
+            await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+            {
+                Author = new EmbedAuthorBuilder()
+                {
+                    IconUrl = av,
+                    Name = Context.User.Username,
+                },
+                Description = $"\"{question}\"\n\n**{Answers[indx]}**",
+                Color = Blurple,
+            }.WithCurrentTimestamp().Build());
         }
     }
 }
