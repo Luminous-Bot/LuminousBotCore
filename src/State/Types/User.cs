@@ -26,6 +26,12 @@ namespace Public_Bot
         [GraphQLSVar, GraphQLProp]
         public string Username { get; set; }
         public User() { }
+        public User(ulong id)
+        {
+            this.Id = id;
+            this.Username = "Unknown";
+            StateService.Mutate<User>(GraphQLParser.GenerateGQLMutation<User>("createUser", true, this, "data", "CreateUserInput!"));
+        }
         public User(IUser user) 
         {
             this.Id = user.Id;

@@ -37,16 +37,19 @@ namespace Public_Bot
             if (guild != null)
             {
                 GuildMember member;
+
+                if (!User.UserExists(MemberId))
+                    _ = new User(MemberId);
+
                 if (guild.GuildMembers.GuildMemberExists(this.MemberID))
+                {
                     member = guild.GuildMembers.GetGuildMember(this.MemberID);
+                }
                 else
                 {
-                    var gm = GuildHandler.client.GetGuild(GuildID).GetUser(this.MemberID);
-                    if (gm != null)
-                        member = guild.GuildMembers.CreateGuildMember(MemberId);
-                    else
-                        throw new Exception("User is not in guild or list!");
+                    member = new GuildMember(MemberId, GuildID);
                 }
+                
                 member.Infractions.Add(this);
                 StateService.Mutate<Infraction>(GraphQLParser.GenerateGQLMutation<Infraction>("createInfraction", true, this, "data", "CreateInfractionInput!"));
             }

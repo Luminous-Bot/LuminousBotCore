@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Public_Bot.Modules.Handlers
@@ -14,33 +15,37 @@ namespace Public_Bot.Modules.Handlers
     class LoggingHandler
     {
         public static DiscordShardedClient client;
+        private Thread _loggingThread;
         public LoggingHandler(DiscordShardedClient c)
         {
-            client = c;
-            //subscribe
-            client.ChannelCreated        += Client_ChannelCreated;
-            client.ChannelDestroyed      += Client_ChannelDestroyed;
-            client.ChannelUpdated        += Client_ChannelUpdated;
-            client.GuildUpdated          += Client_GuildUpdated;
-            client.MessageDeleted        += Client_MessageDeleted;
-            client.MessageUpdated        += Client_MessageUpdated;
-            client.RoleCreated           += Client_RoleCreated;
-            client.RoleDeleted           += Client_RoleDeleted;
-            client.RoleUpdated           += Client_RoleUpdated;
-            client.UserUnbanned          += Client_UserUnbanned;
-            client.UserUpdated           += Client_UserUpdated;
-            client.GuildMemberUpdated    += Client_GuildMemberUpdated;
-            client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
-            client.MessagesBulkDeleted   += Client_MessagesBulkDeleted;
-            client.UserJoined            += Client_UserJoined;
-            client.UserLeft              += Client_UserLeft;
-            client.InviteCreated         += Client_InviteCreated;
-            client.InviteDeleted         += Client_InviteDeleted;
+            _loggingThread = new Thread(() => 
+            {
+                client = c;
+                //subscribe
+                client.ChannelCreated += Client_ChannelCreated;
+                client.ChannelDestroyed += Client_ChannelDestroyed;
+                client.ChannelUpdated += Client_ChannelUpdated;
+                client.GuildUpdated += Client_GuildUpdated;
+                client.MessageDeleted += Client_MessageDeleted;
+                //client.MessageUpdated += Client_MessageUpdated; < moved to Message Handler
+                client.RoleCreated += Client_RoleCreated;
+                client.RoleDeleted += Client_RoleDeleted;
+                client.RoleUpdated += Client_RoleUpdated;
+                client.UserUnbanned += Client_UserUnbanned;
+                client.UserUpdated += Client_UserUpdated;
+                client.GuildMemberUpdated += Client_GuildMemberUpdated;
+                client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
+                client.MessagesBulkDeleted += Client_MessagesBulkDeleted;
+                client.UserJoined += Client_UserJoined;
+                client.UserLeft += Client_UserLeft;
+                client.InviteCreated += Client_InviteCreated;
+                client.InviteDeleted += Client_InviteDeleted;
+            });
+            _loggingThread.Start();
         }
 
         private async Task Client_InviteDeleted(Cacheable<SocketGuildInvite, string> arg1, SocketGuild arg2)
         {
-            
             var gs = GuildSettings.Get(arg2.Id);
             if (gs.LogChannel == 0 || !gs.Logging)
                 return;
@@ -602,7 +607,7 @@ namespace Public_Bot.Modules.Handlers
             }
         }
 
-        private async Task Client_MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
+        public async Task Client_MessageUpdated(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
         {
             if (arg2.Author.IsBot || arg2.Author.IsWebhook)
                 return;

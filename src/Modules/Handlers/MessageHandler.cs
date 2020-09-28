@@ -36,6 +36,9 @@ namespace Public_Bot.Modules.Handlers
         {
             if (arg2.Author.IsBot || arg2.Author.IsWebhook)
                 return;
+
+            await HandlerService.GetHandlerInstance<LoggingHandler>().Client_MessageUpdated(arg1, arg2, arg3);
+
             if (MessageHelper.MessageExists(arg2.Id))
             {
                 var msg = MessageHelper.GetMessage(arg2.Id);

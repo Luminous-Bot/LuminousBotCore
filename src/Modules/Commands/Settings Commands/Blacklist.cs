@@ -106,38 +106,62 @@ namespace Public_Bot.Modules.Commands.Settings_Commands
                         return;
                     }
 
-                    var chan = GetChannel(args[1]);
+                    List<SocketGuildChannel> Added = new List<SocketGuildChannel>();
+                    List<string> Failed = new List<string>();
 
-                    if(chan == null)
+                    foreach(var arg in args.Skip(1))
                     {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
+                        var chan = GetChannel(arg);
+
+                        if (chan == null)
                         {
-                            Title = "Invalid Channel!",
-                            Description = "The channel you provided was Invalid!",
-                            Color = Color.Red
-                        }.WithCurrentTimestamp().Build());
-                        return;
+                            Failed.Add(arg);
+                            continue;
+                        }
+
+                        if (chan.GetType() == typeof(SocketVoiceChannel))
+                        {
+                            Failed.Add(arg);
+                            continue;
+                        }
+
+                        GuildSettings.BlacklistedChannels.Add(chan.Id);
+                        GuildSettings.SaveGuildSettings();
+
+                        Added.Add(chan);
                     }
 
-                    if(chan.GetType() == typeof(SocketVoiceChannel))
+                    var addedFields = new EmbedFieldBuilder()
                     {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "A Voice channel?",
-                            Description = "We cant add voice channels because simply luminous cant recieve commands in a voice channel!",
-                            Color = Color.Red
-                        }.WithCurrentTimestamp().Build());
-                        return;
-                    }
+                        Name = "Added",
+                        Value = "```\n"
+                    };
 
-                    GuildSettings.BlacklistedChannels.Add(chan.Id);
-                    GuildSettings.SaveGuildSettings();
+                    foreach (var item in Added)
+                        addedFields.Value += $"#{item.Name}\n";
+                    addedFields.Value += "```";
+
+                    var failedFields = new EmbedFieldBuilder()
+                    {
+                        Name = "Failed",
+                        Value = "```\n"
+                    };
+
+                    foreach (var item in Failed)
+                        failedFields.Value += $"{item}\n";
+
+                    failedFields.Value += "```";
 
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "Success!",
-                        Description = $"Added <#{chan.Id}> to the blacklist!",
-                        Color = Color.Green
+                        Title = Added.Any() ? "Success!" : "Failed",
+                        Color = Added.Any() ? Color.Green : Color.Red,
+                        Fields = new List<EmbedFieldBuilder>()
+                        {
+                            Added.Any() ? addedFields : null,
+                            Failed.Any() ? failedFields : null
+                        },
+                        
                     }.WithCurrentTimestamp().Build());
 
                     return;
