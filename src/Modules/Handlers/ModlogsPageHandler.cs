@@ -101,8 +101,21 @@ namespace Public_Bot.Modules.Handlers
         
         private async Task HandleModlogsPage(Discord.Cacheable<Discord.IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
-            if (arg3.User.Value.IsBot)
+            IUser User;
+            if (arg3.User.IsSpecified)
+                User = arg3.User.Value;
+            else
+                User = await arg2.GetUserAsync(arg3.UserId);
+
+            if (User == null)
+                User = client.GetUser(arg3.UserId);
+
+            if (User == null)
                 return;
+
+            if (User.IsBot)
+                return;
+
             if (CurrentPages.Any(x => x.MessageID == arg3.MessageId))
             {
                 var page = CurrentPages.Find(x => x.MessageID == arg1.Id);

@@ -21,12 +21,16 @@ namespace Public_Bot.Modules.Commands.General_Commands
         [DiscordCommand("guild", description = "Shows the current guild's stats", commandHelp = "Usage - `(PREFIX)guild`")]
         public async Task stats()
         {
-            var iconurl = Context.Guild.IconUrl;
-            if(iconurl != null)
+
+            var iconurl = "https://cdn4.iconfinder.com/data/icons/defaulticon/icons/png/256x256/no.png";
+            iconurl = Context.Guild.IconUrl;
+
+            if (iconurl != null)
                 iconurl = iconurl.Replace("webp", "jpg");
             var bannerirl = Context.Guild.BannerUrl;
             if(bannerirl != null)
                 bannerirl = bannerirl.Replace("webp", "jpg");
+
             var img = GuildStatBuilder.MakeServerCard(Context.Guild.Name, iconurl, bannerirl, Context.Guild.Owner.ToString(), Context.Guild.MemberCount.ToString(), Context.Guild.PremiumSubscriptionCount.ToString(), Context.Guild.CreatedAt.DateTime);
             img.Save($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}gld.png", System.Drawing.Imaging.ImageFormat.Png);
             await Context.Channel.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}gld.png");

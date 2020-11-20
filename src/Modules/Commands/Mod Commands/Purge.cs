@@ -45,9 +45,16 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
                 var msgs = tmp.Where(x => (DateTime.UtcNow - x.Timestamp.UtcDateTime).TotalDays < 14);
                 await ((ITextChannel)Context.Channel).DeleteMessagesAsync(msgs);
                 const int delay = 3000;
-                var m = await Context.Channel.SendMessageAsync($"Purge completed!{(tmp.Count() != msgs.Count() ? " (Some messages couldn't be deleted because there older than two weeks!)" : "")}");
-                await Task.Delay(delay);
-                await m.DeleteAsync();
+                try
+                {
+                    var m = await Context.Channel.SendMessageAsync($"Purge completed!{(tmp.Count() != msgs.Count() ? " (Some messages couldn't be deleted because there older than two weeks!)" : "")}");
+                    await Task.Delay(delay);
+                    await m.DeleteAsync();
+                }
+                catch(AggregateException x)
+                {
+                    await Context.User.SendMessageAsync($"Purge completed!{(tmp.Count() != msgs.Count() ? " (Some messages couldn't be deleted because there older than two weeks!)" : "")} I've dm'd you the results of the purge because Luminous doesn't have permission to send messages in {Context.Channel.Name}!");
+                }
             }
             else if(args.Length == 2)
             {
@@ -93,9 +100,16 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
                 messages = messages.Where(x => (DateTime.UtcNow - x.CreatedAt.UtcDateTime).TotalDays < 14);
                 await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
                 const int delay = 2000;
-                var m = await Context.Channel.SendMessageAsync($"Purge completed!");
-                await Task.Delay(delay);
-                await m.DeleteAsync();
+                try
+                {
+                    var m = await Context.Channel.SendMessageAsync($"Purge completed!");
+                    await Task.Delay(delay);
+                    await m.DeleteAsync();
+                }
+                catch (AggregateException x)
+                {
+                    await Context.User.SendMessageAsync($"Purge completed! I've dm'd you the results of the purge because Luminous doesn't have permission to send messages in {Context.Channel.Name}!");
+                }
             }
         }
     }

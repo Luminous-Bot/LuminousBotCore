@@ -69,7 +69,7 @@ namespace Public_Bot.Modules.Handlers
                 // Check if the arg is an id
                 if (Regex.IsMatch(args[0], @"(\d{18}|\d{17})"))
                 {
-                    var id = ulong.Parse(args[0]);
+                    var id = ulong.Parse(Regex.Match(args[0], @"(\d{18}|\d{17})").Groups[1].Value);
 
                     await context.Guild.AddBanAsync(id, reason: reason);
 

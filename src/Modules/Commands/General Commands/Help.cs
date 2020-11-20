@@ -139,20 +139,9 @@ namespace Public_Bot.Modules.Commands.General_Commands
             else if(args.Length == 1)
             {
                 var cmds = ReadCurrentCommands(GuildSettings.Prefix);
-                var perm = HelpMessageHandler.CalcHelpPage(Context.User as SocketGuildUser, GuildSettings);
                 if (cmds.Any(x => x.HasName(args[0].ToLower())))
                 {
                     var cmd = cmds.Find(x => x.HasName(args[0].ToLower()));
-                    if (perm == HelpMessageHandler.HelpPages.Public && cmd.RequiresPermission)
-                    {
-                        await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
-                        {
-                            Title = "**You can't access this command!**",
-                            Description = "You don't have permission to use this command, therefore we're not gonna show you how.",
-                            Color = Color.Red,
-                        }.WithCurrentTimestamp().Build());
-                        return;
-                    }
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
                         Title = $"**{GuildSettings.Prefix}{cmd.CommandName}**",
