@@ -28,7 +28,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
             }
             else
             {
-                use = GetUser(args[0]);
+                use = await GetUser(args[0]);
             }
             if (use == null)
             {

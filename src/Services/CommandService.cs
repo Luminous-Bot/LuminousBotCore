@@ -884,8 +884,11 @@ namespace Public_Bot
 
 
         }
-        public SocketGuildUser GetUser(string user)
+        public async Task<SocketGuildUser> GetUser(string user)
         {
+            // Download when needed
+            await Context.Guild.DownloadUsersAsync();
+
             var regex = new Regex(@"(\d{18}|\d{17})");
             if (regex.IsMatch(user))
             {

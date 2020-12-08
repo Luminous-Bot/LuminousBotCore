@@ -19,9 +19,35 @@ namespace Public_Bot
             client = c;
             client.JoinedGuild += AddGuild;
             client.UserJoined += NewUser;
+            client.GuildAvailable += Client_GuildAvailable; ;
+            client.ShardConnected += Client_ShardReady;
         }
-        
-        
+
+        private Task Client_GuildAvailable(SocketGuild arg)
+        {
+            Task.Run(() => HandleGuildDownloadAsync(arg));
+            return Task.CompletedTask;
+        }
+
+        private async Task Client_ShardReady(DiscordSocketClient arg)
+        {
+            Logger.Write("Starting Init download..");
+
+            foreach (var guild in arg.Guilds)
+            {
+                Task.Run(() => HandleGuildDownloadAsync(guild));
+            }
+        }
+
+        private async Task HandleGuildDownloadAsync(SocketGuild arg)
+        {
+            // We need to download the guilds members for checking by name/nickname
+            Logger.Write($"Starting download of {arg.Name} Members..");
+            await arg.DownloadUsersAsync();
+            Logger.Write($"Finished download of {arg.Name}");
+        }
+
+
         #region old
         //public static GuildMember GetOrCreateGuildMember(ulong MemberID, ulong GuildID)
         //{
@@ -92,6 +118,8 @@ namespace Public_Bot
 
             if(!GuildCache.CacheContains(arg.Id))
                 GuildCache.AddGuild(g);
+
+            Task.Run(() => HandleGuildDownloadAsync(arg));
         }
 
         public static Guild GetGuild(ulong id)

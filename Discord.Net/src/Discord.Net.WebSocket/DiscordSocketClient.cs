@@ -960,12 +960,12 @@ namespace Discord.WebSocket
                                 break;
                             case "GUILD_MEMBERS_CHUNK":
                                 {
-                                    await _gatewayLogger.DebugAsync("Received Dispatch (GUILD_MEMBERS_CHUNK)").ConfigureAwait(false);
-
                                     var data = (payload as JToken).ToObject<GuildMembersChunkEvent>(_serializer);
                                     var guild = State.GetGuild(data.GuildId);
+
                                     if (guild != null)
                                     {
+                                        await _gatewayLogger.DebugAsync($"Chunk {data.ChunkIndex + 1}/{data.ChunkCount} Recieved for {guild.Name}");
                                         foreach (var memberModel in data.Members)
                                             guild.AddOrUpdateUser(memberModel);
 

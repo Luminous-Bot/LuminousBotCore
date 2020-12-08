@@ -29,7 +29,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
 
             try
             {
-                var user = GetUser(usr);
+                var user = await GetUser(usr);
                 var guildlvl = GuildLeaderboards.Get(Context.Guild.Id);
                 var leveluser = guildlvl.CurrentUsers.GetLevelUser(user.Id);
                 if (url == "none")

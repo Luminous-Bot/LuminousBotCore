@@ -96,6 +96,7 @@ namespace Public_Bot.Modules.Handlers
                         Color = Color.DarkGreen,
                         Timestamp = DateTime.Now
                     }.Build());
+                    return;
                 }
                 else
                 {

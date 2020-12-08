@@ -36,7 +36,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
             }
             var cgu = Context.Guild.GetUser(Context.User.Id);
 
-            var user = GetUser(args[0]);
+            var user = await GetUser(args[0]);
 
             if (user != null && user.Id != cgu.Id && cgu.GuildPermissions.ManageNicknames)
             {

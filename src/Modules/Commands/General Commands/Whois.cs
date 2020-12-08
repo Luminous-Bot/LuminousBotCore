@@ -23,7 +23,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
             SocketGuildUser userAccount;
             if (user.Length == 0)
                 userAccount = Context.User as SocketGuildUser;
-            else userAccount = GetUser(user[0]);
+            else userAccount = await GetUser(user[0]);
 
             if (userAccount == null)
             {

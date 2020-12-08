@@ -27,7 +27,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
         {
             var user = Context.User;
             if (args.Length == 1)
-                user = GetUser(args[0]);
+                user = await GetUser(args[0]);
             if (user == null)
             {
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()

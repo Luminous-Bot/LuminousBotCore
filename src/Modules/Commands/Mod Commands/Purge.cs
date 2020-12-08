@@ -74,7 +74,7 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
                     return;
                 }
                 
-                var user = GetUser(usr);
+                var user = await GetUser(usr);
                 if (user == null)
                 {
                     await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
