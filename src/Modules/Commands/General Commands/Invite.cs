@@ -29,7 +29,7 @@ namespace Public_Bot.Modules.Commands.General_Commands
                     Name = Context.Client.CurrentUser.Username
                 },
                 Title = "Invite!",
-                Description = $"Thanks for considering to invite {Context.Client.CurrentUser.Username}. You can find alot of information about how to setup {Context.Client.CurrentUser.Username} on our [Discord](https://disocrd.com/invite/w8EcwBy)!",
+                Description = $"Thanks for considering to invite {Context.Client.CurrentUser.Username}. You can find a lot of information about how to setup {Context.Client.CurrentUser.Username} on our [Discord](https://discord.com/invite/w8EcwBy)!",
                 Fields = new List<EmbedFieldBuilder>()
                 {
                     new EmbedFieldBuilder()
