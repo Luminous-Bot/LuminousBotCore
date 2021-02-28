@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Public_Bot.Modules.Handlers.MuteHandler;
+
 namespace Public_Bot.Modules.Commands.Mod_Commands
 {
     [DiscordCommandClass("🔨 Mod Commands 🔨", "Make your staff team more efficient with this module, you can keep track of user infractions and keep your server in order!")]

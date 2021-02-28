@@ -27,7 +27,16 @@ namespace Public_Bot.Modules.Handlers
                         ("username", GraphQLParser.CleanUserContent(GraphQLParser.CleanUserContent(arg2.ToString()))), // Because the graphql string needs to be cleaned as well we have to clean^2
                         ("id", arg2.Id)
                     ));
-                    UserCache.UpdateUser(newuser);
+
+                    if (!newuser.HasValue)
+                    {
+                        Logger.Write("Failed to mutate, got undef user!", Logger.Severity.Warn);
+                    }
+                    else
+                    {
+                        UserCache.UpdateUser(newuser.Value);
+                    }
+                    
                 }
             }
         }

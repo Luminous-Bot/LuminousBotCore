@@ -153,7 +153,7 @@ namespace Public_Bot
             var client = new RestClient("https://upload.hapsy.net/upload");
             client.Timeout = -1;
             var request = new RestRequest(Method.POST);
-            request.AddHeader("Authorization", "4e06ce55-9373-4ef9-b66f-aec02687f6a3");
+            request.AddHeader("Authorization", ConfigLoader.HapsyApiKey);
             request.AddFile("file", fPath);
             IRestResponse response = await client.ExecuteAsync(request);
             //Console.WriteLine(response.Content);

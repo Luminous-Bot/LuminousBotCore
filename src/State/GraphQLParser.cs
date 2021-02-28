@@ -139,7 +139,7 @@ namespace Public_Bot
         }
         public static string GenerateGQLMutation<T>(string opname, bool hasVars, T obj, string varName = "", string varType = "", params (string, object)[] Params)
         {
-            Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);
+            //Logger.Write($"Making Mutation for method {opname}", Logger.Severity.State);
             var classtype = typeof(T);
             var typeVars = classtype.GetProperties().Where(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(GraphQLSVar) || y.AttributeType == typeof(GraphQLSObj)));
             List<string> vars = new List<string>();
@@ -238,7 +238,7 @@ namespace Public_Bot
         }
         public static string GenerateGQLQuery<T>(string method, params (string, object)[] Params)
         {
-            Logger.Write($"Making Query for method {method}", Logger.Severity.State);
+            //Logger.Write($"Making Query for method {method}", Logger.Severity.State);
             string parms = "";
             foreach (var p in Params)
             {

@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Public_Bot
 {
-    class Logger
+    public class Logger
     {
         public static string ErrorLogFile = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}error.txt";
         public enum Severity
@@ -56,6 +57,15 @@ namespace Public_Bot
                     break;
 
             }
+
+            if(s == Severity.Error || s == Severity.Warn || s == Severity.Critical)
+            {
+                Task.Run(async () =>
+                {
+                    CommandHandler.SendCrits(message, s).ConfigureAwait(false);
+                });
+            }
+
             if (s == Severity.Error || s == Severity.Critical)
             {
                 string errormsg = $"<----------{DateTime.UtcNow.ToString("o")}---------->\n";

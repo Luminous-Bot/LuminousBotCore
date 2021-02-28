@@ -515,11 +515,11 @@ namespace Public_Bot
         public async Task<ICommandResult> ExecuteAsync(SocketCommandContext context, GuildSettings s)
         {
             bool perm = false;
-            var usr = context.Guild.GetUser(context.Message.Author.Id);
+            var usr = await context.Client.Rest.GetGuildUserAsync(context.Guild.Id, context.User.Id);
             if (context.User.Id == 259053800755691520)
                 perm = true;
             else
-                perm = s.PermissionRoles.Any(x => usr.Roles.Any(y => y.Id == x)) ? true : context.Guild.OwnerId == context.User.Id;
+                perm = s.PermissionRoles.Any(x => usr.RoleIds.Any(y => y == x)) ? true : context.Guild.OwnerId == context.User.Id;
 
             if (s.BlacklistedChannels.Contains(context.Channel.Id) && !perm)
             {

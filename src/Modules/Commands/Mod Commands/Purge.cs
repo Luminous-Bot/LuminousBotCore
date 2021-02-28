@@ -26,22 +26,22 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
         {
             if(args.Length == 1)
             {
-                uint ammount = 0;
+                uint amount = 0;
 
                 if (uint.TryParse(args[0], out var res))
-                    ammount = res;
+                    amount = res + 1;
                 else
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "Invalid Ammount",
+                        Title = "Invalid Amount",
                         Color = Color.Red,
-                        Description = "The ammount of messages you entered was not a number or far exceeds our parseable range",
+                        Description = "The amount of messages you entered was not a number or far exceeds our parseable range",
                     }.WithCurrentTimestamp().Build());
                     return;
                 }
 
-                var tmp = await Context.Channel.GetMessagesAsync((int)ammount).FlattenAsync();
+                var tmp = await Context.Channel.GetMessagesAsync((int)amount).FlattenAsync();
                 var msgs = tmp.Where(x => (DateTime.UtcNow - x.Timestamp.UtcDateTime).TotalDays < 14);
                 await ((ITextChannel)Context.Channel).DeleteMessagesAsync(msgs);
                 const int delay = 3000;
@@ -59,17 +59,17 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
             else if(args.Length == 2)
             {
                 string usr = args[0];
-                uint ammount = 0;
+                uint amount = 0;
 
                 if (uint.TryParse(args[1], out var res))
-                    ammount = res + 1;
+                    amount = res + 1;
                 else
                 {
                     await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                     {
-                        Title = "Invalid Ammount",
+                        Title = "Invalid Amount",
                         Color = Color.Red,
-                        Description = "The ammount of messages you entered was not a number or far exceeds our parseable range",
+                        Description = "The amount of messages you entered was not a number or far exceeds our parseable range",
                     }.WithCurrentTimestamp().Build());
                     return;
                 }
@@ -96,7 +96,7 @@ namespace Public_Bot.Modules.Commands.Mod_Commands
                     }.Build());
                     return;
                 }
-                var messages = tmp.Where(x => x.Author.Id == user.Id).Take((int)ammount);
+                var messages = tmp.Where(x => x.Author.Id == user.Id).Take((int)amount);
                 messages = messages.Where(x => (DateTime.UtcNow - x.CreatedAt.UtcDateTime).TotalDays < 14);
                 await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
                 const int delay = 2000;

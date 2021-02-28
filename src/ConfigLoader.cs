@@ -13,6 +13,7 @@ namespace Public_Bot
         private static string ConfigPath = $"{DataDirectoryPath}{Path.DirectorySeparatorChar}Config.json";
         public static string Token { get; set; }
         public static string StateUrl { get; set; }
+        public static string HapsyApiKey { get; set; }
         public static void LoadConfig()
         {
             if (!Directory.Exists(DataDirectoryPath))
@@ -29,6 +30,7 @@ namespace Public_Bot
 
             Token = Config["Token"].ToString();
             StateUrl = Config["StateUrl"].ToString();
+            HapsyApiKey = Config["HapsyApiKey"].ToString();
         }
     }
 }

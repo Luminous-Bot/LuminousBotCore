@@ -238,7 +238,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "XP per Message",
-                            Description = $"The current XP per Message is {ls.XpPerMessage}\nTo change the ammount of XP per message run `{GuildSettings.Prefix}levelsettings messagexp <ammount>`",
+                            Description = $"The current XP per Message is {ls.XpPerMessage}\nTo change the amount of XP per message run `{GuildSettings.Prefix}levelsettings messagexp <amount>`",
                             Color = Color.Green
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -276,7 +276,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "XP per Voice Channel Minute",
-                            Description = $"The current XP per Voice Channel Minute is {ls.XpPerVCMinute}\nTo change the ammount of XP per minute in VC run `(PREFIX)levelsettings voicexp <ammount>`",
+                            Description = $"The current XP per Voice Channel Minute is {ls.XpPerVCMinute}\nTo change the amount of XP per minute in VC run `(PREFIX)levelsettings voicexp <amount>`",
                             Color = Color.Green
                         }.WithCurrentTimestamp().Build());
                         return;
@@ -735,7 +735,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                         await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                         {
                             Title = "Are you sure?",
-                            Description = $"This process can take some time depending on the ammount of users you have in your guild. please type \"{GuildSettings.Prefix}levelsettings refresh {role.Mention} confirm\"",
+                            Description = $"This process can take some time depending on the amount of users you have in your guild. please type \"{GuildSettings.Prefix}levelsettings refresh {role.Mention} confirm\"",
                             Color = Color.Orange
                         }.WithCurrentTimestamp().Build());
                     }

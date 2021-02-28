@@ -9,34 +9,41 @@ using System.Threading.Tasks;
 
 namespace Public_Bot
 {
+    public struct GQLReturn<T>
+    {
+        public T? Value;
+        public bool HasValue { get; }
+
+        public GQLReturn(bool hasValue, T val = default(T))
+        {
+            this.HasValue = hasValue;
+
+            // This might set classes to their default props because of default(T)?
+            this.Value = val;
+        }
+        public GQLReturn(T val)
+        {
+            this.HasValue = true;
+            this.Value = val;
+        }
+    }
+
     public class StateService
     {
         private static HttpClient client = new HttpClient();
         public static string Url
             => ConfigLoader.StateUrl;
 
-        //public static string cs = "Server=5.135.180.140;Port=5423;Username=admin;Password=administratorPassword#124;Database=luminous-db";
-        //public static NpgsqlConnection c = new NpgsqlConnection(cs);
-        //public static bool Opened = false;
-        //public static object ExecuteScalar(string q)
-        //{
-        //    if (!Opened)
-        //    { c.Open(); Opened = true; }
-        //    Logger.Write($"Sending RAW sql query:\n{q}", Logger.Severity.State);
-        //    NpgsqlCommand cmd = new NpgsqlCommand(q, c);
-        //    Logger.Write("Success!", Logger.Severity.State);
-        //    return cmd.ExecuteScalar();
-        //}
-        public static T Query<T>(string q, bool HighPriority = false, int Try = 1)
+        public static GQLReturn<T> Query<T>(string q, bool HighPriority = false, int Try = 1)
             => QueryAsync<T>(q, HighPriority, Try).GetAwaiter().GetResult();
-        public static async Task<T> QueryAsync<T>(string q, bool HighPriority = false, int Try = 1)
+        public static async Task<GQLReturn<T>> QueryAsync<T>(string q, bool HighPriority = false, int Try = 1)
         {
             string _stack = Environment.StackTrace;
             string tName = typeof(T).Name;
             if (typeof(T).Name.Contains("List"))
                 tName = typeof(T).GenericTypeArguments[0].Name + "[]";
 
-            Logger.Write($"Sending Gql Query for {tName}", Logger.Severity.State);
+            //Logger.Write($"Sending Gql Query for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             string cntnt = await res.Content.ReadAsStringAsync();
             if(res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
@@ -49,11 +56,20 @@ namespace Public_Bot
             }
             if (res.IsSuccessStatusCode)
             {
-                var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cntnt);
-                Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                GqlBase<T> rtn;
+                try
+                {
+                    rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cntnt);
+                }
+                catch(Exception x)
+                {
+                    Logger.Write($"Got Exception on QueryAsync: {x}");
+                    return new GQLReturn<T>(false);
+                }
+                //Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
                 if (rtn.data == null)
                     return default;
-                return rtn.data.First().Value;
+                return new GQLReturn<T>(true, rtn.data.First().Value);
             }
             else
             {
@@ -62,16 +78,16 @@ namespace Public_Bot
                 return default;
             }
         }
-        public static T Mutate<T>(string q, bool HighPriority = false, int Try = 1)
+        public static GQLReturn<T> Mutate<T>(string q, bool HighPriority = false, int Try = 1)
             => MutateAsync<T>(q, HighPriority, Try).GetAwaiter().GetResult();
-        public static async Task<T> MutateAsync<T>(string q, bool HighPriority = false, int Try = 1)
+        public static async Task<GQLReturn<T>> MutateAsync<T>(string q, bool HighPriority = false, int Try = 1)
         {
             string _stack = Environment.StackTrace;
             string tName = typeof(T).Name;
             if (typeof(T).Name.Contains("List"))
                 tName = typeof(T).GenericTypeArguments[0].Name + "[]";
 
-            Logger.Write($"Sending Gql Mutation for {tName}", Logger.Severity.State);
+            //Logger.Write($"Sending Gql Mutation for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             var cont = await res.Content.ReadAsStringAsync();
             if (res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
@@ -84,13 +100,23 @@ namespace Public_Bot
             }
             if (res.IsSuccessStatusCode)
             {
-                var rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cont);
+                GqlBase<T> rtn;
+                
+                try
+                {
+                     rtn = JsonConvert.DeserializeObject<GqlBase<T>>(cont);
+                }
+                catch(Exception x)
+                {
+                    Logger.Write($"Got Exception on MutateAsync {x}", Logger.Severity.Warn);
+                    return new GQLReturn<T>(false);
+                }
                 if(rtn.errors == null)
                 {
-                    Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                    //Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
                     if (rtn.data == null)
                         return default;
-                    return rtn.data.First().Value;
+                    return new GQLReturn<T>(rtn.data.First().Value);
                 }
                 else
                 {
@@ -113,7 +139,7 @@ namespace Public_Bot
             if (typeof(T).Name.Contains("List"))
                 tName = typeof(T).GenericTypeArguments[0].Name + "[]";
 
-            Logger.Write($"Sending Raw GQL for {tName}", Logger.Severity.State);
+            //Logger.Write($"Sending Raw GQL for {tName}", Logger.Severity.State);
             var res = await client.PostAsync(Url, new StringContent(q, Encoding.UTF8, "application/json"));
             string cont = await res.Content.ReadAsStringAsync();
             if (res.StatusCode == System.Net.HttpStatusCode.BadGateway && HighPriority)
@@ -124,29 +150,34 @@ namespace Public_Bot
                     await ExecuteNoReturnAsync<T>(q, HighPriority, Try + 1);
                 }
             }
-            var rtn = JsonConvert.DeserializeObject<GqlError>(cont);
-            if (res.IsSuccessStatusCode && rtn.errors == null)
+            try
             {
-                Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                var rtn = JsonConvert.DeserializeObject<GqlError>(cont);
+                if (res.IsSuccessStatusCode && rtn.errors == null)
+                {
+                    //Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
+                }
+                else
+                {
+                    Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
+                    await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), cont, _stack, Try);
+                }
             }
-            else
+            catch(Exception x)
             {
-                Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.Error);
-                await CommandHandler.HandleFailedGql(q, typeof(T).Name, "mutation", res.StatusCode.ToString(), cont, _stack, Try);
+                Logger.Write($"Got Exception on ExecuteNoReturnAsync: {x}", Logger.Severity.Warn);
             }
         }
         public static bool Exists<T>(string q)
         {
             var res = Query<T>(q, true);
-            if (res == null)
-                return false;
-            return true;
+            return res.HasValue;
         }
 
         public static bool Exists(string q)
         {
             var res = Query<ExistBase>(q, true);
-            return res.result.Values.First();
+            return res.HasValue ? res.Value.result.First().Value : false;
         }
         private class ExistBase
         {

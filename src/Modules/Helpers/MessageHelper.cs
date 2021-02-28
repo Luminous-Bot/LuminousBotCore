@@ -13,7 +13,9 @@ namespace Public_Bot.Modules.Helpers
         public static bool MessageExists(ulong messageId)
         {
             var re = StateService.Query<bool>("{\"operationName\":null,\"variables\":{},\"query\":\"{ messageExists(MessageID: \\\"" + messageId + "\\\") }\"}", true);
-            return re;
+
+            // TODO: maybe change this signature?
+            return re.HasValue ? re.Value : true;
         }
 
         
@@ -22,7 +24,10 @@ namespace Public_Bot.Modules.Helpers
         public static async Task<Message> GetMessageAsync(ulong id)
         {
             var q = GraphQLParser.GenerateGQLQuery<Message>("message", ("id", id));
-            return await StateService.QueryAsync<Message>(q);
+
+            var r = await StateService.QueryAsync<Message>(q);
+
+            return r.HasValue ? r.Value : null;
         }
     }
 }

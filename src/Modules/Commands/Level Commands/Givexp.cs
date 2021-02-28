@@ -21,7 +21,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
     [DiscordCommandClass("🧪 Levels 🧪", "Add ranks and leaderboards for your server with Levels!")]
     public class Givexp : CommandModuleBase
     {
-        [DiscordCommand("givexp", RequiredPermission = true, description = "Gives a user XP", commandHelp = "Usage - `(PREFIX)givexp <user> <ammount>")]
+        [DiscordCommand("givexp", RequiredPermission = true, description = "Gives a user XP", commandHelp = "Usage - `(PREFIX)givexp <user> <amount>")]
         public async Task gxp(params string[] args)
         {
             if (args.Length == 0)
@@ -50,7 +50,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "How much XP?",
-                    Description = $"How much XP do you want to give {user.Mention}? use `{GuildSettings.Prefix}givexp <@user> <ammount>`",
+                    Description = $"How much XP do you want to give {user.Mention}? use `{GuildSettings.Prefix}givexp <@user> <amount>`",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
                 return;

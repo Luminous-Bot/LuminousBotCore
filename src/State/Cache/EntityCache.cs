@@ -34,7 +34,7 @@ namespace Public_Bot
         }
 
         /// <summary>
-        /// Returns the ammount of items in the Cache
+        /// Returns the amount of items in the Cache
         /// </summary>
         public int Count
             => _CacheList.Count;
@@ -136,7 +136,7 @@ namespace Public_Bot
         }
 
         /// <summary>
-        /// Returns the ammount of items in the Cache
+        /// Returns the amount of items in the Cache
         /// </summary>
         public int Count 
             => _CacheList.Count;
@@ -233,7 +233,7 @@ namespace Public_Bot
         }
 
         /// <summary>
-        /// Returns the ammount of items in the Cache
+        /// Returns the amount of items in the Cache
         /// </summary>
         public int Count
             => _CacheList.Count;

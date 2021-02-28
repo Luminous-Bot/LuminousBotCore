@@ -21,7 +21,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
     [DiscordCommandClass("🧪 Levels 🧪", "Add ranks and leaderboards for your server with Levels!")]
     public class Givelevel : CommandModuleBase
     {
-        [DiscordCommand("givelevel", RequiredPermission = true, commandHelp = "Usage `(PREFIX)givelevel <user> <ammount>`", description = "Gives a user Levels")]
+        [DiscordCommand("givelevel", RequiredPermission = true, commandHelp = "Usage `(PREFIX)givelevel <user> <amount>`", description = "Gives a user Levels")]
         public async Task gl(params string[] args)
         {
             if (args.Length == 0)
@@ -50,7 +50,7 @@ namespace Public_Bot.Modules.Commands.Level_Commands
                 await Context.Channel.SendMessageAsync("", false, new EmbedBuilder()
                 {
                     Title = "How many levels?",
-                    Description = $"How many levels do you want to give {user.Mention}? use `{GuildSettings.Prefix}givelevel <@user> <ammount>`",
+                    Description = $"How many levels do you want to give {user.Mention}? use `{GuildSettings.Prefix}givelevel <@user> <amount>`",
                     Color = Color.Red
                 }.WithCurrentTimestamp().Build());
                 return;

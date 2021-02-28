@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Public_Bot.Logger;
 
 namespace Public_Bot
 {
@@ -70,6 +71,30 @@ namespace Public_Bot
         //private async Task Client_ShardDisconnected(Exception arg1, DiscordSocketClient arg2)
         //    => isReady = false;
 
+        public static async Task SendCrits(string message, Severity s)
+        {
+            var stack = Environment.StackTrace;
+
+            await client.GetGuild(724798166804725780).GetTextChannel(815486435527753738).SendMessageAsync("", false, new EmbedBuilder()
+            {
+                Title = "Console critical log!",
+                Description = $"Severity: {s}",
+                Fields = new List<EmbedFieldBuilder>()
+                {
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Message",
+                        Value = message
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "Stack",
+                        Value = stack
+                    }
+                },
+                Color = Color.Red
+            }.WithCurrentTimestamp().Build());
+        }
 
         private async Task Ready(DiscordSocketClient arg)
         {
@@ -139,29 +164,29 @@ namespace Public_Bot
                             {
                                  // no permissions, tell the user
                                  try
-                                {
-                                    await context.User.SendMessageAsync("", false, new EmbedBuilder()
-                                    {
-                                        Title = "Hey! We're missing permissions!",
-                                        Color = Color.Red,
-                                        Description = $"The bot doesn't have permission to send messages in <#{context.Channel.Id}> on {context.Guild}!",
-                                        Fields = new List<EmbedFieldBuilder>()
-                                        {
-                                             new EmbedFieldBuilder()
-                                             {
-                                                 Name = "If you're an Admin",
-                                                 Value = $"Please check {client.CurrentUser.Username}'s permission in `#{context.Channel.Name}` to make sure the bot can **Send Messages** in said channel. If the bot still has this issue please join the [Support Server](https://discord.com/invite/w8EcwBy) and ask around for help.",
-                                                 IsInline = true
-                                             },
-                                             new EmbedFieldBuilder()
-                                             {
-                                                 Name = "If you're a Member",
-                                                 Value = $"Contact an Mod/Admin/Owner in {context.Guild.Name} and tell them that the bot doesn't have permission to send messages in `#{context.Channel}`. Thanks.",
-                                                 IsInline = true
-                                             }
-                                        }
-                                    }.WithCurrentTimestamp().Build());
-                                }
+                                 {
+                                     await context.User.SendMessageAsync("", false, new EmbedBuilder()
+                                     {
+                                         Title = "Hey! We're missing permissions!",
+                                         Color = Color.Red,
+                                         Description = $"The bot doesn't have permission to send messages in <#{context.Channel.Id}> on {context.Guild}!",
+                                         Fields = new List<EmbedFieldBuilder>()
+                                         {
+                                              new EmbedFieldBuilder()
+                                              {
+                                                  Name = "If you're an Admin",
+                                                  Value = $"Please check {client.CurrentUser.Username}'s permission in `#{context.Channel.Name}` to make sure the bot can **Send Messages** in said channel. If the bot still has this issue please join the [Support Server](https://discord.com/invite/w8EcwBy) and ask around for help.",
+                                                  IsInline = true
+                                              },
+                                              new EmbedFieldBuilder()
+                                              {
+                                                  Name = "If you're a Member",
+                                                  Value = $"Contact an Mod/Admin/Owner in {context.Guild.Name} and tell them that the bot doesn't have permission to send messages in `#{context.Channel}`. Thanks.",
+                                                  IsInline = true
+                                              }
+                                         }
+                                     }.WithCurrentTimestamp().Build());
+                                 }
                                 catch { }
                                 return;
                             }
@@ -170,7 +195,32 @@ namespace Public_Bot
                         var c = client.GetGuild(724798166804725780).GetTextChannel(740141617566056489);
                         if (c == null)
                             return;
-                        File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", $"----< Start Exception >----\n\n{resp.Exception.ToString()}\n\n----< End Exception >----");
+
+                        var gU = context.Guild.GetUser(context.User.Id);
+
+                        object contextData = new
+                        {
+                            command = new
+                            {
+                                message = msg.Content,
+                                channel = msg.Channel.Name,
+                                guild = context.Guild.Name,
+                            },
+                            user = new
+                            {
+                                id = context.User.Id,
+                                name = context.User.ToString(),
+                                hierarchy = gU?.Hierarchy ?? -1,
+                                isOwner = context.Guild.OwnerId == context.User.Id,
+                            },
+                            self = new
+                            {
+                                guildHierarchy = context.Guild.CurrentUser.Hierarchy,
+                                permissions = context.Guild.CurrentUser.GuildPermissions,
+                            }
+                        };
+
+                        File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", $"----< Start Exception >----\n\n{resp.Exception.ToString()}\n\n----< End Exception >----\n\n----< Context >----\n{JsonConvert.SerializeObject(contextData)}\n----< End Context >----");
                         await c.SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}cmderror.txt", "", false, new EmbedBuilder()
                         {
                             Title = "Command Exception!",
