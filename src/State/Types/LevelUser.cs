@@ -47,7 +47,7 @@ namespace Public_Bot
         public long GetRank()
         {
             var rank = StateService.Query<long>($"{{\"operationName\":null,\"variables\":{{}},\"query\":\"{{ levelMemberRank(GuildID: \\\"{this.GuildID}\\\", UserID: \\\"{this.Id}\\\") }} \"}}");
-            return rank.Value;
+            return rank;
         }
         public double CalculateTotalXP()
         {
@@ -75,10 +75,10 @@ namespace Public_Bot
 
             PositionValue = CurrentLevel + (CurrentXP / NextLevelXP);
 
-            return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!")).Value;
+            return StateService.Mutate<LevelUser>(GraphQLParser.GenerateGQLMutation<LevelUser>("createOrUpdateLevelMember", true, this, "data", "CreateLevelMemberInput!"));
         }
         public static LevelUser Fetch(ulong GuildId, ulong UserId)
-            => StateService.Query<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"{GuildId}"), ("UserID", $"{UserId}"))).Value;
+            => StateService.Query<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"{GuildId}"), ("UserID", $"{UserId}")));
         public static bool Exists(ulong GuildId, ulong UserId)
             => StateService.Exists<LevelUser>(GraphQLParser.GenerateGQLQuery<LevelUser>("levelMember", ("GuildID", $"{GuildId}"), ("UserID", $"{UserId}")));
         public LevelUser() { }

@@ -28,13 +28,13 @@ namespace Public_Bot.Modules.Handlers
                         ("id", arg2.Id)
                     ));
 
-                    if (!newuser.HasValue)
+                    if (newuser == null)
                     {
                         Logger.Write("Failed to mutate, got undef user!", Logger.Severity.Warn);
                     }
                     else
                     {
-                        UserCache.UpdateUser(newuser.Value);
+                        UserCache.UpdateUser(newuser);
                     }
                     
                 }

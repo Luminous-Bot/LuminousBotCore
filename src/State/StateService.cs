@@ -9,34 +9,15 @@ using System.Threading.Tasks;
 
 namespace Public_Bot
 {
-    public struct GQLReturn<T>
-    {
-        public T? Value;
-        public bool HasValue { get; }
-
-        public GQLReturn(bool hasValue, T val = default(T))
-        {
-            this.HasValue = hasValue;
-
-            // This might set classes to their default props because of default(T)?
-            this.Value = val;
-        }
-        public GQLReturn(T val)
-        {
-            this.HasValue = true;
-            this.Value = val;
-        }
-    }
-
     public class StateService
     {
         private static HttpClient client = new HttpClient();
         public static string Url
             => ConfigLoader.StateUrl;
 
-        public static GQLReturn<T> Query<T>(string q, bool HighPriority = false, int Try = 1)
+        public static T Query<T>(string q, bool HighPriority = false, int Try = 1)
             => QueryAsync<T>(q, HighPriority, Try).GetAwaiter().GetResult();
-        public static async Task<GQLReturn<T>> QueryAsync<T>(string q, bool HighPriority = false, int Try = 1)
+        public static async Task<T> QueryAsync<T>(string q, bool HighPriority = false, int Try = 1)
         {
             string _stack = Environment.StackTrace;
             string tName = typeof(T).Name;
@@ -64,12 +45,12 @@ namespace Public_Bot
                 catch(Exception x)
                 {
                     Logger.Write($"Got Exception on QueryAsync: {x}");
-                    return new GQLReturn<T>(false);
+                    return default;
                 }
                 //Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
                 if (rtn.data == null)
                     return default;
-                return new GQLReturn<T>(true, rtn.data.First().Value);
+                return rtn.data.First().Value;
             }
             else
             {
@@ -78,9 +59,9 @@ namespace Public_Bot
                 return default;
             }
         }
-        public static GQLReturn<T> Mutate<T>(string q, bool HighPriority = false, int Try = 1)
+        public static T Mutate<T>(string q, bool HighPriority = false, int Try = 1)
             => MutateAsync<T>(q, HighPriority, Try).GetAwaiter().GetResult();
-        public static async Task<GQLReturn<T>> MutateAsync<T>(string q, bool HighPriority = false, int Try = 1)
+        public static async Task<T> MutateAsync<T>(string q, bool HighPriority = false, int Try = 1)
         {
             string _stack = Environment.StackTrace;
             string tName = typeof(T).Name;
@@ -109,14 +90,14 @@ namespace Public_Bot
                 catch(Exception x)
                 {
                     Logger.Write($"Got Exception on MutateAsync {x}", Logger.Severity.Warn);
-                    return new GQLReturn<T>(false);
+                    return default;
                 }
                 if(rtn.errors == null)
                 {
                     //Logger.Write($"Got Status {res.StatusCode}!", Logger.Severity.State);
                     if (rtn.data == null)
                         return default;
-                    return new GQLReturn<T>(rtn.data.First().Value);
+                    return rtn.data.First().Value;
                 }
                 else
                 {
@@ -171,13 +152,13 @@ namespace Public_Bot
         public static bool Exists<T>(string q)
         {
             var res = Query<T>(q, true);
-            return res.HasValue;
+            return res != null;
         }
 
         public static bool Exists(string q)
         {
             var res = Query<ExistBase>(q, true);
-            return res.HasValue ? res.Value.result.First().Value : false;
+            return res.result.Values.First();
         }
         private class ExistBase
         {

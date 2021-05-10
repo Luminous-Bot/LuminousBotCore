@@ -12,10 +12,10 @@ namespace Public_Bot
         public static string ErrorLogFile = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}error.txt";
         public enum Severity
         {
-            Log,
-            Warn, 
-            Error,
             Critical,
+            Error,
+            Warn,
+            Log,
             DiscordAPI,
             Mongo,
             State
@@ -60,10 +60,8 @@ namespace Public_Bot
 
             if(s == Severity.Error || s == Severity.Warn || s == Severity.Critical)
             {
-                Task.Run(async () =>
-                {
-                    CommandHandler.SendCrits(message, s).ConfigureAwait(false);
-                });
+                Console.WriteLine("sending crits");
+                CommandHandler.SendCrits(message, s).ConfigureAwait(false);
             }
 
             if (s == Severity.Error || s == Severity.Critical)

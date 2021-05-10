@@ -29,7 +29,7 @@ namespace Public_Bot
                 ("IsInServer", isInServer), 
                 ("GuildID", this.GuildID),
                 ("UserID", this.Id));
-            return (await StateService.MutateAsync<GuildMember>(q)).Value;
+            return (await StateService.MutateAsync<GuildMember>(q));
         }
 
         [GraphQLObj]
@@ -37,7 +37,7 @@ namespace Public_Bot
         [GraphQLObj]
         public User User { get; set; }
         public static GuildMember Fetch(ulong id, ulong GuildID)
-            => StateService.Query<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", id), ("GuildID", GuildID))).Value;
+            => StateService.Query<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", id), ("GuildID", GuildID)));
         public static bool Exists(ulong Id, ulong GuildID)
             => StateService.Exists<GuildMember>(GraphQLParser.GenerateGQLQuery<GuildMember>("guildMember", ("UserID", Id), ("GuildID", GuildID)));
         public GuildMember() { }

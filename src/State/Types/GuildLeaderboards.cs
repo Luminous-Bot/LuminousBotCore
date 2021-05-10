@@ -33,9 +33,9 @@ namespace Public_Bot
             => await StateService.MutateAsync<GuildLeaderboards>(GraphQLParser.GenerateGQLMutation<GuildLeaderboards>("createOrUpdateGuildLeaderboard", true, this, "GuildLevelSettings", "GuildLevelSettingsInput!", ("GuildID", this.GuildID)));
 
         public static GuildLeaderboards Fetch(ulong id)
-            => StateService.Query<GuildLeaderboards>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboard", ("GuildID", id))).Value;
+            => StateService.Query<GuildLeaderboards>(GraphQLParser.GenerateGQLQuery<GuildLeaderboards>("guildLeaderboard", ("GuildID", id)));
         public List<LevelUser> GetTop(int count)
-            => StateService.Query<List<LevelUser>>(GraphQLParser.GenerateGQLQuery<List<LevelUser>>("topLevelMembers", ("Count", count), ("GuildID", $"{this.GuildID}"))).Value;
+            => StateService.Query<List<LevelUser>>(GraphQLParser.GenerateGQLQuery<List<LevelUser>>("topLevelMembers", ("Count", count), ("GuildID", $"{this.GuildID}")));
         public GuildLeaderboards() 
         {
             CurrentUsers = new LevelMemberCache(this);

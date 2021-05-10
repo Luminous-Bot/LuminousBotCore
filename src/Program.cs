@@ -86,6 +86,12 @@ namespace Public_Bot
         {
             if (msg.Message == null)
                 return;
+
+            if(msg.Severity == LogSeverity.Critical || msg.Severity == LogSeverity.Error || msg.Severity == LogSeverity.Warning)
+            {
+                await CommandHandler.SendCrits($"[Svt: {msg.Severity} | Src: {msg.Source}] {msg.Message}", (Logger.Severity)msg.Severity);
+            }
+
             if(!msg.Message.StartsWith("Received Dispatch"))
                 Logger.Write($"[Svt: {msg.Severity}".PadRight(14) + $" Src: {msg.Source}".PadRight(16) + $" Ex: {msg.Exception}]" + " - " + msg.Message, Logger.Severity.DiscordAPI);
         }

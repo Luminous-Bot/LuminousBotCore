@@ -36,13 +36,10 @@ namespace Public_Bot
 
             client.ShardReady += Ready;
 
-            //client.ShardConnected += Client_ShardConnected;
-
             //client.ShardDisconnected += Client_ShardDisconnected;
 
             Logger.Write($"Command Handler Ready", Logger.Severity.Log);
         }
-
 
         private static string FormatJson(string json)
         {
@@ -75,6 +72,32 @@ namespace Public_Bot
         {
             var stack = Environment.StackTrace;
 
+            if(message.Length > 1024)
+            {
+                File.WriteAllText($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}consoleCrits.txt", message);
+                await client.GetGuild(724798166804725780).GetTextChannel(815486435527753738).SendFileAsync($"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}consoleCrits.txt", "", false, new EmbedBuilder()
+                {
+                    Title = "Console critical log!",
+                    Description = $"Severity: {s}",
+                    Fields = new List<EmbedFieldBuilder>()
+                    {
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Message",
+                            Value = "Attached"
+                        },
+                        new EmbedFieldBuilder()
+                        {
+                            Name = "Stack",
+                            Value = stack
+                        }
+                    },
+                    Color = Color.Red
+                }.WithCurrentTimestamp().Build());
+                Console.WriteLine("Crits sent");
+                return;
+            }
+
             await client.GetGuild(724798166804725780).GetTextChannel(815486435527753738).SendMessageAsync("", false, new EmbedBuilder()
             {
                 Title = "Console critical log!",
@@ -94,6 +117,8 @@ namespace Public_Bot
                 },
                 Color = Color.Red
             }.WithCurrentTimestamp().Build());
+
+            Console.WriteLine("Crits sent");
         }
 
         private async Task Ready(DiscordSocketClient arg)

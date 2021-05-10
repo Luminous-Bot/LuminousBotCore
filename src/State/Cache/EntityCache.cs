@@ -244,6 +244,13 @@ namespace Public_Bot
         /// <param name="value"></param>
         public void Add(T value)
         {
+            if (value == null)
+            {
+                var stack = Environment.StackTrace;
+                Logger.Write($"Value was null: {stack}", Logger.Severity.Warn);
+                return;
+            }
+
             // Since we should not have 2 users with the same id, check this :D
             if (_CacheList.Any(x => x.Id == value.Id && x.GuildID == value.GuildID))
                 return;
@@ -261,6 +268,12 @@ namespace Public_Bot
         /// <param name="value"></param>
         public void Replace(T value)
         {
+            if (value == null)
+            {
+                var stack = Environment.StackTrace;
+                Logger.Write($"Value was null: {stack}", Logger.Severity.Warn);
+                return;
+            }
             // Check if that item exists
             if (_CacheList.Any(x => x.Id == value.Id && x.GuildID == value.GuildID))
             {
@@ -283,6 +296,13 @@ namespace Public_Bot
         /// <param name="value"></param>
         public void AddOrReplace(T value)
         {
+            if (value == null)
+            {
+                var stack = Environment.StackTrace;
+                Logger.Write($"Value was null: {stack}", Logger.Severity.Warn);
+                return;
+            }
+
             if (_CacheList.Any(x => x.Id == value.Id && x.GuildID == value.GuildID))
                 Replace(value);
             else

@@ -15,7 +15,7 @@ namespace Public_Bot.Modules.Helpers
             var re = StateService.Query<bool>("{\"operationName\":null,\"variables\":{},\"query\":\"{ messageExists(MessageID: \\\"" + messageId + "\\\") }\"}", true);
 
             // TODO: maybe change this signature?
-            return re.HasValue ? re.Value : true;
+            return re;
         }
 
         
@@ -27,7 +27,7 @@ namespace Public_Bot.Modules.Helpers
 
             var r = await StateService.QueryAsync<Message>(q);
 
-            return r.HasValue ? r.Value : null;
+            return r;
         }
     }
 }

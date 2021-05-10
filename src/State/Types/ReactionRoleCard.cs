@@ -19,6 +19,6 @@ namespace Public_Bot
 
 
         public async Task<ReactionRoleCard> Create()
-            => (await StateService.MutateAsync<ReactionRoleCard>(GraphQLParser.GenerateGQLMutation<ReactionRoleCard>("createOrUpdateReactionRoleCard", true, this, "data", "ReactionRoleCardInput!"))).Value;
+            => (await StateService.MutateAsync<ReactionRoleCard>(GraphQLParser.GenerateGQLMutation<ReactionRoleCard>("createOrUpdateReactionRoleCard", true, this, "data", "ReactionRoleCardInput!")));
     }
 }
